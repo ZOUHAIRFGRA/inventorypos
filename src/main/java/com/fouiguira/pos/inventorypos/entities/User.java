@@ -6,14 +6,14 @@ import java.util.Date;
 
 @Entity
 @Table(name = "users")
-@Data // Lombok annotation to generate getters, setters, and other methods
+@Data
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id; // Unique identifier for each user
 
-    @Column(unique = true, nullable = false)
-    private String username; // Unique username
+    @Column(nullable = false)
+    private String username; // Username
 
     @Column(nullable = false)
     private String password; // Hashed password

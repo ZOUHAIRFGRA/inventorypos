@@ -1,13 +1,13 @@
 package com.fouiguira.pos.inventorypos;
 
-import org.springframework.boot.SpringApplication;
+import com.fouiguira.pos.inventorypos.main.MainApp;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class InventoryposApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(InventoryposApplication.class, args);
-	}
+    public static void main(String[] args) {
+        MainApp.main(args);
+    }
 
 }
