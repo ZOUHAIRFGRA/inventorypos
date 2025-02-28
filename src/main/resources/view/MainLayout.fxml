@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.MainLayoutController">
+    <top>
+        <MenuBar>
+            <Menu text="File">
+                <MenuItem text="Exit" onAction="#handleExit"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <center>
+        <fx:include source="ProductView.fxml"/>
+    </center>
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="Load Products" fx:id="loadProductsButton" onAction="#handleLoadProducts"/>
+        </HBox>
+    </bottom>
+</BorderPane>
