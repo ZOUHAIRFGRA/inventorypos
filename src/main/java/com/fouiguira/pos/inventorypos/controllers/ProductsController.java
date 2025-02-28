@@ -2,12 +2,17 @@ package com.fouiguira.pos.inventorypos.controllers;
 
 import com.fouiguira.pos.inventorypos.entities.Product;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -17,25 +22,25 @@ public class ProductsController {
     private final ProductService productService;
 
     @FXML
-    private ComboBox<Product> productComboBox;
+    private TableView<Product> productTable;
     @FXML
-    private TextField productNameField;
+    private TableColumn<Product, Long> colId;
     @FXML
-    private TextField categoryField;
+    private TableColumn<Product, String> colName;
     @FXML
-    private TextField priceField;
+    private TableColumn<Product, String> colCategory;
     @FXML
-    private TextField stockField;
+    private TableColumn<Product, Double> colPrice;
     @FXML
-    private TextField imagePathField;
+    private TableColumn<Product, Integer> colStock;
+    @FXML
+    private TextField productNameField, categoryField, priceField, stockField, imagePathField;
     @FXML
     private TextArea descriptionField;
     @FXML
-    private Button addButton;
+    private ImageView productImage;
     @FXML
-    private Button updateButton;
-    @FXML
-    private Button deleteButton;
+    private Button addButton, updateButton, deleteButton;
 
     @Autowired
     public ProductsController(ProductService productService) {
@@ -44,18 +49,27 @@ public class ProductsController {
 
     @FXML
     public void initialize() {
-        loadProducts();
-        productComboBox.setOnAction(e -> populateFieldsFromSelection());
+        Platform.runLater(this::loadProducts);
+        setupTable();
+        productTable.setOnMouseClicked(event -> populateFieldsFromSelection());
+    }
+
+    private void setupTable() {
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
+        colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
+        colStock.setCellValueFactory(new PropertyValueFactory<>("stockQuantity"));
     }
 
     private void loadProducts() {
         List<Product> products = productService.getAllProducts();
-        productComboBox.getItems().setAll(products);
+        productTable.getItems().setAll(products);
     }
 
     @FXML
     private void populateFieldsFromSelection() {
-        Product selectedProduct = productComboBox.getSelectionModel().getSelectedItem();
+        Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
         if (selectedProduct != null) {
             productNameField.setText(selectedProduct.getName());
             categoryField.setText(selectedProduct.getCategory());
@@ -63,6 +77,14 @@ public class ProductsController {
             stockField.setText(String.valueOf(selectedProduct.getStockQuantity()));
             imagePathField.setText(selectedProduct.getImagePath());
             descriptionField.setText(selectedProduct.getDescription());
+
+            // Load image if path is valid
+            File file = new File(selectedProduct.getImagePath());
+            if (file.exists()) {
+                productImage.setImage(new Image(file.toURI().toString()));
+            } else {
+                productImage.setImage(null);
+            }
         }
     }
 
@@ -74,8 +96,6 @@ public class ProductsController {
             showAlert(AlertType.INFORMATION, "Product added successfully!");
             clearFields();
             loadProducts();
-        } catch (IllegalArgumentException e) {
-            showAlert(AlertType.ERROR, e.getMessage());
         } catch (Exception e) {
             showAlert(AlertType.ERROR, "Failed to add product: " + e.getMessage());
         }
@@ -86,12 +106,11 @@ public class ProductsController {
         try {
             Long productId = getProductId();
             Product product = createProductFromFields();
+            product.setId(productId);
             productService.updateProduct(productId, product);
             showAlert(AlertType.INFORMATION, "Product updated successfully!");
             clearFields();
             loadProducts();
-        } catch (IllegalArgumentException e) {
-            showAlert(AlertType.ERROR, e.getMessage());
         } catch (Exception e) {
             showAlert(AlertType.ERROR, "Failed to update product: " + e.getMessage());
         }
@@ -105,15 +124,13 @@ public class ProductsController {
             showAlert(AlertType.INFORMATION, "Product deleted successfully!");
             clearFields();
             loadProducts();
-        } catch (IllegalArgumentException e) {
-            showAlert(AlertType.ERROR, e.getMessage());
         } catch (Exception e) {
             showAlert(AlertType.ERROR, "Failed to delete product: " + e.getMessage());
         }
     }
 
     private Long getProductId() {
-        Product selectedProduct = productComboBox.getSelectionModel().getSelectedItem();
+        Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
         if (selectedProduct == null) {
             throw new IllegalArgumentException("Please select a product to proceed.");
         }
@@ -123,14 +140,10 @@ public class ProductsController {
     private Product createProductFromFields() {
         String name = productNameField.getText();
         String category = categoryField.getText();
-        double price = parseDouble(priceField.getText(), "Price");
-        int stockQuantity = parseInteger(stockField.getText(), "Stock Quantity");
+        double price = Double.parseDouble(priceField.getText());
+        int stockQuantity = Integer.parseInt(stockField.getText());
         String imagePath = imagePathField.getText();
         String description = descriptionField.getText();
-
-        if (name.isEmpty() || category.isEmpty()) {
-            throw new IllegalArgumentException("Name and category cannot be empty");
-        }
 
         Product product = new Product();
         product.setName(name);
@@ -145,22 +158,6 @@ public class ProductsController {
         return product;
     }
 
-    private double parseDouble(String value, String fieldName) {
-        try {
-            return Double.parseDouble(value);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(fieldName + " must be a valid number.");
-        }
-    }
-
-    private int parseInteger(String value, String fieldName) {
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(fieldName + " must be a valid integer.");
-        }
-    }
-
     private void clearFields() {
         productNameField.clear();
         categoryField.clear();
@@ -168,7 +165,8 @@ public class ProductsController {
         stockField.clear();
         imagePathField.clear();
         descriptionField.clear();
-        productComboBox.getSelectionModel().clearSelection();
+        productImage.setImage(null);
+        productTable.getSelectionModel().clearSelection();
     }
 
     private void showAlert(AlertType type, String message) {

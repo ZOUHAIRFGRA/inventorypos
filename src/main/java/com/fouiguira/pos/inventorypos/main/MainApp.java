@@ -14,19 +14,19 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        // Start Spring Boot backend
         springContext = SpringApplication.run(InventoryposApplication.class);
 
-        // Load JavaFX UI from FXML
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getClassLoader().getResource("view/MainLayout.fxml"));
-        loader.setControllerFactory(springContext::getBean); // Let Spring inject controllers
+        loader.setControllerFactory(springContext::getBean);
         System.out.println(getClass().getClassLoader().getResource("view/MainLayout.fxml")
 );
 
-        Scene scene = new Scene(loader.load(), 800, 600);
+        Scene scene = new Scene(loader.load());
         stage.setScene(scene);
         stage.setTitle("Inventory POS System");
+        stage.setMaximized(true);
+//        stage.setFullScreen(true);
         stage.show();
     }
 
