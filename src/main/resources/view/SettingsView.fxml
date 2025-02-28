@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.SettingsController"
+      spacing="15" style="-fx-padding: 20;">
+    <Label text="Settings" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+    <Button text="Backup Data"/>
+    <Button text="Restore Data"/>
+    <Button text="Change Password"/>
+</VBox>

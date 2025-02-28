@@ -1,68 +1,66 @@
 package com.fouiguira.pos.inventorypos.controllers;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.Alert;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
+
 @Component
 public class MainLayoutController {
 
     @FXML
-    private BorderPane mainLayout; // Reference to the main layout
+    private BorderPane mainLayout;
 
     @FXML
-    private Button loadProductsButton; // Reference to the Load Products button
+    private Button dashboardButton, productsButton, salesButton, settingsButton;
 
-    @FXML
-    private MenuBar menuBar; // Reference to the MenuBar if you have one
+    private final ApplicationContext context;
+
+    @Autowired
+    public MainLayoutController(ApplicationContext context) {
+        this.context = context;
+    }
 
     @FXML
     public void initialize() {
-        // Initialize any necessary data or state here
-        loadProductsButton.setOnAction(e -> handleLoadProducts());
+        dashboardButton.setOnAction(e -> loadView("DashboardView.fxml"));
+        productsButton.setOnAction(e -> loadView("ProductView.fxml"));
+        salesButton.setOnAction(e -> loadView("SalesHistoryView.fxml"));
+        settingsButton.setOnAction(e -> loadView("SettingsView.fxml"));
+
+        // Load default view (Dashboard)
+        loadView("DashboardView.fxml");
     }
 
-    // Method to handle loading products when the button is clicked
-    @FXML
-    private void handleLoadProducts() {
+    private void loadView(String fxmlFile) {
         try {
-            // Logic to switch to ProductView (assuming it's defined)
-            loadProductView();
-        } catch (Exception e) {
-            showAlert("Error", "Failed to load products: " + e.getMessage());
-        }
-    }
-
-    private void loadProductView() {
-        try {
-            // Load ProductView.fxml here
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getClassLoader().getResource("view/ProductView.fxml"));
-            Parent productView = loader.load();
-            mainLayout.setCenter(productView); // Set the loaded view in the center of the main layout
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/" + fxmlFile));
+            loader.setControllerFactory(context::getBean); // Spring injects controllers
+            Parent view = loader.load();
+            mainLayout.setCenter(view);
         } catch (IOException e) {
-            showAlert("Error", "Could not load product view: " + e.getMessage());
+            showAlert("Error", "Could not load view: " + e.getMessage());
+            e.printStackTrace();
         }
-    }
-
-    // Method to handle exit action from the menu
-    @FXML
-    private void handleExit() {
-        // Logic to exit the application
-        System.exit(0);
     }
 
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void handleExit(ActionEvent actionEvent) {
+        System.exit(0);
     }
 }

@@ -3,7 +3,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.MainLayoutController">
+<BorderPane fx:id="mainLayout" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.fouiguira.pos.inventorypos.controllers.MainLayoutController">
     <top>
         <MenuBar>
             <Menu text="File">
@@ -11,12 +12,20 @@
             </Menu>
         </MenuBar>
     </top>
+
+    <!-- Admin Sidebar -->
+    <left>
+        <VBox spacing="10" style="-fx-padding: 15; -fx-background-color: #333;">
+            <Label text="Admin Panel" style="-fx-font-size: 18; -fx-text-fill: white;"/>
+            <Button text="Dashboard" fx:id="dashboardButton" style="-fx-pref-width: 150;"/>
+            <Button text="Manage Products" fx:id="productsButton" style="-fx-pref-width: 150;"/>
+            <Button text="Sales History" fx:id="salesButton" style="-fx-pref-width: 150;"/>
+            <Button text="Settings" fx:id="settingsButton" style="-fx-pref-width: 150;"/>
+        </VBox>
+    </left>
+
+    <!-- Content Area (Changes dynamically) -->
     <center>
-        <fx:include source="ProductView.fxml"/>
+        <Pane fx:id="contentPane"/>
     </center>
-    <bottom>
-        <HBox spacing="10" alignment="CENTER">
-            <Button text="Load Products" fx:id="loadProductsButton" onAction="#handleLoadProducts"/>
-        </HBox>
-    </bottom>
 </BorderPane>

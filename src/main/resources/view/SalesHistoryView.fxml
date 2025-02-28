@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.SalesHistoryController"
+      spacing="15" style="-fx-padding: 20;">
+    <Label text="Sales History" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+    <TableView fx:id="salesTable">
+        <columns>
+            <TableColumn text="Invoice ID"/>
+            <TableColumn text="Date"/>
+            <TableColumn text="Total Amount"/>
+        </columns>
+    </TableView>
+</VBox>

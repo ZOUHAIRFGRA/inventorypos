@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.DashboardController"
+      spacing="15" style="-fx-padding: 20;">
+    <Label text="Dashboard" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+    <Label text="Total Sales: $5000" style="-fx-font-size: 16;"/>
+    <Label text="Low Stock Alerts: 3 items" style="-fx-font-size: 16;"/>
+</VBox>

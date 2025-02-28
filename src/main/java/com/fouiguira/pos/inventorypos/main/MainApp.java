@@ -21,7 +21,8 @@ public class MainApp extends Application {
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getClassLoader().getResource("view/MainLayout.fxml"));
         loader.setControllerFactory(springContext::getBean); // Let Spring inject controllers
-        System.out.println(getClass().getResource("view/MainLayout.fxml"));
+        System.out.println(getClass().getClassLoader().getResource("view/MainLayout.fxml")
+);
 
         Scene scene = new Scene(loader.load(), 800, 600);
         stage.setScene(scene);
