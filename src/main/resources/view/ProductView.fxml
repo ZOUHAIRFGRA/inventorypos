@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import com.jfoenix.controls.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.ProductsController">
+    <children>
+        <VBox spacing="15" layoutX="20" layoutY="20">
+            <children>
+                <Label text="Manage Products" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-padding: 10;" />
+
+                <ComboBox fx:id="productComboBox" promptText="Select a Product" onAction="#populateFieldsFromSelection" />
+
+                <GridPane hgap="10" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints halignment="RIGHT"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+                    <children>
+                        <Label text="Product Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <JFXTextField fx:id="productNameField" promptText="Product Name" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                        <Label text="Category:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <JFXTextField fx:id="categoryField" promptText="Category" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Price:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <JFXTextField fx:id="priceField" promptText="Price" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                        <Label text="Stock Quantity:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <JFXTextField fx:id="stockField" promptText="Stock Quantity" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                        <Label text="Image Path:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                        <JFXTextField fx:id="imagePathField" promptText="Image Path" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                        <Label text="Description:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                        <JFXTextArea fx:id="descriptionField" promptText="Description" prefRowCount="3" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                    </children>
+                </GridPane>
+
+                <HBox spacing="10" alignment="CENTER">
+                    <JFXButton fx:id="addButton" text="Add" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" onAction="#handleAddProduct"/>
+                    <JFXButton fx:id="updateButton" text="Update" style="-fx-background-color: #FFA500; -fx-text-fill: white;" onAction="#handleUpdateProduct"/>
+                    <JFXButton fx:id="deleteButton" text="Delete" style="-fx-background-color: #FF4444; -fx-text-fill: white;" onAction="#handleDeleteProduct"/>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
