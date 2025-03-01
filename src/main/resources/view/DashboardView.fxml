@@ -5,7 +5,41 @@
 
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.DashboardController"
       spacing="15" style="-fx-padding: 20;">
-    <Label text="Dashboard" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
-    <Label text="Total Sales: $5000" style="-fx-font-size: 16;"/>
-    <Label text="Low Stock Alerts: 3 items" style="-fx-font-size: 16;"/>
+
+    <!-- Dashboard Title -->
+    <Label text="Admin Dashboard" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+
+    <!-- Sales Summary Panel -->
+    <HBox spacing="20">
+        <VBox>
+            <Label text="Total Sales Today:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+            <Label fx:id="totalSalesTodayLabel" style="-fx-font-size: 16;"/>
+        </VBox>
+        <VBox>
+            <Label text="Total Revenue:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+            <Label fx:id="totalRevenueLabel" style="-fx-font-size: 16;"/>
+        </VBox>
+        <VBox>
+            <Label text="Pending Payments:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+            <Label fx:id="pendingPaymentsLabel" style="-fx-font-size: 16; -fx-text-fill: red;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Recent Transactions Table -->
+    <Label text="Recent Transactions" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+    <TableView fx:id="recentSalesTable">
+        <columns>
+            <TableColumn text="Sale ID" fx:id="colSaleId" minWidth="100"/>
+            <TableColumn text="Amount" fx:id="colAmount" minWidth="120"/>
+            <TableColumn text="Cashier" fx:id="colCashier" minWidth="150"/>
+            <TableColumn text="Date" fx:id="colDate" minWidth="180"/>
+        </columns>
+    </TableView>
+
+    <!-- Low Stock Alerts -->
+    <Label text="Low Stock Alerts" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+    <ListView fx:id="lowStockList" prefHeight="100"/>
+
+
+
 </VBox>
