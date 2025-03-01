@@ -5,7 +5,6 @@ import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -41,6 +40,10 @@ public class ProductsController {
     private ImageView productImage;
     @FXML
     private Button addButton, updateButton, deleteButton;
+    @FXML
+    private ComboBox<String> categoryComboBox; // ComboBox for categories
+    @FXML
+    private TextField searchField; // Search field to enter product name
 
     @Autowired
     public ProductsController(ProductService productService) {
@@ -51,6 +54,7 @@ public class ProductsController {
     public void initialize() {
         Platform.runLater(this::loadProducts);
         setupTable();
+        loadCategories(); // Load categories into the ComboBox
         productTable.setOnMouseClicked(event -> populateFieldsFromSelection());
     }
 
@@ -67,6 +71,11 @@ public class ProductsController {
         productTable.getItems().setAll(products);
     }
 
+    private void loadCategories() {
+        // For demonstration purposes, let's assume these are predefined categories
+        categoryComboBox.getItems().addAll("Category 1", "Category 2", "Category 3", "Category 4");
+    }
+
     @FXML
     private void populateFieldsFromSelection() {
         Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
@@ -79,40 +88,69 @@ public class ProductsController {
             descriptionField.setText(selectedProduct.getDescription());
 
             // Load image if path is valid
-            File file = new File(selectedProduct.getImagePath());
-            if (file.exists()) {
-                productImage.setImage(new Image(file.toURI().toString()));
-            } else {
-                productImage.setImage(null);
-            }
+            loadImageFromPath(selectedProduct.getImagePath());
         }
+    }
+
+    private void loadImageFromPath(String imagePath) {
+        File file = new File(imagePath);
+        if (file.exists() && file.isFile()) {
+            productImage.setImage(new Image(file.toURI().toString()));
+        } else {
+            productImage.setImage(null); // or set a default image
+        }
+    }
+
+    @FXML
+    public void handleSearch() {
+        String searchText = searchField.getText().trim();
+        String selectedCategory = categoryComboBox.getValue();
+
+        // If category is selected, filter by category
+        List<Product> filteredProducts;
+        if (selectedCategory != null && !selectedCategory.isEmpty()) {
+            filteredProducts = productService.getProductsByCategory(selectedCategory);
+        } else {
+            filteredProducts = productService.getAllProducts();
+        }
+
+        // If search text is provided, filter by product name as well
+        if (searchText != null && !searchText.isEmpty()) {
+            filteredProducts.removeIf(product -> !product.getName().toLowerCase().contains(searchText.toLowerCase()));
+        }
+
+        productTable.getItems().setAll(filteredProducts);
     }
 
     @FXML
     public void handleAddProduct() {
         try {
-            Product product = createProductFromFields();
-            productService.createProduct(product);
-            showAlert(AlertType.INFORMATION, "Product added successfully!");
-            clearFields();
-            loadProducts();
+            if (validateFields()) {
+                Product product = createProductFromFields();
+                productService.createProduct(product);
+                showAlert(Alert.AlertType.INFORMATION, "Product added successfully!");
+                clearFields();
+                loadProducts();
+            }
         } catch (Exception e) {
-            showAlert(AlertType.ERROR, "Failed to add product: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Failed to add product: " + e.getMessage());
         }
     }
 
     @FXML
     public void handleUpdateProduct() {
         try {
-            Long productId = getProductId();
-            Product product = createProductFromFields();
-            product.setId(productId);
-            productService.updateProduct(productId, product);
-            showAlert(AlertType.INFORMATION, "Product updated successfully!");
-            clearFields();
-            loadProducts();
+            if (validateFields()) {
+                Long productId = getProductId();
+                Product product = createProductFromFields();
+                product.setId(productId);
+                productService.updateProduct(productId, product);
+                showAlert(Alert.AlertType.INFORMATION, "Product updated successfully!");
+                clearFields();
+                loadProducts();
+            }
         } catch (Exception e) {
-            showAlert(AlertType.ERROR, "Failed to update product: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Failed to update product: " + e.getMessage());
         }
     }
 
@@ -121,11 +159,11 @@ public class ProductsController {
         try {
             Long productId = getProductId();
             productService.deleteProduct(productId);
-            showAlert(AlertType.INFORMATION, "Product deleted successfully!");
+            showAlert(Alert.AlertType.INFORMATION, "Product deleted successfully!");
             clearFields();
             loadProducts();
         } catch (Exception e) {
-            showAlert(AlertType.ERROR, "Failed to delete product: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Failed to delete product: " + e.getMessage());
         }
     }
 
@@ -158,6 +196,22 @@ public class ProductsController {
         return product;
     }
 
+    private boolean validateFields() {
+        try {
+            if (productNameField.getText().isEmpty() || categoryField.getText().isEmpty() || priceField.getText().isEmpty() || stockField.getText().isEmpty()) {
+                showAlert(Alert.AlertType.WARNING, "Please fill in all required fields.");
+                return false;
+            }
+            // Validate numeric fields
+            Double.parseDouble(priceField.getText());
+            Integer.parseInt(stockField.getText());
+            return true;
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.ERROR, "Please enter valid numbers for price and stock.");
+            return false;
+        }
+    }
+
     private void clearFields() {
         productNameField.clear();
         categoryField.clear();
@@ -169,9 +223,9 @@ public class ProductsController {
         productTable.getSelectionModel().clearSelection();
     }
 
-    private void showAlert(AlertType type, String message) {
+    private void showAlert(Alert.AlertType type, String message) {
         Alert alert = new Alert(type);
-        alert.setTitle(type == AlertType.ERROR ? "Error" : "Success");
+        alert.setTitle(type == Alert.AlertType.ERROR ? "Error" : "Success");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

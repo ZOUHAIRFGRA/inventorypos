@@ -10,4 +10,6 @@ public interface ProductService {
     List<Product> getProductsByCategory(String category);
     Product updateProduct(Long id, Product product);
     void deleteProduct(Long id);
+    List<Product> getLowStockProducts(int threshold);
+
 }

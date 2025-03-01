@@ -6,6 +6,7 @@ import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -18,6 +19,8 @@ public class ProductServiceImpl implements ProductService {
     public Product createProduct(Product product) {
         return productRepository.save(product);
     }
+
+
 
     @Override
     public Product getProductById(Long id) {
@@ -39,9 +42,13 @@ public class ProductServiceImpl implements ProductService {
         Product existingProduct = productRepository.findById(id).orElse(null);
         if (existingProduct != null) {
             existingProduct.setName(product.getName());
-            existingProduct.setPrice(product.getPrice());
             existingProduct.setCategory(product.getCategory());
-            // Set other fields as necessary
+            existingProduct.setPrice(product.getPrice());
+            existingProduct.setStockQuantity(product.getStockQuantity()); // Ensure this line exists
+            existingProduct.setDescription(product.getDescription());
+            existingProduct.setImagePath(product.getImagePath());
+            existingProduct.setUpdatedAt(new Date());
+
             return productRepository.save(existingProduct);
         }
         return null;
@@ -50,5 +57,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
+    }
+
+
+    @Override
+    public List<Product> getLowStockProducts(int threshold) {
+        return productRepository.findByStockQuantityLessThan(threshold);
     }
 }
