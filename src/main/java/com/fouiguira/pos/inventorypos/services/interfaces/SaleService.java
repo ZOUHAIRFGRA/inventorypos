@@ -13,4 +13,9 @@ public interface SaleService {
     List<Sale> getSalesByCashier(User cashier);
     Sale updateSale(Long id, Sale sale);
     void deleteSale(Long id);
+
+    double getTotalSalesToday();
+    double getTotalRevenue();
+    double getPendingPayments();
+    List<Sale> getLast10Sales();
 }

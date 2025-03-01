@@ -21,6 +21,8 @@ public class SaleServiceImpl implements SaleService {
         return saleRepository.save(sale);
     }
 
+
+
     @Override
     public Sale getSaleById(Long id) {
         return saleRepository.findById(id).orElse(null);
@@ -51,5 +53,25 @@ public class SaleServiceImpl implements SaleService {
     @Override
     public void deleteSale(Long id) {
         saleRepository.deleteById(id);
+    }
+
+    @Override
+    public double getTotalSalesToday() {
+        return saleRepository.findTotalSalesToday() != null ? saleRepository.findTotalSalesToday() : 0.0;
+    }
+
+    @Override
+    public double getTotalRevenue() {
+        return saleRepository.findTotalRevenue() != null ? saleRepository.findTotalRevenue() : 0.0;
+    }
+
+    @Override
+    public double getPendingPayments() {
+        return saleRepository.findPendingPayments() != null ? saleRepository.findPendingPayments() : 0.0;
+    }
+
+    @Override
+    public List<Sale> getLast10Sales() {
+        return saleRepository.findTop10ByOrderByTimestampDesc();
     }
 }
