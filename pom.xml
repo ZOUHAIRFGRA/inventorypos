@@ -12,7 +12,7 @@
 
 	<groupId>com.fouiguira.pos</groupId>
 	<artifactId>inventorypos</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>inventorypos</name>
 	<description>A desktop POS system for inventory management using Spring Boot and JavaFX</description>
 
@@ -100,6 +100,16 @@
 			<version>9.0.1</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.5.16</version>
+			<scope>compile</scope>
+		</dependency>
+
+
+
 
 	</dependencies>
 
@@ -121,17 +131,12 @@
 				</configuration>
 			</plugin>
 
-			<!-- Spring Boot Plugin -->
+			<!-- Spring Boot Plugin (Corrected) -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
+					<mainClass>com.fouiguira.pos.inventorypos.InventoryposApplication</mainClass>
 				</configuration>
 			</plugin>
 
