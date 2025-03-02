@@ -19,6 +19,7 @@
             <Label text="Admin Panel" style="-fx-font-size: 18; -fx-text-fill: white;"/>
             <Button text="Dashboard" fx:id="dashboardButton" style="-fx-pref-width: 150;"/>
             <Button text="Manage Products" fx:id="productsButton" style="-fx-pref-width: 150;"/>
+            <Button text="Manage Categories" fx:id="categoriesButton" style="-fx-pref-width: 150;"/>
             <Button text="Sales History" fx:id="salesButton" style="-fx-pref-width: 150;"/>
             <Button text="Settings" fx:id="settingsButton" style="-fx-pref-width: 150;"/>
         </VBox>

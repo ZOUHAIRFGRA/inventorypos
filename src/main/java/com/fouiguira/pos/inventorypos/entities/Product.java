@@ -15,8 +15,10 @@ public class Product {
     @Column(nullable = false)
     private String name; // Name of the product
 
-    @Column(nullable = false)
-    private String category; // Category (e.g., Food, Construction)
+
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
     @Column(nullable = false)
     private Double price; // Price of the product
