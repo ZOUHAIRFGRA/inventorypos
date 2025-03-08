@@ -10,8 +10,6 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
-import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -69,13 +67,10 @@ public class DashboardController {
 
         colSaleId.setCellValueFactory(cellData -> new SimpleLongProperty(cellData.getValue().getId()).asObject());
         colAmount.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getTotalPrice()).asObject());
-
         colCashier.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getCashier() != null ? cellData.getValue().getCashier().getUsername() : "N/A")
-        );
-
+                new SimpleStringProperty(cellData.getValue().getCashier() != null ? cellData.getValue().getCashier().getUsername() : "N/A"));
         colDate.setCellValueFactory(cellData -> {
-            Date date = cellData.getValue().getTimestamp(); // Assuming timestamp is java.util.Date
+            Date date = cellData.getValue().getTimestamp();
             String formattedDate = "N/A";
             if (date != null) {
                 LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -86,6 +81,7 @@ public class DashboardController {
 
         recentSalesTable.getItems().setAll(recentSales);
     }
+
     private void loadLowStockAlerts() {
         List<Product> lowStockProducts = productService.getLowStockProducts(5);
         lowStockList.getItems().clear();

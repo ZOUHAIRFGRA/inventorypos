@@ -16,17 +16,31 @@ public class MainApp extends Application {
     public void start(Stage stage) throws Exception {
         springContext = SpringApplication.run(InventoryposApplication.class);
 
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getClassLoader().getResource("view/MainLayout.fxml"));
+        // Load FXML from resources/view/
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainLayout.fxml"));
         loader.setControllerFactory(springContext::getBean);
-        System.out.println(getClass().getClassLoader().getResource("view/MainLayout.fxml")
-);
 
+        // Debug: Print FXML path
+        System.out.println("MainLayout.fxml path: " + getClass().getResource("/view/MainLayout.fxml"));
+
+        // Load the FXML and create the scene
         Scene scene = new Scene(loader.load());
+
+        // Load CSS from resources/styles/
+        String cssPath = getClass().getResource("/styles/styles.css") != null 
+            ? getClass().getResource("/styles/styles.css").toExternalForm() 
+            : null;
+        if (cssPath != null) {
+            scene.getStylesheets().add(cssPath);
+            System.out.println("Styles.css path: " + cssPath);
+        } else {
+            System.err.println("Error: styles.css not found at /styles/styles.css");
+        }
+
+        // Set up the stage
         stage.setScene(scene);
         stage.setTitle("Inventory POS System");
         stage.setMaximized(true);
-//        stage.setFullScreen(true);
         stage.show();
     }
 

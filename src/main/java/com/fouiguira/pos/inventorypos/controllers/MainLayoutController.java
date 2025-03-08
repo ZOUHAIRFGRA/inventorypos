@@ -1,15 +1,15 @@
 package com.fouiguira.pos.inventorypos.controllers;
 
+import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
-import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ public class MainLayoutController {
     private BorderPane mainLayout;
 
     @FXML
-    private Button dashboardButton, productsButton, salesButton, settingsButton;
+    private MFXButton dashboardButton, productsButton;
 
     private final ApplicationContext context;
 
@@ -31,19 +31,27 @@ public class MainLayoutController {
 
     @FXML
     public void initialize() {
+        // Load CSS if available, otherwise log a warning
+        String cssPath = getClass().getResource("/styles/styles.css") != null 
+            ? getClass().getResource("/styles/styles.css").toExternalForm() 
+            : null;
+        if (cssPath != null) {
+            mainLayout.getStylesheets().add(cssPath);
+            System.out.println("MainLayoutController: Loaded styles.css from " + cssPath);
+        } else {
+            System.err.println("MainLayoutController: Warning - styles.css not found at /styles/styles.css");
+        }
+
+        // Set button actions
         dashboardButton.setOnAction(e -> loadView("DashboardView.fxml"));
         productsButton.setOnAction(e -> loadView("ProductView.fxml"));
-        salesButton.setOnAction(e -> loadView("SalesHistoryView.fxml"));
-        settingsButton.setOnAction(e -> loadView("SettingsView.fxml"));
-
-        // Load default view (Dashboard)
         loadView("DashboardView.fxml");
     }
 
     private void loadView(String fxmlFile) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/" + fxmlFile));
-            loader.setControllerFactory(context::getBean); // Spring injects controllers
+            loader.setControllerFactory(context::getBean);
             Parent view = loader.load();
             mainLayout.setCenter(view);
         } catch (IOException e) {
@@ -60,6 +68,7 @@ public class MainLayoutController {
         alert.showAndWait();
     }
 
+    @FXML
     public void handleExit(ActionEvent actionEvent) {
         System.exit(0);
     }

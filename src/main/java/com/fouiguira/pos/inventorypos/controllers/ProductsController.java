@@ -1,125 +1,219 @@
 package com.fouiguira.pos.inventorypos.controllers;
 
+import com.fouiguira.pos.inventorypos.entities.Category;
 import com.fouiguira.pos.inventorypos.entities.Product;
+import com.fouiguira.pos.inventorypos.services.interfaces.CategoryService;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
+import io.github.palexdev.materialfx.controls.*;
+import io.github.palexdev.materialfx.controls.cell.MFXTableRowCell;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
 @Controller
 public class ProductsController {
 
     private final ProductService productService;
+    private final CategoryService categoryService;
 
     @FXML
-    private TableView<Product> productTable;
+    private MFXTableView<Product> productTable;
     @FXML
-    private TableColumn<Product, Long> colId;
+    private MFXTableColumn<Product> colId;
     @FXML
-    private TableColumn<Product, String> colName;
+    private MFXTableColumn<Product> colName;
     @FXML
-    private TableColumn<Product, String> colCategory;
+    private MFXTableColumn<Product> colCategory;
     @FXML
-    private TableColumn<Product, Double> colPrice;
+    private MFXTableColumn<Product> colPrice;
     @FXML
-    private TableColumn<Product, Integer> colStock;
+    private MFXTableColumn<Product> colStock;
     @FXML
-    private TextField productNameField, categoryField, priceField, stockField, imagePathField;
+    private MFXTableColumn<Product> colImage;
+    @FXML
+    private MFXTextField productNameField;
+    @FXML
+    private MFXTextField priceField;
+    @FXML
+    private MFXTextField stockField;
+    @FXML
+    private MFXTextField imagePathField;
     @FXML
     private TextArea descriptionField;
     @FXML
     private ImageView productImage;
     @FXML
-    private Button addButton, updateButton, deleteButton;
+    private MFXButton addButton;
     @FXML
-    private ComboBox<String> categoryComboBox; // ComboBox for categories
+    private MFXButton updateButton;
     @FXML
-    private TextField searchField; // Search field to enter product name
+    private MFXButton deleteButton;
+    @FXML
+    private MFXComboBox<Category> categoryComboBox;
+    @FXML
+    private MFXTextField searchField;
 
     @Autowired
-    public ProductsController(ProductService productService) {
+    public ProductsController(ProductService productService, CategoryService categoryService) {
         this.productService = productService;
+        this.categoryService = categoryService;
     }
 
     @FXML
     public void initialize() {
-        Platform.runLater(this::loadProducts);
+        Platform.runLater(() -> {
+            loadProducts();
+            searchField.setFloatingText("Search");
+            productNameField.setFloatingText("Product Name");
+            priceField.setFloatingText("Price");
+            stockField.setFloatingText("Stock Quantity");
+            imagePathField.setFloatingText("Image Path");
+        });
         setupTable();
-        loadCategories(); // Load categories into the ComboBox
-        productTable.setOnMouseClicked(event -> populateFieldsFromSelection());
-    }
-
-    private void setupTable() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
-        colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
-        colStock.setCellValueFactory(new PropertyValueFactory<>("stockQuantity"));
-    }
-
-    private void loadProducts() {
-        List<Product> products = productService.getAllProducts();
-        productTable.getItems().setAll(products);
+        loadCategories();
+        productTable.getSelectionModel().selectionProperty().addListener((obs, oldSel, newSel) -> populateFieldsFromSelection());
     }
 
     private void loadCategories() {
-        // For demonstration purposes, let's assume these are predefined categories
-        categoryComboBox.getItems().addAll("Category 1", "Category 2", "Category 3", "Category 4");
+        List<Category> categories = categoryService.getAllCategories();
+        categoryComboBox.setItems(FXCollections.observableArrayList(categories));
+        categoryComboBox.setConverter(new javafx.util.StringConverter<Category>() {
+            @Override
+            public String toString(Category category) {
+                return category == null ? "Select Category" : category.getName();
+            }
+
+            @Override
+            public Category fromString(String string) {
+                return categoryComboBox.getItems().stream()
+                        .filter(c -> c.getName().equals(string))
+                        .findFirst()
+                        .orElse(null);
+            }
+        });
+    }
+
+    private void setupTable() {
+        // Configure MFXTableColumns
+        colId.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getId));
+        colName.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getName));
+        colCategory.setRowCellFactory(product -> new MFXTableRowCell<>(p -> p.getCategory() != null ? p.getCategory().getName() : "No Category"));
+        colPrice.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getPrice));
+        colStock.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getStockQuantity));
+    
+        // Custom cell for image column
+        colImage.setRowCellFactory(product -> {
+            MFXTableRowCell<Product, String> cell = new MFXTableRowCell<>(Product::getImagePath);
+            ImageView imageView = new ImageView();
+            imageView.setFitWidth(50);
+            imageView.setFitHeight(50);
+            cell.setGraphic(imageView); // Set ImageView as the graphic
+            cell.textProperty().addListener((obs, oldText, newText) -> {
+                if (newText != null && !newText.isEmpty()) {
+                    File file = new File(newText);
+                    if (file.exists()) {
+                        imageView.setImage(new Image(file.toURI().toString(), 50, 50, true, true));
+                    } else {
+                        imageView.setImage(null);
+                    }
+                } else {
+                    imageView.setImage(null);
+                }
+            });
+            return cell;
+        });
+    
+        // Enable selection
+        productTable.getSelectionModel().setAllowsMultipleSelection(false);
+    }
+    private void loadProducts() {
+        List<Product> products = productService.getAllProducts();
+        productTable.setItems(FXCollections.observableArrayList(products));
     }
 
     @FXML
     private void populateFieldsFromSelection() {
-        Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
+        Product selectedProduct = productTable.getSelectionModel().getSelectedValue();
         if (selectedProduct != null) {
             productNameField.setText(selectedProduct.getName());
-            categoryField.setText(selectedProduct.getCategory());
+            categoryComboBox.getSelectionModel().selectItem(selectedProduct.getCategory());
             priceField.setText(String.valueOf(selectedProduct.getPrice()));
             stockField.setText(String.valueOf(selectedProduct.getStockQuantity()));
             imagePathField.setText(selectedProduct.getImagePath());
             descriptionField.setText(selectedProduct.getDescription());
-
-            // Load image if path is valid
             loadImageFromPath(selectedProduct.getImagePath());
         }
     }
 
     private void loadImageFromPath(String imagePath) {
-        File file = new File(imagePath);
-        if (file.exists() && file.isFile()) {
-            productImage.setImage(new Image(file.toURI().toString()));
-        } else {
-            productImage.setImage(null); // or set a default image
+        if (imagePath != null && !imagePath.isEmpty()) {
+            File file = new File(imagePath);
+            if (file.exists() && file.isFile()) {
+                productImage.setImage(new Image(file.toURI().toString()));
+            } else {
+                productImage.setImage(null);
+            }
         }
     }
 
     @FXML
     public void handleSearch() {
-        String searchText = searchField.getText().trim();
-        String selectedCategory = categoryComboBox.getValue();
-
-        // If category is selected, filter by category
+        String searchText = searchField.getText().trim().toLowerCase();
+        Category selectedCategory = categoryComboBox.getSelectionModel().getSelectedItem();
         List<Product> filteredProducts;
-        if (selectedCategory != null && !selectedCategory.isEmpty()) {
-            filteredProducts = productService.getProductsByCategory(selectedCategory);
+
+        if (selectedCategory != null) {
+            filteredProducts = productService.getProductsByCategory(selectedCategory.getName());
         } else {
             filteredProducts = productService.getAllProducts();
         }
 
-        // If search text is provided, filter by product name as well
-        if (searchText != null && !searchText.isEmpty()) {
-            filteredProducts.removeIf(product -> !product.getName().toLowerCase().contains(searchText.toLowerCase()));
+        if (!searchText.isEmpty()) {
+            filteredProducts.removeIf(product -> !product.getName().toLowerCase().contains(searchText));
         }
 
-        productTable.getItems().setAll(filteredProducts);
+        productTable.setItems(FXCollections.observableArrayList(filteredProducts));
+    }
+
+    @FXML
+    private void handleSelectImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Product Image");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+
+        File selectedFile = fileChooser.showOpenDialog(null);
+        if (selectedFile != null) {
+            String imagePath = selectedFile.getAbsolutePath();
+            imagePathField.setText(imagePath);
+            loadImageFromPath(imagePath);
+        }
+    }
+
+    @FXML
+    public void handleCategorySelection() {
+        Category selectedCategory = categoryComboBox.getSelectionModel().getSelectedItem();
+        System.out.println("Selected Category: " + selectedCategory);
+
+        if (selectedCategory != null) {
+            List<Product> filteredProducts = productService.getProductsByCategory(selectedCategory.getName());
+            productTable.setItems(FXCollections.observableArrayList(filteredProducts));
+        } else {
+            loadProducts();
+        }
     }
 
     @FXML
@@ -168,7 +262,7 @@ public class ProductsController {
     }
 
     private Long getProductId() {
-        Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
+        Product selectedProduct = productTable.getSelectionModel().getSelectedValue();
         if (selectedProduct == null) {
             throw new IllegalArgumentException("Please select a product to proceed.");
         }
@@ -177,7 +271,13 @@ public class ProductsController {
 
     private Product createProductFromFields() {
         String name = productNameField.getText();
-        String category = categoryField.getText();
+        Category selectedCategory = categoryComboBox.getSelectionModel().getSelectedItem();
+
+        if (selectedCategory == null) {
+            showAlert(Alert.AlertType.WARNING, "Please select a category.");
+            throw new IllegalArgumentException("Category is required.");
+        }
+
         double price = Double.parseDouble(priceField.getText());
         int stockQuantity = Integer.parseInt(stockField.getText());
         String imagePath = imagePathField.getText();
@@ -185,7 +285,7 @@ public class ProductsController {
 
         Product product = new Product();
         product.setName(name);
-        product.setCategory(category);
+        product.setCategory(selectedCategory);
         product.setPrice(price);
         product.setStockQuantity(stockQuantity);
         product.setImagePath(imagePath);
@@ -198,11 +298,11 @@ public class ProductsController {
 
     private boolean validateFields() {
         try {
-            if (productNameField.getText().isEmpty() || categoryField.getText().isEmpty() || priceField.getText().isEmpty() || stockField.getText().isEmpty()) {
+            if (productNameField.getText().isEmpty() || categoryComboBox.getSelectionModel().getSelectedItem() == null ||
+                    priceField.getText().isEmpty() || stockField.getText().isEmpty()) {
                 showAlert(Alert.AlertType.WARNING, "Please fill in all required fields.");
                 return false;
             }
-            // Validate numeric fields
             Double.parseDouble(priceField.getText());
             Integer.parseInt(stockField.getText());
             return true;
@@ -214,7 +314,7 @@ public class ProductsController {
 
     private void clearFields() {
         productNameField.clear();
-        categoryField.clear();
+        categoryComboBox.getSelectionModel().clearSelection();
         priceField.clear();
         stockField.clear();
         imagePathField.clear();

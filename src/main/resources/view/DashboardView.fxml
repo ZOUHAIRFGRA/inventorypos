@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?import io.github.palexdev.materialfx.controls.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.DashboardController"
-      spacing="15" style="-fx-padding: 20;">
+      spacing="15" styleClass="dashboard-container">
 
     <!-- Dashboard Title -->
-    <Label text="Admin Dashboard" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+    <Label text="Admin Dashboard" styleClass="title-label"/>
 
     <!-- Sales Summary Panel -->
-    <HBox spacing="20">
+    <HBox spacing="20" styleClass="summary-panel">
         <VBox>
-            <Label text="Total Sales Today:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
-            <Label fx:id="totalSalesTodayLabel" style="-fx-font-size: 16;"/>
+            <Label text="Total Sales Today:" styleClass="label-bold"/>
+            <Label fx:id="totalSalesTodayLabel" styleClass="summary-value"/>
         </VBox>
         <VBox>
-            <Label text="Total Revenue:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
-            <Label fx:id="totalRevenueLabel" style="-fx-font-size: 16;"/>
+            <Label text="Total Revenue:" styleClass="label-bold"/>
+            <Label fx:id="totalRevenueLabel" styleClass="summary-value"/>
         </VBox>
         <VBox>
-            <Label text="Pending Payments:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
-            <Label fx:id="pendingPaymentsLabel" style="-fx-font-size: 16; -fx-text-fill: red;"/>
+            <Label text="Pending Payments:" styleClass="label-bold"/>
+            <Label fx:id="pendingPaymentsLabel" styleClass="summary-value-pending"/>
         </VBox>
     </HBox>
 
     <!-- Recent Transactions Table -->
-    <Label text="Recent Transactions" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
-    <TableView fx:id="recentSalesTable">
+    <Label text="Recent Transactions" styleClass="section-title"/>
+    <TableView fx:id="recentSalesTable" styleClass="table-view">
         <columns>
             <TableColumn text="Sale ID" fx:id="colSaleId" minWidth="100"/>
             <TableColumn text="Amount" fx:id="colAmount" minWidth="120"/>
@@ -37,9 +37,6 @@
     </TableView>
 
     <!-- Low Stock Alerts -->
-    <Label text="Low Stock Alerts" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
-    <ListView fx:id="lowStockList" prefHeight="100"/>
-
-
-
+    <Label text="Low Stock Alerts" styleClass="section-title"/>
+    <ListView fx:id="lowStockList" prefHeight="100" styleClass="list-view"/>
 </VBox>
