@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?import io.github.palexdev.materialfx.controls.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -15,17 +15,14 @@
 
     <!-- Admin Sidebar -->
     <left>
-        <VBox spacing="10" style="-fx-padding: 15; -fx-background-color: #333;">
-            <Label text="Admin Panel" style="-fx-font-size: 18; -fx-text-fill: white;"/>
-            <Button text="Dashboard" fx:id="dashboardButton" style="-fx-pref-width: 150;"/>
-            <Button text="Manage Products" fx:id="productsButton" style="-fx-pref-width: 150;"/>
-            <Button text="Manage Categories" fx:id="categoriesButton" style="-fx-pref-width: 150;"/>
-            <Button text="Sales History" fx:id="salesButton" style="-fx-pref-width: 150;"/>
-            <Button text="Settings" fx:id="settingsButton" style="-fx-pref-width: 150;"/>
+        <VBox spacing="10" styleClass="sidebar">
+            <Label text="Admin Panel" styleClass="sidebar-title"/>
+            <MFXButton fx:id="dashboardButton" text="Dashboard" styleClass="sidebar-button"/>
+            <MFXButton fx:id="productsButton" text="Manage Products" styleClass="sidebar-button"/>
         </VBox>
     </left>
 
-    <!-- Content Area (Changes dynamically) -->
+    <!-- Content Area -->
     <center>
         <Pane fx:id="contentPane"/>
     </center>

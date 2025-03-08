@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import io.github.palexdev.materialfx.controls.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.CategoryController"
+      spacing="10" alignment="CENTER" styleClass="category-container">
+
+    <!-- Title Label -->
+    <Label text="Manage Categories" styleClass="title-label"/>
+
+    <!-- Category Selection -->
+    <MFXComboBox fx:id="categoryComboBox" promptText="Select Category" prefWidth="250"/>
+
+    <!-- CRUD Buttons -->
+    <HBox spacing="10">
+        <MFXButton fx:id="addCategoryButton" text="Add Category" onAction="#handleAddCategory" styleClass="button-success"/>
+        <MFXButton fx:id="editCategoryButton" text="Edit Category" onAction="#handleEditCategory" styleClass="button-warning"/>
+        <MFXButton fx:id="deleteCategoryButton" text="Delete Category" onAction="#handleDeleteCategory" styleClass="button-danger"/>
+    </HBox>
+</VBox>

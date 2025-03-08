@@ -1,0 +1,194 @@
+/* Root styling for the entire application */
+.root {
+    -fx-font-family: "Roboto", "Arial", sans-serif;
+    -fx-background-color: #f0f4f8;
+    -fx-padding: 10;
+}
+
+/* Titles and Labels */
+.title-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #212121;
+    -fx-padding: 0 0 20 0;
+}
+
+.section-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #424242;
+    -fx-padding: 10 0 10 0;
+}
+
+.label-bold {
+    -fx-font-weight: bold;
+    -fx-text-fill: #424242;
+    -fx-font-size: 14px;
+}
+
+/* Sidebar (used in MainLayout) */
+.sidebar {
+    -fx-background-color: #333;
+    -fx-padding: 15;
+}
+
+.sidebar-title {
+    -fx-font-size: 18px;
+    -fx-text-fill: white;
+    -fx-padding: 0 0 10 0;
+}
+
+.sidebar-button {
+    -fx-background-color: #555;
+    -fx-text-fill: white;
+    -fx-pref-width: 150px;
+    -fx-background-radius: 4;
+    -fx-padding: 10;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #777;
+}
+
+/* MaterialFX Text Fields */
+.mfx-text-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #bdbdbd;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 14px;
+    -fx-text-fill: #212121;
+    -fx-prompt-text-fill: #757575;
+}
+
+.mfx-text-field:focused {
+    -fx-border-color: #1976d2;
+    -fx-border-width: 0 0 2 0;
+}
+
+/* MaterialFX ComboBox */
+.mfx-combo-box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #bdbdbd;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 14px;
+    -fx-text-fill: #212121;
+    -fx-prompt-text-fill: #757575;
+}
+
+.mfx-combo-box:focused {
+    -fx-border-color: #1976d2;
+    -fx-border-width: 0 0 2 0;
+}
+
+/* MaterialFX Buttons */
+.mfx-button {
+    -fx-background-radius: 4;
+    -fx-padding: 10 20 10 20;
+    -fx-font-size: 14px;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+.button-success {
+    -fx-background-color: #4CAF50;
+}
+
+.button-success:hover {
+    -fx-background-color: #45a049;
+}
+
+.button-warning {
+    -fx-background-color: #FFB300;
+}
+
+.button-warning:hover {
+    -fx-background-color: #ffa000;
+}
+
+.button-danger {
+    -fx-background-color: #F44336;
+}
+
+.button-danger:hover {
+    -fx-background-color: #da190b;
+}
+
+/* MaterialFX TableView */
+.mfx-table-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);
+}
+
+.mfx-table-view .columns-container {
+    -fx-background-color: #fafafa;
+    -fx-border-color: #e0e0e0;
+    -fx-padding: 5;
+}
+
+.mfx-table-view .mfx-table-column {
+    -fx-text-fill: #424242;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER;
+    -fx-padding: 5;
+}
+
+.mfx-table-view .virtual-flow {
+    -fx-background-color: #ffffff;
+}
+
+.mfx-table-view .mfx-table-row {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-padding: 5;
+}
+
+.mfx-table-view .mfx-table-row:odd {
+    -fx-background-color: #f9f9f9;
+}
+
+.mfx-table-view .mfx-table-row:selected {
+    -fx-background-color: #e3f2fd;
+}
+
+.mfx-table-view .mfx-table-row-cell {
+    -fx-text-fill: #212121;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 5;
+}
+
+/* ScrollPane */
+.scroll-pane {
+    -fx-background-color: #f0f4f8;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #f0f4f8;
+}
+
+/* TextArea */
+.text-area {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #bdbdbd;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-font-size: 14px;
+    -fx-text-fill: #212121;
+    -fx-prompt-text-fill: #757575;
+}
+
+.text-area:focused {
+    -fx-border-color: #1976d2;
+    -fx-border-width: 2;
+}
+
+/* ImageView */
+.image-view {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);
+}
