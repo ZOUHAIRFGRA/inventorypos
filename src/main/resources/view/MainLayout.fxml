@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import io.github.palexdev.materialfx.controls.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
 
-<BorderPane fx:id="mainLayout" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.fouiguira.pos.inventorypos.controllers.MainLayoutController">
-    <top>
-        <MenuBar>
-            <Menu text="File">
-                <MenuItem text="Exit" onAction="#handleExit"/>
-            </Menu>
-        </MenuBar>
-    </top>
-
-    <!-- Admin Sidebar -->
+<BorderPane fx:id="mainLayout" xmlns:fx="http://javafx.com/fxml/1" 
+            xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.fouiguira.pos.inventorypos.controllers.MainLayoutController">
+    <!-- Left: Sidebar -->
     <left>
-        <VBox spacing="10" styleClass="sidebar">
-            <Label text="Admin Panel" styleClass="sidebar-title"/>
-            <MFXButton fx:id="dashboardButton" text="Dashboard" styleClass="sidebar-button"/>
-            <MFXButton fx:id="productsButton" text="Manage Products" styleClass="sidebar-button"/>
+        <VBox styleClass="sidebar" spacing="15" prefWidth="200">
+            <children>
+                <Label text="Inventory POS" styleClass="sidebar-title" />
+                <MFXButton fx:id="dashboardButton" text="Admin Dashboard" styleClass="sidebar-button" />
+                <MFXButton fx:id="productsButton" text="Manage Products" styleClass="sidebar-button" />
+                <MFXButton fx:id="salesHistoryButton" text="Sales History" styleClass="sidebar-button" />
+                <MFXButton fx:id="cashierButton" text="Cashier POS" styleClass="sidebar-button" />
+                <MFXButton fx:id="settingsButton" text="Settings" styleClass="sidebar-button" />
+                <MFXButton fx:id="invoicesButton" text="Invoices" styleClass="sidebar-button" />
+                <MFXButton fx:id="exitButton" text="Exit" styleClass="sidebar-button" />
+            </children>
         </VBox>
     </left>
 
-    <!-- Content Area -->
+    <!-- Center: Content Area -->
     <center>
-        <Pane fx:id="contentPane"/>
+        <Pane fx:id="contentArea" />
     </center>
 </BorderPane>
