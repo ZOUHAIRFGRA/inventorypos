@@ -4,14 +4,12 @@ import lombok.Data;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "sales_products",
-        uniqueConstraints = @UniqueConstraint(columnNames = "products_id"))
+@Table(name = "sales_products")
 @Data
 public class SaleProduct {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id; // Unique identifier for this table
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "sale_id", nullable = false)
@@ -19,9 +17,8 @@ public class SaleProduct {
 
     @ManyToOne
     @JoinColumn(name = "products_id", nullable = false)
-    private Product product; // Ensure this is ManyToOne, NOT OneToOne
+    private Product product;
 
     @Column(nullable = false)
     private Integer quantity;
 }
-

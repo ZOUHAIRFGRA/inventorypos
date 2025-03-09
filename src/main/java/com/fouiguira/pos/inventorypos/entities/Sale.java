@@ -11,22 +11,23 @@ import java.util.List;
 public class Sale {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id; // Unique identifier for each sale
+    private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<SaleProduct> products; // List of products sold
+    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL) // Adjusted to mappedBy
+    private List<SaleProduct> products;
 
     @Column(nullable = false)
-    private Double totalPrice; // Total price of the sale
+    private Double totalPrice;
 
-    private String clientName; // Optional client name
+    private String clientName;
 
     @ManyToOne
     @JoinColumn(name = "cashier_id", nullable = false)
-    private User cashier; // Cashier processing the sale
+    private User cashier;
+
+    @Column(nullable = false)
+    private String paymentMethod; // Added for POS (e.g., "Cash", "Card")
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date timestamp = new Date(); // Timestamp of the sale
+    private Date timestamp = new Date();
 }
-
-

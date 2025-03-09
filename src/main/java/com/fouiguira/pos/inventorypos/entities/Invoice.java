@@ -2,6 +2,7 @@ package com.fouiguira.pos.inventorypos.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.Date;
 
 @Entity
@@ -10,23 +11,26 @@ import java.util.Date;
 public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id; // Unique identifier for each invoice
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "sale_id", nullable = false)
-    private Sale sale; // Reference to the Sale ID
+    private Sale sale;
+
+    @Column(nullable = false)
+    private Double totalAmount; // Added to store invoice total
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date timestamp = new Date(); // Timestamp of invoice generation
+    private Date timestamp = new Date();
 
     @Enumerated(EnumType.STRING)
-    private InvoiceStatus status; // Payment status
+    private InvoiceStatus status;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt = new Date(); // Timestamp of invoice creation
+    private Date createdAt = new Date();
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt = new Date(); // Timestamp of last update
+    private Date updatedAt = new Date();
 
     public enum InvoiceStatus {
         PAID, PENDING
