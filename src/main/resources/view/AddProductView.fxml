@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import io.github.palexdev.materialfx.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="20" styleClass="add-product-container" xmlns="http://javafx.com/javafx/17.0.12" 
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.AddProductController">
+    <padding>
+        <Insets top="25" right="25" bottom="25" left="25" />
+    </padding>
+    <children>
+        <!-- Title -->
+        <Label text="Add New Product" styleClass="title-label" />
+
+        <!-- Main Content -->
+        <HBox alignment="CENTER" spacing="30">
+            <!-- Image Section -->
+            <VBox alignment="CENTER" spacing="15" styleClass="image-section">
+                <ImageView fx:id="productImage" fitHeight="150" fitWidth="150" preserveRatio="true" styleClass="product-image" />
+                <MFXButton text="Select Image" onAction="#handleSelectImage" styleClass="button-select-image" />
+                <MFXTextField fx:id="imagePathField" promptText="Image Path" editable="false" prefWidth="200" styleClass="mfx-text-field" />
+            </VBox>
+
+            <!-- Form Section -->
+            <GridPane hgap="15" vgap="20" styleClass="form-grid">
+                <children>
+                    <Label text="Product Name" styleClass="form-label" GridPane.rowIndex="0" />
+                    <MFXTextField fx:id="productNameField" promptText="Enter product name" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="250" styleClass="mfx-text-field" />
+
+                    <Label text="Category" styleClass="form-label" GridPane.rowIndex="1" />
+                    <MFXComboBox fx:id="categoryComboBox" promptText="Select Category" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="250" styleClass="mfx-combo-box" />
+
+                    <Label text="Price" styleClass="form-label" GridPane.rowIndex="2" />
+                    <MFXTextField fx:id="priceField" promptText="Enter price (e.g., 19.99)" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="250" styleClass="mfx-text-field" />
+
+                    <Label text="Stock Quantity" styleClass="form-label" GridPane.rowIndex="3" />
+                    <MFXTextField fx:id="stockField" promptText="Enter stock quantity" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="250" styleClass="mfx-text-field" />
+
+                    <Label text="Description" styleClass="form-label" GridPane.rowIndex="4" />
+                    <TextArea fx:id="descriptionField" promptText="Enter product description" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="250" prefHeight="80" styleClass="text-area" />
+                </children>
+            </GridPane>
+        </HBox>
+
+        <!-- Buttons -->
+        <HBox alignment="CENTER_RIGHT" spacing="15">
+            <MFXButton fx:id="cancelButton" text="Cancel" onAction="#handleCancel" styleClass="button-cancel" />
+            <MFXButton fx:id="saveButton" text="Save Product" onAction="#handleSaveProduct" styleClass="button-save" />
+        </HBox>
+    </children>
+</VBox>
