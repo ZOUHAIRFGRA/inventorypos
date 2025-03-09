@@ -1,13 +1,17 @@
 package com.fouiguira.pos.inventorypos.services.interfaces;
+
 import com.fouiguira.pos.inventorypos.entities.Product;
+import com.fouiguira.pos.inventorypos.entities.SaleProduct;
+
 import java.util.List;
 
 public interface ProductService {
-    Product createProduct(Product product);
-    Product getProductById(Long id);
     List<Product> getAllProducts();
-    List<Product> getProductsByCategory(String categoryName); // Change parameter to categoryName
+    Product getProductById(Long id);
+    List<Product> getProductsByCategory(String categoryName);
+    Product createProduct(Product product);
     Product updateProduct(Long id, Product product);
     void deleteProduct(Long id);
     List<Product> getLowStockProducts(int threshold);
+    void updateStockAfterSale(List<SaleProduct> saleProducts);
 }
