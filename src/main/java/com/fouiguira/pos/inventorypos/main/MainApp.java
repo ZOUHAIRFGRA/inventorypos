@@ -7,21 +7,26 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 public class MainApp extends Application {
 
-    private static ApplicationContext springContext;
+    public static ApplicationContext springContext;
+
+    @Override
+    public void init() {
+        // Initialize Spring context before JavaFX start
+        springContext = SpringApplication.run(InventoryposApplication.class);
+    }
 
     @Override
     public void start(Stage stage) throws Exception {
-        springContext = SpringApplication.run(InventoryposApplication.class);
-
-        // Load FXML from resources/view/
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainLayout.fxml"));
+        // Load FXML from resources/view/ (changed to Login.fxml as per your requirement)
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
         loader.setControllerFactory(springContext::getBean);
 
         // Debug: Print FXML path
-        System.out.println("MainLayout.fxml path: " + getClass().getResource("/view/MainLayout.fxml"));
+        System.out.println("Login.fxml path: " + getClass().getResource("/view/Login.fxml"));
 
         // Load the FXML and create the scene
         Scene scene = new Scene(loader.load());
@@ -42,6 +47,14 @@ public class MainApp extends Application {
         stage.setTitle("Inventory POS System");
         stage.setMaximized(true);
         stage.show();
+    }
+
+    @Override
+    public void stop() {
+        // Close Spring context when JavaFX stops
+        if (springContext != null) {
+            ((ConfigurableApplicationContext) springContext).close();
+        }
     }
 
     public static void main(String[] args) {
