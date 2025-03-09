@@ -37,3 +37,7 @@ inventory.db
 storage/images/**
 
 **.exe
+
+
+# Logs
+*.log

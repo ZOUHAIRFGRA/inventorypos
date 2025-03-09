@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import io.github.palexdev.materialfx.controls.*?>
+
+<VBox alignment="CENTER" spacing="20" style="-fx-padding: 20;" styleClass="login-container" 
+      xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" 
+      fx:controller="com.fouiguira.pos.inventorypos.controllers.LoginController">
+    <children>
+        <Label text="Login" styleClass="login-title" />
+        <MFXTextField fx:id="usernameField" promptText="Username" prefWidth="200" />
+        <MFXPasswordField fx:id="passwordField" promptText="Password" prefWidth="200" />
+        <MFXButton fx:id="loginButton" text="Login" onAction="#handleLogin" styleClass="button-success" />
+        <Label fx:id="messageLabel" text="" style="-fx-text-fill: red;" />
+    </children>
+</VBox>
