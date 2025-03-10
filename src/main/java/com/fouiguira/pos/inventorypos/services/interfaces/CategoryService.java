@@ -7,7 +7,7 @@ public interface CategoryService {
     List<Category> getAllCategories();  // Retrieve all categories
     Category getCategoryByName(String name);  // Find category by name
     Category getCategoryById(Long id);  // Find category by ID
-    void createCategory(Category category);  // Create a new category
-    void updateCategory(Category category);  // Update an existing category
+    Category createCategory(Category category);  // Create a new category
+    Category updateCategory(Long id,Category category);  // Update an existing category
     void deleteCategory(Long id);  // Delete a category by ID
 }

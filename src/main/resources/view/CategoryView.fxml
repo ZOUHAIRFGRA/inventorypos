@@ -1,21 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import io.github.palexdev.materialfx.controls.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.CategoryController"
-      spacing="10" alignment="CENTER" styleClass="category-container">
+<GridPane alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+          styleClass="grid-pane" vgap="10.0" xmlns="http://javafx.com/javafx/17.0.12" 
+          xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.CategoryController">
+    <columnConstraints>
+        <ColumnConstraints halignment="CENTER" minWidth="10.0" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="32.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+    </rowConstraints>
+    <padding>
+        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+    </padding>
+    <children>
+        <!-- Background -->
+        <StackPane styleClass="grid-background" GridPane.columnSpan="2147483647" GridPane.rowSpan="2147483647">
+            <GridPane.margin>
+                <Insets bottom="-15.0" left="-15.0" right="-15.0" />
+            </GridPane.margin>
+        </StackPane>
 
-    <!-- Title Label -->
-    <Label text="Manage Categories" styleClass="title-label"/>
+        <!-- Title -->
+        <Label text="Categories" styleClass="header-label" GridPane.columnSpan="2147483647">
+            <padding>
+                <Insets bottom="10.0" top="10.0" />
+            </padding>
+        </Label>
 
-    <!-- Category Selection -->
-    <MFXComboBox fx:id="categoryComboBox" promptText="Select Category" prefWidth="250"/>
+        <!-- Category Table -->
+        <MFXTableView fx:id="categoryTable" prefHeight="400" prefWidth="600" styleClass="mfx-table-view" 
+                      GridPane.rowIndex="1" GridPane.columnSpan="2147483647">
+            <tableColumns>
+                <MFXTableColumn fx:id="colId" text="ID" prefWidth="100" />
+                <MFXTableColumn fx:id="colName" text="Name" prefWidth="300" />
+                <MFXTableColumn fx:id="colDescription" text="Description" prefWidth="300" />
+                <MFXTableColumn fx:id="colActions" text="Actions" prefWidth="150" />
+            </tableColumns>
+        </MFXTableView>
 
-    <!-- CRUD Buttons -->
-    <HBox spacing="10">
-        <MFXButton fx:id="addCategoryButton" text="Add Category" onAction="#handleAddCategory" styleClass="button-success"/>
-        <MFXButton fx:id="editCategoryButton" text="Edit Category" onAction="#handleEditCategory" styleClass="button-warning"/>
-        <MFXButton fx:id="deleteCategoryButton" text="Delete Category" onAction="#handleDeleteCategory" styleClass="button-danger"/>
-    </HBox>
-</VBox>
+        <!-- Add Button -->
+        <HBox spacing="10" alignment="CENTER_RIGHT" GridPane.rowIndex="2" GridPane.columnSpan="2147483647">
+            <children>
+                <MFXButton fx:id="addButton" text="Add Category" onAction="#openAddCategoryView" styleClass="button-success" />
+            </children>
+        </HBox>
+    </children>
+</GridPane>

@@ -2,6 +2,7 @@ package com.fouiguira.pos.inventorypos.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.Date;
 
 @Entity
@@ -10,29 +11,28 @@ import java.util.Date;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id; // Unique identifier for each product
+    private Long id;
 
     @Column(nullable = false)
-    private String name; // Name of the product
-
+    private String name;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id", nullable = true) // Changed to nullable = true
     private Category category;
 
     @Column(nullable = false)
-    private Double price; // Price of the product
+    private Double price;
 
     @Column(nullable = false)
-    private Integer stockQuantity; // Available stock quantity
+    private Integer stockQuantity;
 
-    private String imagePath; // Path to product image
+    private String imagePath;
 
-    private String description; // Description of the product
-
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt = new Date(); // Timestamp of product creation
+    private String description;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt = new Date(); // Timestamp of last update
+    private Date createdAt = new Date();
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt = new Date();
 }

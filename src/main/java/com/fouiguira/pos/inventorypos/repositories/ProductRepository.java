@@ -1,5 +1,6 @@
 package com.fouiguira.pos.inventorypos.repositories;
 
+import com.fouiguira.pos.inventorypos.entities.Category;
 import com.fouiguira.pos.inventorypos.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -8,4 +9,5 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategoryName(String categoryName);
     List<Product> findByStockQuantityLessThan(int threshold);
+    List<Product> findByCategory(Category category);
 }
