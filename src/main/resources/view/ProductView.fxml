@@ -2,76 +2,56 @@
 <?import io.github.palexdev.materialfx.controls.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<ScrollPane fitToHeight="true" fitToWidth="true" xmlns:fx="http://javafx.com/fxml/1" 
-            xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.fouiguira.pos.inventorypos.controllers.ProductsController">
-    <content>
-        <AnchorPane>
+<GridPane alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+          styleClass="grid-pane" vgap="10.0" xmlns="http://javafx.com/javafx/17.0.12" 
+          xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.ProductsController">
+    <columnConstraints>
+        <ColumnConstraints halignment="CENTER" minWidth="10.0" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="32.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+    </rowConstraints>
+    <padding>
+        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+    </padding>
+    <children>
+        <!-- Background -->
+        <StackPane styleClass="grid-background" GridPane.columnSpan="2147483647" GridPane.rowSpan="2147483647">
+            <GridPane.margin>
+                <Insets bottom="-15.0" left="-15.0" right="-15.0" />
+            </GridPane.margin>
+        </StackPane>
+
+        <!-- Title -->
+        <Label text="Products" styleClass="header-label" GridPane.columnSpan="2147483647">
+            <padding>
+                <Insets bottom="10.0" top="10.0" />
+            </padding>
+        </Label>
+
+        <!-- Product Table -->
+        <MFXTableView fx:id="productTable" prefHeight="400" prefWidth="800" styleClass="mfx-table-view" 
+                      GridPane.rowIndex="1" GridPane.columnSpan="2147483647">
+            <tableColumns>
+                <MFXTableColumn fx:id="colId" text="ID" prefWidth="80" />
+                <MFXTableColumn fx:id="colName" text="Name" prefWidth="200" />
+                <MFXTableColumn fx:id="colCategory" text="Category" prefWidth="150" />
+                <MFXTableColumn fx:id="colPrice" text="Price" prefWidth="100" />
+                <MFXTableColumn fx:id="colStock" text="Stock" prefWidth="100" />
+                <MFXTableColumn fx:id="colImage" text="Image" prefWidth="100" />
+                <MFXTableColumn fx:id="colActions" text="Actions" prefWidth="150" />
+            </tableColumns>
+        </MFXTableView>
+
+        <!-- Add Button -->
+        <HBox spacing="10" alignment="CENTER_RIGHT" GridPane.rowIndex="2" GridPane.columnSpan="2147483647">
             <children>
-                <VBox layoutX="20" layoutY="20" spacing="20">
-                    <children>
-                        <!-- Title -->
-                        <Label text="Manage Products" styleClass="title-label" />
-
-                        <!-- Search Bar -->
-                        <HBox spacing="10">
-                            <Label text="Search:" styleClass="label-bold" />
-                            <MFXTextField fx:id="searchField" promptText="Enter product name..." onKeyReleased="#handleSearch" prefWidth="200" />
-                        </HBox>
-
-                        <!-- Product Table (MFXTableView) -->
-                        <MFXTableView fx:id="productTable" styleClass="mfx-table-view" prefHeight="300">
-                            <tableColumns>
-                                <MFXTableColumn fx:id="colId" text="ID" prefWidth="50" />
-                                <MFXTableColumn fx:id="colName" text="Name" prefWidth="180" />
-                                <MFXTableColumn fx:id="colCategory" text="Category" prefWidth="100" />
-                                <MFXTableColumn fx:id="colPrice" text="Price" prefWidth="100" />
-                                <MFXTableColumn fx:id="colStock" text="Stock" prefWidth="80" />
-                                <MFXTableColumn fx:id="colImage" text="Image" prefWidth="75" />
-                            </tableColumns>
-                        </MFXTableView>
-
-                        <!-- Product Image and Details -->
-                        <HBox spacing="20">
-                            <VBox spacing="10">
-                                <ImageView fx:id="productImage" fitHeight="150" fitWidth="150" />
-                                <HBox spacing="10">
-                                    <MFXButton text="Select Image" onAction="#handleSelectImage" styleClass="button-success" />
-                                    <MFXTextField fx:id="imagePathField" promptText="Image Path" editable="false" prefWidth="200" />
-                                </HBox>
-                            </VBox>
-
-                            <GridPane hgap="15" vgap="15">
-                                <children>
-                                    <Label text="Product Name:" styleClass="label-bold" GridPane.rowIndex="0" />
-                                    <MFXTextField fx:id="productNameField" promptText="Product Name" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-
-                                    <Label text="Category:" styleClass="label-bold" GridPane.rowIndex="1" />
-                                    <MFXComboBox fx:id="categoryComboBox" promptText="Select Category" onAction="#handleCategorySelection" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-
-                                    <Label text="Price:" styleClass="label-bold" GridPane.rowIndex="2" />
-                                    <MFXTextField fx:id="priceField" promptText="Price" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-
-                                    <Label text="Stock Quantity:" styleClass="label-bold" GridPane.rowIndex="3" />
-                                    <MFXTextField fx:id="stockField" promptText="Stock Quantity" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-
-                                    <Label text="Description:" styleClass="label-bold" GridPane.rowIndex="4" />
-                                    <TextArea fx:id="descriptionField" promptText="Description" GridPane.columnIndex="1" GridPane.rowIndex="4" prefHeight="100" />
-                                </children>
-                            </GridPane>
-                        </HBox>
-
-                        <!-- Buttons -->
-                        <HBox spacing="20">
-                            <MFXButton fx:id="addButton" text="Add" onAction="#handleAddProduct" styleClass="button-success" />
-                            <MFXButton fx:id="updateButton" text="Update" onAction="#handleUpdateProduct" styleClass="button-warning" />
-                            <MFXButton fx:id="deleteButton" text="Delete" onAction="#handleDeleteProduct" styleClass="button-danger" />
-                        </HBox>
-                    </children>
-                </VBox>
+                <MFXButton fx:id="addButton" text="Add Product" onAction="#openAddProductView" styleClass="button-success" />
             </children>
-        </AnchorPane>
-    </content>
-</ScrollPane>
+        </HBox>
+    </children>
+</GridPane>
