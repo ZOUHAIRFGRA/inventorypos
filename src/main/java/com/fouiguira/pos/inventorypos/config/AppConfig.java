@@ -3,6 +3,7 @@ package com.fouiguira.pos.inventorypos.config;
 import com.fouiguira.pos.inventorypos.repositories.UserRepository;
 import com.fouiguira.pos.inventorypos.repositories.ProductRepository;
 import com.fouiguira.pos.inventorypos.repositories.SaleRepository;
+import com.fouiguira.pos.inventorypos.repositories.CategoryRepository;
 import com.fouiguira.pos.inventorypos.repositories.InvoiceRepository;
 import com.fouiguira.pos.inventorypos.services.impl.*;
 import com.fouiguira.pos.inventorypos.services.interfaces.*;
@@ -21,8 +22,8 @@ public class AppConfig {
         return new ProductServiceImpl(productRepository);
     }
 
-    public CategoryService categoryService() {
-        return new CategoryServiceImpl();
+    public CategoryService categoryService(CategoryRepository categoryRepository) {
+        return new CategoryServiceImpl(categoryRepository, null);
     }
 
     

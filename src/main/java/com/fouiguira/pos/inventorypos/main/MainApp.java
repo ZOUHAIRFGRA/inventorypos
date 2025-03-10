@@ -21,7 +21,6 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        // Load FXML from resources/view/ (changed to Login.fxml as per your requirement)
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
         loader.setControllerFactory(springContext::getBean);
 
