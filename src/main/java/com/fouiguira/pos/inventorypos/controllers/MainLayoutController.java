@@ -4,12 +4,16 @@ import io.github.palexdev.materialfx.controls.MFXButton;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.BorderPane;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
+import com.fouiguira.pos.inventorypos.entities.User;
+import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
 
 import java.io.IOException;
 
@@ -20,18 +24,19 @@ public class MainLayoutController {
     private BorderPane mainLayout;
 
     @FXML
-    private MFXButton dashboardButton, productsButton;
+    private MFXButton dashboardButton,categoryButton, productsButton, salesHistoryButton, cashierButton, settingsButton, invoicesButton, exitButton;
 
     private final ApplicationContext context;
+    private final UserService userService; // Now properly injected
 
-    @Autowired
-    public MainLayoutController(ApplicationContext context) {
+    public MainLayoutController(ApplicationContext context, UserService userService) {
         this.context = context;
+        this.userService = userService;
     }
 
     @FXML
     public void initialize() {
-        // Load CSS if available, otherwise log a warning
+        // Load CSS if available
         String cssPath = getClass().getResource("/styles/styles.css") != null 
             ? getClass().getResource("/styles/styles.css").toExternalForm() 
             : null;
@@ -43,9 +48,35 @@ public class MainLayoutController {
         }
 
         // Set button actions
-        dashboardButton.setOnAction(e -> loadView("DashboardView.fxml"));
+        dashboardButton.setOnAction(e -> loadView("AdminDashboard.fxml"));
         productsButton.setOnAction(e -> loadView("ProductView.fxml"));
-        loadView("DashboardView.fxml");
+        salesHistoryButton.setOnAction(e -> loadView("SalesHistoryView.fxml"));
+        cashierButton.setOnAction(e -> loadView("CashierDashboard.fxml"));
+        settingsButton.setOnAction(e -> loadView("SettingsView.fxml"));
+        invoicesButton.setOnAction(e -> loadView("InvoiceView.fxml"));
+        categoryButton.setOnAction(e -> loadView("CategoryView.fxml"));
+        exitButton.setOnAction(this::handleExit);
+
+        // Apply role-based access
+        configureAccess();
+
+        // Load default view based on role
+        User.Role role = userService.getCurrentUserRole();
+        if (role == User.Role.OWNER) { // Assuming OWNER is admin equivalent
+            loadView("AdminDashboard.fxml");
+        } else {
+            loadView("CashierDashboard.fxml");
+        }
+    }
+
+    private void configureAccess() {
+        User.Role role = userService.getCurrentUserRole();
+        if (role == User.Role.CASHIER || role == User.Role.STAFF) {
+            dashboardButton.setDisable(true);
+            productsButton.setDisable(true);
+            settingsButton.setDisable(true);
+            invoicesButton.setDisable(true);
+        }
     }
 
     private void loadView(String fxmlFile) {
@@ -54,6 +85,9 @@ public class MainLayoutController {
             loader.setControllerFactory(context::getBean);
             Parent view = loader.load();
             mainLayout.setCenter(view);
+            // Maximize the size of the loaded view
+            BorderPane.setMargin(view, new Insets(0));
+            BorderPane.setAlignment(view, Pos.CENTER);
         } catch (IOException e) {
             showAlert("Error", "Could not load view: " + e.getMessage());
             e.printStackTrace();
