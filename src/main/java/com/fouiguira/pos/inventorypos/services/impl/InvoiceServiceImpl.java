@@ -105,30 +105,30 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public void generateInvoicePdf(Invoice invoice) {
-        try {
-            // Ensure the products collection is initialized
-            Sale sale = invoice.getSale();
-            sale.getProducts().size(); // This will initialize the products collection
+public void generateInvoicePdf(Invoice invoice) {
+    try {
+        // Ensure the products collection is initialized
+        Sale sale = invoice.getSale();
+        sale.getProducts().size(); // This will initialize the products collection
 
-            String fileName = "invoice_" + invoice.getId() + "_" + System.currentTimeMillis() + ".pdf";
-            PdfWriter writer = new PdfWriter(fileName);
-            PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf);
+        String fileName = "invoice_" + invoice.getId() + "_" + System.currentTimeMillis() + ".pdf";
+        PdfWriter writer = new PdfWriter(fileName);
+        PdfDocument pdf = new PdfDocument(writer);
+        Document document = new Document(pdf);
 
-            document.add(new Paragraph("Inventory POS - Invoice #" + invoice.getId()));
-            document.add(new Paragraph("Date: " + invoice.getTimestamp()));
-            document.add(new Paragraph("Client: " + invoice.getClientName()));
-            document.add(new Paragraph("Cashier: " + invoice.getCashier().getUsername()));
-            document.add(new Paragraph("Status: " + invoice.getStatus()));
-            document.add(new Paragraph("Total Amount: $" + String.format("%.2f", invoice.getTotalAmount())));
+        document.add(new Paragraph("Inventory POS - Invoice #" + invoice.getId()));
+        document.add(new Paragraph("Date: " + invoice.getTimestamp()));
+        document.add(new Paragraph("Client: " + invoice.getClientName()));
+        document.add(new Paragraph("Cashier: " + invoice.getCashier().getUsername()));
+        document.add(new Paragraph("Status: " + invoice.getStatus()));
+        document.add(new Paragraph("Total Amount: $" + String.format("%.2f", invoice.getTotalAmount())));
 
-            Table table = new Table(4); // Added column for unit price
-            table.addCell(new Cell().add(new Paragraph("Product")));
-            table.addCell(new Cell().add(new Paragraph("Unit Price")));
-            table.addCell(new Cell().add(new Paragraph("Quantity")));
-            table.addCell(new Cell().add(new Paragraph("Total Price")));
-            sale.getProducts().forEach(sp -> {
+        Table table = new Table(4); // Added column for unit price
+        table.addCell(new Cell().add(new Paragraph("Product")));
+        table.addCell(new Cell().add(new Paragraph("Unit Price")));
+        table.addCell(new Cell().add(new Paragraph("Quantity")));
+        table.addCell(new Cell().add(new Paragraph("Total Price")));
+       sale.getProducts().forEach(sp -> {
                 table.addCell(new Cell().add(new Paragraph(sp.getProduct().getName())));
                 table.addCell(new Cell().add(new Paragraph("$" + String.format("%.2f", sp.getProduct().getPrice()))));
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(sp.getQuantity()))));
@@ -142,4 +142,5 @@ public class InvoiceServiceImpl implements InvoiceService {
             System.out.println("Failed to generate invoice PDF: " + e.getMessage());
         }
     }
+
 }

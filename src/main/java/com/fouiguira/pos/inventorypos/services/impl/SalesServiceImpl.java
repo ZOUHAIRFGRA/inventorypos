@@ -6,11 +6,14 @@ import com.fouiguira.pos.inventorypos.entities.User;
 import com.fouiguira.pos.inventorypos.repositories.SaleRepository;
 import com.fouiguira.pos.inventorypos.services.interfaces.InvoiceService;
 import com.fouiguira.pos.inventorypos.services.interfaces.SalesService;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -33,8 +36,9 @@ public class SalesServiceImpl implements SalesService {
     }
 
     @Override
+    @Transactional
     public Sale createSale(Sale sale) {
-        sale.getProducts().forEach(sp -> sp.setSale(sale)); // Set bidirectional relationship
+        sale.getProducts().forEach(sp -> sp.setSale(sale));
         return saleRepository.save(sale);
     }
 
@@ -64,10 +68,12 @@ public class SalesServiceImpl implements SalesService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void printReceipt(Sale sale) {
-        Invoice invoice = invoiceService.getInvoiceBySaleId(sale.getId());
+        Sale fullSale = getSaleById(sale.getId()); // Ensure products are loaded
+        Invoice invoice = invoiceService.getInvoiceBySaleId(fullSale.getId());
         if (invoice == null) {
-            invoice = invoiceService.createInvoiceFromSale(sale.getId());
+            invoice = invoiceService.createInvoiceFromSale(fullSale.getId());
         }
         invoiceService.generateInvoicePdf(invoice);
     }
@@ -78,9 +84,12 @@ public class SalesServiceImpl implements SalesService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Sale getSaleById(Long id) {
-        return saleRepository.findById(id)
+        Sale sale = saleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sale not found with id: " + id));
+        Hibernate.initialize(sale.getProducts()); // Force load products
+        return sale;
     }
 
     @Override
