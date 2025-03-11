@@ -13,7 +13,6 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -33,7 +32,6 @@ public class InvoiceController {
 
     private static final DecimalFormat df = new DecimalFormat("#,##0.00");
 
-    @Autowired
     public InvoiceController(InvoiceService invoiceService) {
         this.invoiceService = invoiceService;
     }

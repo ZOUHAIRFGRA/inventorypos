@@ -18,13 +18,20 @@ public class Invoice {
     private Sale sale;
 
     @Column(nullable = false)
-    private Double totalAmount; // Added to store invoice total
+    private Double totalAmount;
+
+    @Column(nullable = false)
+    private String clientName; // Added for clarity on invoice
+
+    @ManyToOne
+    @JoinColumn(name = "cashier_id", nullable = false)
+    private User cashier; // Added to track who issued the invoice
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp = new Date();
 
     @Enumerated(EnumType.STRING)
-    private InvoiceStatus status;
+    private InvoiceStatus status = InvoiceStatus.PENDING; // Default to PENDING
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
@@ -34,5 +41,20 @@ public class Invoice {
 
     public enum InvoiceStatus {
         PAID, PENDING
+    }
+
+    // Ensure totalAmount is set based on sale
+    @PrePersist
+    @PreUpdate
+    public void calculateTotalAmount() {
+        if (sale != null && totalAmount == null) {
+            totalAmount = sale.getTotalPrice();
+        }
+        if (sale != null && clientName == null) {
+            clientName = sale.getClientName() != null ? sale.getClientName() : "Unknown";
+        }
+        if (sale != null && cashier == null) {
+            cashier = sale.getCashier();
+        }
     }
 }

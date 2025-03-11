@@ -5,7 +5,6 @@ import com.fouiguira.pos.inventorypos.entities.Invoice;
 import com.fouiguira.pos.inventorypos.entities.Product;
 import com.fouiguira.pos.inventorypos.entities.Sale;
 import com.fouiguira.pos.inventorypos.entities.SaleProduct;
-import com.fouiguira.pos.inventorypos.entities.User;
 import com.fouiguira.pos.inventorypos.services.interfaces.CategoryService;
 import com.fouiguira.pos.inventorypos.services.interfaces.InvoiceService;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
@@ -60,12 +59,17 @@ public class CashierDashboardController {
     private MFXTableColumn<SaleProduct> cartQtyCol;
     private MFXTableColumn<SaleProduct> cartPriceCol;
     private MFXTableColumn<SaleProduct> cartTotalCol;
+    private MFXTableColumn<SaleProduct> cartActionCol;
+    @FXML
+    private MFXTextField clientNameField;
     @FXML
     private Label cartTotalLabel;
     @FXML
     private MFXComboBox<String> paymentMethodComboBox;
     @FXML
-    private MFXButton checkoutButton, clearCartButton;
+    private MFXButton checkoutButton;
+    @FXML
+    private MFXButton clearCartButton;
 
     @FXML
     private MFXTableView<Sale> salesHistoryTable;
@@ -93,7 +97,6 @@ public class CashierDashboardController {
     private ObservableList<SaleProduct> cartItems = FXCollections.observableArrayList();
     private static final DecimalFormat df = new DecimalFormat("#,##0.00");
 
-    @Autowired
     public CashierDashboardController(ProductService productService, CategoryService categoryService,
                                       SalesService salesService, InvoiceService invoiceService, UserService userService) {
         this.productService = productService;
@@ -116,9 +119,11 @@ public class CashierDashboardController {
             loadSalesHistory();
             setupPaymentMethods();
             searchField.setFloatingText("Search Products");
+            clientNameField.setFloatingText("Client Name (Required)");
         });
     }
 
+    @SuppressWarnings("unchecked")
     private void setupTables() {
         // Product Table
         prodIdCol = new MFXTableColumn<>("ID", true);
@@ -140,11 +145,7 @@ public class CashierDashboardController {
             cell.textProperty().addListener((obs, oldText, newText) -> {
                 if (newText != null && !newText.isEmpty()) {
                     File file = new File(newText);
-                    if (file.exists()) {
-                        imageView.setImage(new Image(file.toURI().toString(), 50, 50, true, true));
-                    } else {
-                        imageView.setImage(null);
-                    }
+                    imageView.setImage(file.exists() ? new Image(file.toURI().toString(), 50, 50, true, true) : null);
                 } else {
                     imageView.setImage(null);
                 }
@@ -159,12 +160,46 @@ public class CashierDashboardController {
         cartQtyCol = new MFXTableColumn<>("Qty", true);
         cartPriceCol = new MFXTableColumn<>("Price", true);
         cartTotalCol = new MFXTableColumn<>("Total", true);
+        cartActionCol = new MFXTableColumn<>("Action", false);
 
         cartNameCol.setRowCellFactory(item -> new MFXTableRowCell<>(i -> i.getProduct().getName()));
-        cartQtyCol.setRowCellFactory(item -> new MFXTableRowCell<>(SaleProduct::getQuantity));
+        cartQtyCol.setRowCellFactory(item -> {
+            MFXTableRowCell<SaleProduct, Integer> cell = new MFXTableRowCell<>(SaleProduct::getQuantity);
+            MFXTextField qtyField = new MFXTextField(String.valueOf(item.getQuantity()));
+            qtyField.setPrefWidth(50);
+            qtyField.textProperty().addListener((obs, oldVal, newVal) -> {
+                try {
+                    int newQty = Integer.parseInt(newVal);
+                    Product p = item.getProduct();
+                    if (newQty <= p.getStockQuantity() && newQty > 0) {
+                        item.setQuantity(newQty);
+                        updateCartTotal();
+                        cartTable.update();
+                    } else {
+                        qtyField.setText(String.valueOf(item.getQuantity()));
+                        showAlert(Alert.AlertType.WARNING, "Invalid quantity! Must be > 0 and ≤ stock (" + p.getStockQuantity() + ")");
+                    }
+                } catch (NumberFormatException e) {
+                    qtyField.setText(String.valueOf(item.getQuantity()));
+                }
+            });
+            cell.setGraphic(qtyField);
+            return cell;
+        });
         cartPriceCol.setRowCellFactory(item -> new MFXTableRowCell<>(i -> "$" + df.format(i.getProduct().getPrice())));
         cartTotalCol.setRowCellFactory(item -> new MFXTableRowCell<>(i -> "$" + df.format(i.getQuantity() * i.getProduct().getPrice())));
-        cartTable.getTableColumns().addAll(cartNameCol, cartQtyCol, cartPriceCol, cartTotalCol);
+        cartActionCol.setRowCellFactory(item -> {
+            MFXTableRowCell<SaleProduct, Void> cell = new MFXTableRowCell<>(i -> null);
+            MFXButton removeButton = new MFXButton("Remove");
+            removeButton.getStyleClass().add("button-danger");
+            removeButton.setOnAction(e -> {
+                cartItems.remove(item);
+                updateCartTotal();
+            });
+            cell.setGraphic(removeButton);
+            return cell;
+        });
+        cartTable.getTableColumns().addAll(cartNameCol, cartQtyCol, cartPriceCol, cartTotalCol, cartActionCol);
         cartTable.setItems(cartItems);
         cartTable.getSelectionModel().setAllowsMultipleSelection(false);
 
@@ -238,26 +273,26 @@ public class CashierDashboardController {
     @FXML
     public void handleAddToCart() {
         Product selectedProduct = productTable.getSelectionModel().getSelectedValue();
-        if (selectedProduct != null) {
-            SaleProduct item = cartItems.stream()
-                .filter(i -> i.getProduct().getId().equals(selectedProduct.getId()))
-                .findFirst()
-                .orElse(new SaleProduct());
-            if (item.getProduct() == null) {
-                item.setProduct(selectedProduct);
-                item.setQuantity(0);
-            }
-            if (item.getQuantity() < selectedProduct.getStockQuantity()) {
-                item.setQuantity(item.getQuantity() + 1);
-                if (!cartItems.contains(item)) {
-                    cartItems.add(item);
-                }
-                updateCartTotal();
-            } else {
-                showAlert(Alert.AlertType.WARNING, "Not enough stock available!");
-            }
-        } else {
+        if (selectedProduct == null) {
             showAlert(Alert.AlertType.WARNING, "Please select a product to add to cart!");
+            return;
+        }
+        SaleProduct item = cartItems.stream()
+            .filter(i -> i.getProduct().getId().equals(selectedProduct.getId()))
+            .findFirst()
+            .orElse(new SaleProduct());
+        if (item.getProduct() == null) {
+            item.setProduct(selectedProduct);
+            item.setQuantity(0);
+        }
+        if (item.getQuantity() < selectedProduct.getStockQuantity()) {
+            item.setQuantity(item.getQuantity() + 1);
+            if (!cartItems.contains(item)) {
+                cartItems.add(item);
+            }
+            updateCartTotal();
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Not enough stock available! Max: " + selectedProduct.getStockQuantity());
         }
     }
 
@@ -267,52 +302,95 @@ public class CashierDashboardController {
             showAlert(Alert.AlertType.WARNING, "Cart is empty!");
             return;
         }
+        String clientName = clientNameField.getText().trim();
+        if (clientName.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Please enter a client name to complete the sale!");
+            return;
+        }
+
         Sale sale = new Sale();
         sale.setTimestamp(new Date());
-        sale.setProducts(new ArrayList<>(cartItems));
         sale.setTotalPrice(cartItems.stream().mapToDouble(i -> i.getQuantity() * i.getProduct().getPrice()).sum());
         sale.setPaymentMethod(paymentMethodComboBox.getSelectionModel().getSelectedItem());
-        sale.setCashier(userService.getCurrentUser()); // Use the logged-in cashier
+        sale.setCashier(userService.getCurrentUser());
+        sale.setClientName(clientName);
 
-        Sale savedSale = salesService.createSale(sale);
-        Invoice invoice = new Invoice();
-        invoice.setSale(savedSale);
-        invoice.setTotalAmount(savedSale.getTotalPrice());
-        invoice.setStatus("Cash".equals(sale.getPaymentMethod()) ? Invoice.InvoiceStatus.PAID : Invoice.InvoiceStatus.PENDING);
-        invoiceService.createInvoice(invoice);
+        List<SaleProduct> saleProducts = new ArrayList<>();
+        for (SaleProduct cartItem : cartItems) {
+            SaleProduct saleProduct = new SaleProduct();
+            saleProduct.setProduct(cartItem.getProduct());
+            saleProduct.setQuantity(cartItem.getQuantity());
+            saleProduct.setSale(sale);
+            saleProducts.add(saleProduct);
+        }
+        sale.setProducts(saleProducts);
 
-        productService.updateStockAfterSale(cartItems);
-        showAlert(Alert.AlertType.INFORMATION, "Checkout successful! Invoice generated.");
-        clearCart();
-        loadSalesHistory();
-    }
-
-    @FXML
-    public void handleClearCart() {
-        clearCart();
+        try {
+            Sale savedSale = salesService.createSale(sale);
+            // Ensure the products collection is initialized
+            savedSale.getProducts().size();
+            Invoice invoice = invoiceService.createInvoiceFromSale(savedSale.getId());
+            productService.updateStockAfterSale(cartItems);
+            invoiceService.generateInvoicePdf(invoice);
+            showAlert(Alert.AlertType.INFORMATION, "Checkout successful! Invoice #" + invoice.getId() + " generated.");
+            clearCart();
+            loadSalesHistory();
+            loadProducts();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Checkout failed: " + e.getMessage());
+            e.printStackTrace(); // Log for debugging
+        }
     }
 
     @FXML
     public void handlePrintReceipt() {
         Sale selectedSale = salesHistoryTable.getSelectionModel().getSelectedValue();
         if (selectedSale != null) {
-            salesService.printReceipt(selectedSale);
-            showAlert(Alert.AlertType.INFORMATION, "Receipt printed successfully!");
+            try {
+                salesService.printReceipt(selectedSale);
+                showAlert(Alert.AlertType.INFORMATION, "Receipt printed successfully! Check the generated PDF.");
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Failed to print receipt: " + e.getMessage());
+                e.printStackTrace(); // Log for debugging
+            }
         } else {
             showAlert(Alert.AlertType.WARNING, "Please select a sale to print receipt!");
         }
     }
+    @FXML
+    public void handleClearCart() {
+        clearCart();
+    }
+
+    // @FXML
+    // public void handlePrintReceipt() {
+    //     Sale selectedSale = salesHistoryTable.getSelectionModel().getSelectedValue();
+    //     if (selectedSale != null) {
+    //         try {
+    //             salesService.printReceipt(selectedSale);
+    //             showAlert(Alert.AlertType.INFORMATION, "Receipt printed successfully! Check the generated PDF.");
+    //         } catch (Exception e) {
+    //             showAlert(Alert.AlertType.ERROR, "Failed to print receipt: " + e.getMessage());
+    //         }
+    //     } else {
+    //         showAlert(Alert.AlertType.WARNING, "Please select a sale to print receipt!");
+    //     }
+    // }
 
     @FXML
     public void handleLogout() {
         userService.logout();
         try {
             Stage stage = (Stage) logoutButton.getScene().getWindow();
-            Parent root = FXMLLoader.load(getClass().getResource("/view/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
+            loader.setControllerFactory(c -> new LoginController(userService)); // Adjust if LoginController differs
+            Parent root = loader.load();
             stage.setScene(new Scene(root));
+            stage.setTitle("Inventory POS System - Login");
+            stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error logging out!");
+            showAlert(Alert.AlertType.ERROR, "Error logging out: " + e.getMessage());
         }
     }
 
@@ -323,6 +401,7 @@ public class CashierDashboardController {
 
     private void clearCart() {
         cartItems.clear();
+        clientNameField.clear();
         updateCartTotal();
     }
 

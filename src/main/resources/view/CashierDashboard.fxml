@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import io.github.palexdev.materialfx.controls.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+
+<ScrollPane fitToHeight="true" fitToWidth="true" xmlns:fx="http://javafx.com/fxml/1" 
+            xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.fouiguira.pos.inventorypos.controllers.CashierDashboardController">
+    <content>
+        <VBox spacing="20" style="-fx-padding: 20;" fx:id="rootVBox">
+            <children>
+                <!-- Title -->
+                <Label text="Cashier POS" styleClass="title-label" />
+
+                <!-- Search and Cart Section -->
+                <HBox spacing="20">
+                    <!-- Left: Product Search and Selection -->
+                    <VBox spacing="10" prefWidth="400">
+                        <HBox spacing="10">
+                            <MFXTextField fx:id="searchField" promptText="Search products..." onKeyReleased="#handleSearch" prefWidth="250" />
+                            <MFXComboBox fx:id="categoryComboBox" promptText="Category" onAction="#handleCategorySelection" prefWidth="150" />
+                        </HBox>
+                        <MFXTableView fx:id="productTable" styleClass="mfx-table-view" prefHeight="300" />
+                        <MFXButton fx:id="addToCartButton" text="Add to Cart" onAction="#handleAddToCart" styleClass="button-success" />
+                    </VBox>
+
+                    <!-- Right: Cart and Checkout -->
+                    <VBox spacing="10" prefWidth="450" fx:id="cartVBox">
+                        <Label text="Cart" styleClass="section-title" />
+                        <MFXTableView fx:id="cartTable" styleClass="mfx-table-view" prefHeight="200" />
+                        <MFXTextField fx:id="clientNameField" promptText="Client Name (Required)" prefWidth="200" /> <!-- Updated prompt -->
+                        <HBox spacing="10" fx:id="totalHBox">
+                            <Label text="Total:" styleClass="label-bold" />
+                        </HBox>
+                        <HBox spacing="10">
+                            <MFXComboBox fx:id="paymentMethodComboBox" promptText="Payment Method" prefWidth="150" />
+                            <MFXButton fx:id="checkoutButton" text="Checkout" onAction="#handleCheckout" styleClass="button-success" />
+                            <MFXButton fx:id="clearCartButton" text="Clear" onAction="#handleClearCart" styleClass="button-danger" />
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Sales History -->
+                <VBox spacing="10">
+                    <Label text="Recent Sales" styleClass="section-title" />
+                    <MFXTableView fx:id="salesHistoryTable" styleClass="mfx-table-view" prefHeight="200" />
+                    <MFXButton fx:id="printReceiptButton" text="Print Receipt" onAction="#handlePrintReceipt" styleClass="button-warning" />
+                </VBox>
+
+                <!-- Logout Button -->
+                <MFXButton fx:id="logoutButton" text="Logout" onAction="#handleLogout" styleClass="button-danger" />
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

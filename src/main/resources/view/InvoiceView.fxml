@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import io.github.palexdev.materialfx.controls.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<ScrollPane fitToHeight="true" fitToWidth="true" xmlns:fx="http://javafx.com/fxml/1" 
+            xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.fouiguira.pos.inventorypos.controllers.InvoiceController">
+    <content>
+        <VBox spacing="20" style="-fx-padding: 20;">
+            <children>
+                <!-- Title -->
+                <Label text="Invoices" styleClass="title-label" />
+
+                <!-- Filter Section -->
+                <HBox spacing="10">
+                    <Label text="Filter by Date:" styleClass="label-bold" />
+                    <MFXDatePicker fx:id="datePicker" onAction="#handleDateFilter" />
+                    <MFXButton fx:id="clearFilterButton" text="Clear Filter" onAction="#handleClearFilter" styleClass="button-warning" />
+                </HBox>
+
+                <!-- Invoice Table -->
+                <MFXTableView fx:id="invoiceTable" styleClass="mfx-table-view" prefHeight="400">
+                    <tableColumns>
+                        <MFXTableColumn fx:id="invoiceIdCol" text="ID" prefWidth="50" />
+                        <MFXTableColumn fx:id="saleIdCol" text="Sale ID" prefWidth="80" />
+                        <MFXTableColumn fx:id="timestampCol" text="Date" prefWidth="150" />
+                        <MFXTableColumn fx:id="totalAmountCol" text="Total" prefWidth="100" />
+                        <MFXTableColumn fx:id="statusCol" text="Status" prefWidth="100" />
+                    </tableColumns>
+                </MFXTableView>
+
+                <!-- Actions -->
+                <HBox spacing="20">
+                    <MFXButton fx:id="generatePdfButton" text="Generate PDF" onAction="#handleGeneratePdf" styleClass="button-success" />
+                </HBox>
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

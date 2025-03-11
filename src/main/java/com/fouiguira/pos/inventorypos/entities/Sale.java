@@ -13,7 +13,7 @@ public class Sale {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL) // Adjusted to mappedBy
+    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL)
     private List<SaleProduct> products;
 
     @Column(nullable = false)
@@ -26,7 +26,7 @@ public class Sale {
     private User cashier;
 
     @Column(nullable = false)
-    private String paymentMethod; // Added for POS (e.g., "Cash", "Card")
+    private String paymentMethod;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp = new Date();
