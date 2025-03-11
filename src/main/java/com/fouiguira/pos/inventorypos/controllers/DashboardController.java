@@ -1,92 +1,53 @@
 package com.fouiguira.pos.inventorypos.controllers;
 
-import com.fouiguira.pos.inventorypos.entities.Product;
-import com.fouiguira.pos.inventorypos.entities.Sale;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
-import com.fouiguira.pos.inventorypos.services.interfaces.SaleService;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.property.SimpleStringProperty;
+import com.fouiguira.pos.inventorypos.services.interfaces.SalesService;
+import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import javafx.scene.control.Label;
 import org.springframework.stereotype.Controller;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
 
 @Controller
 public class DashboardController {
 
     @FXML
-    private Label totalSalesTodayLabel, totalRevenueLabel, pendingPaymentsLabel;
+    private Label totalSalesLabel;
 
     @FXML
-    private TableView<Sale> recentSalesTable;
-    @FXML
-    private TableColumn<Sale, Long> colSaleId;
-    @FXML
-    private TableColumn<Sale, Double> colAmount;
-    @FXML
-    private TableColumn<Sale, String> colCashier;
-    @FXML
-    private TableColumn<Sale, String> colDate;
+    private Label totalProductsLabel;
 
     @FXML
-    private ListView<String> lowStockList;
+    private Label totalUsersLabel;
 
-    private final SaleService saleService;
+    private final SalesService salesService;
     private final ProductService productService;
+    private final UserService userService;
 
-    @Autowired
-    public DashboardController(SaleService saleService, ProductService productService) {
-        this.saleService = saleService;
+    
+    public DashboardController(SalesService salesService, ProductService productService, UserService userService) {
+        this.salesService = salesService;
         this.productService = productService;
+        this.userService = userService;
     }
 
     @FXML
     public void initialize() {
-        Platform.runLater(this::loadDashboardData);
-    }
+        try {
+            // Populate summary data
+            double totalSales = salesService.getSalesTotalByDate(LocalDate.now());
+            long totalProducts = productService.getAllProducts().size();
+            long totalUsers = userService.getAllUsers().size();
 
-    private void loadDashboardData() {
-        totalSalesTodayLabel.setText(String.format("$%.2f", saleService.getTotalSalesToday()));
-        totalRevenueLabel.setText(String.format("$%.2f", saleService.getTotalRevenue()));
-        pendingPaymentsLabel.setText(String.format("$%.2f", saleService.getPendingPayments()));
-
-        loadRecentSales();
-        loadLowStockAlerts();
-    }
-
-    private void loadRecentSales() {
-        List<Sale> recentSales = saleService.getLast10Sales();
-
-        colSaleId.setCellValueFactory(cellData -> new SimpleLongProperty(cellData.getValue().getId()).asObject());
-        colAmount.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getTotalPrice()).asObject());
-        colCashier.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getCashier() != null ? cellData.getValue().getCashier().getUsername() : "N/A"));
-        colDate.setCellValueFactory(cellData -> {
-            Date date = cellData.getValue().getTimestamp();
-            String formattedDate = "N/A";
-            if (date != null) {
-                LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                formattedDate = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-            }
-            return new SimpleStringProperty(formattedDate);
-        });
-
-        recentSalesTable.getItems().setAll(recentSales);
-    }
-
-    private void loadLowStockAlerts() {
-        List<Product> lowStockProducts = productService.getLowStockProducts(5);
-        lowStockList.getItems().clear();
-        for (Product product : lowStockProducts) {
-            lowStockList.getItems().add(product.getName() + " (Stock: " + product.getStockQuantity() + ")");
+            totalSalesLabel.setText(String.format("$%.2f", totalSales));
+            totalProductsLabel.setText(String.valueOf(totalProducts));
+            totalUsersLabel.setText(String.valueOf(totalUsers));
+        } catch (Exception e) {
+            e.printStackTrace();
+            totalSalesLabel.setText("Error");
+            totalProductsLabel.setText("Error");
+            totalUsersLabel.setText("Error");
         }
     }
 }

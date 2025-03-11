@@ -12,6 +12,7 @@
                 <Label text="Inventory POS" styleClass="sidebar-title" />
                 <MFXButton fx:id="dashboardButton" text="Admin Dashboard" styleClass="sidebar-button" />
                 <MFXButton fx:id="productsButton" text="Manage Products" styleClass="sidebar-button" />
+                <MFXButton fx:id="categoryButton" text="Manage Categories" styleClass="sidebar-button" />
                 <MFXButton fx:id="salesHistoryButton" text="Sales History" styleClass="sidebar-button" />
                 <MFXButton fx:id="cashierButton" text="Cashier POS" styleClass="sidebar-button" />
                 <MFXButton fx:id="settingsButton" text="Settings" styleClass="sidebar-button" />
