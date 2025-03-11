@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
@@ -9,6 +8,20 @@
 
     <Label text="Sales Management" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
 
+    <!-- Filter Section -->
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints minWidth="100"/>
+            <ColumnConstraints minWidth="200"/>
+        </columnConstraints>
+        <Label text="Filter Client Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="filterClientNameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Label text="Filter Cashier:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="filterCashierComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label text="Filter Date:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <DatePicker fx:id="filterDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    </GridPane>
+
     <TableView fx:id="salesTable" prefHeight="300">
         <columns>
             <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
@@ -16,27 +29,32 @@
             <TableColumn fx:id="colTotalPrice" text="Total Price" prefWidth="100"/>
             <TableColumn fx:id="colTimestamp" text="Timestamp" prefWidth="150"/>
             <TableColumn fx:id="colCashier" text="Cashier" prefWidth="120"/>
+            <TableColumn fx:id="colProducts" text="Products" prefWidth="300"/>
+            <TableColumn fx:id="colPaymentMethod" text="Payment Method" prefWidth="150"/>
         </columns>
     </TableView>
 
+    <!-- Detail Display Section -->
     <GridPane hgap="10" vgap="10">
         <columnConstraints>
             <ColumnConstraints minWidth="100"/>
             <ColumnConstraints minWidth="200"/>
         </columnConstraints>
-
         <Label text="Client Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-        <TextField fx:id="clientNameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-
+        <TextField fx:id="clientNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" editable="false"/>
         <Label text="Total Price:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
         <TextField fx:id="totalPriceField" GridPane.rowIndex="1" GridPane.columnIndex="1" editable="false"/>
-
         <Label text="Cashier:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-        <ComboBox fx:id="cashierComboBox" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <ComboBox fx:id="cashierComboBox" GridPane.rowIndex="2" GridPane.columnIndex="1" editable="false"/>
+        <Label text="Products:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextArea fx:id="productsField" GridPane.rowIndex="3" GridPane.columnIndex="1" prefHeight="100" editable="false"/>
+        <Label text="Payment Method:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="paymentMethodField" GridPane.rowIndex="4" GridPane.columnIndex="1" editable="false"/>
     </GridPane>
 
     <HBox spacing="10">
         <Button text="Delete Sale" fx:id="deleteButton" onAction="#handleDeleteSale" style="-fx-background-color: #FF4C4C; -fx-text-fill: white;"/>
+        <Button text="Print Receipt" fx:id="printButton" onAction="#handlePrintReceipt" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
     </HBox>
 
 </VBox>
