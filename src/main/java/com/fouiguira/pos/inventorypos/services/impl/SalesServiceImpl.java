@@ -1,19 +1,16 @@
 package com.fouiguira.pos.inventorypos.services.impl;
 
+import com.fouiguira.pos.inventorypos.entities.Invoice;
 import com.fouiguira.pos.inventorypos.entities.Sale;
+import com.fouiguira.pos.inventorypos.entities.User;
 import com.fouiguira.pos.inventorypos.repositories.SaleRepository;
+import com.fouiguira.pos.inventorypos.services.interfaces.InvoiceService;
 import com.fouiguira.pos.inventorypos.services.interfaces.SalesService;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -23,9 +20,16 @@ import java.util.List;
 public class SalesServiceImpl implements SalesService {
 
     private final SaleRepository saleRepository;
+    private InvoiceService invoiceService;
 
     public SalesServiceImpl(SaleRepository saleRepository) {
         this.saleRepository = saleRepository;
+    }
+
+    @Autowired
+    @Lazy
+    public void setInvoiceService(InvoiceService invoiceService) {
+        this.invoiceService = invoiceService;
     }
 
     @Override
@@ -61,38 +65,36 @@ public class SalesServiceImpl implements SalesService {
 
     @Override
     public void printReceipt(Sale sale) {
-        try {
-            String fileName = "receipt_" + sale.getId() + ".pdf";
-            PdfWriter writer = new PdfWriter(fileName);
-            PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf);
-
-            document.add(new Paragraph("Receipt #" + sale.getId()));
-            document.add(new Paragraph("Date: " + sale.getTimestamp()));
-            document.add(new Paragraph("Cashier: " + sale.getCashier().getUsername()));
-            document.add(new Paragraph("Payment Method: " + sale.getPaymentMethod()));
-            document.add(new Paragraph("Total: $" + String.format("%.2f", sale.getTotalPrice())));
-
-            Table table = new Table(3);
-            table.addCell(new Cell().add(new Paragraph("Product")));
-            table.addCell(new Cell().add(new Paragraph("Quantity")));
-            table.addCell(new Cell().add(new Paragraph("Price")));
-            sale.getProducts().forEach(sp -> {
-                table.addCell(new Cell().add(new Paragraph(sp.getProduct().getName())));
-                table.addCell(new Cell().add(new Paragraph(String.valueOf(sp.getQuantity()))));
-                table.addCell(new Cell().add(new Paragraph("$" + String.format("%.2f", sp.getProduct().getPrice() * sp.getQuantity()))));
-            });
-            document.add(table);
-
-            document.close();
-            System.out.println("Receipt PDF generated: " + new File(fileName).getAbsolutePath());
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate receipt PDF: " + e.getMessage());
+        Invoice invoice = invoiceService.getInvoiceBySaleId(sale.getId());
+        if (invoice == null) {
+            invoice = invoiceService.createInvoiceFromSale(sale.getId());
         }
+        invoiceService.generateInvoicePdf(invoice);
     }
 
     @Override
     public void deleteSale(Long id) {
         saleRepository.deleteById(id);
+    }
+
+    @Override
+    public Sale getSaleById(Long id) {
+        return saleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sale not found with id: " + id));
+    }
+
+    @Override
+    public List<Sale> getSalesByCashier(User cashier) {
+        return saleRepository.findByCashier(cashier);
+    }
+
+    @Override
+    public List<Sale> getSalesByClientName(String clientName) {
+        return saleRepository.findByClientNameContainingIgnoreCase(clientName);
+    }
+
+    @Override
+    public List<Sale> getSalesByPaymentMethod(String paymentMethod) {
+        return saleRepository.findByPaymentMethod(paymentMethod);
     }
 }

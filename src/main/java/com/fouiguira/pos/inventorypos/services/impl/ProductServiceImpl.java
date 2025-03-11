@@ -4,6 +4,9 @@ import com.fouiguira.pos.inventorypos.entities.Product;
 import com.fouiguira.pos.inventorypos.entities.SaleProduct;
 import com.fouiguira.pos.inventorypos.repositories.ProductRepository;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -64,9 +67,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void updateStockAfterSale(List<SaleProduct> saleProducts) {
-        saleProducts.forEach(sp -> {
-            Product product = sp.getProduct();
+        for (SaleProduct sp : saleProducts) {
+            Product product = productRepository.findById(sp.getProduct().getId())
+                .orElseThrow(() -> new RuntimeException("Product not found: " + sp.getProduct().getId()));
             int newStock = product.getStockQuantity() - sp.getQuantity();
             if (newStock < 0) {
                 throw new RuntimeException("Insufficient stock for product: " + product.getName());
@@ -74,6 +79,6 @@ public class ProductServiceImpl implements ProductService {
             product.setStockQuantity(newStock);
             product.setUpdatedAt(new Date());
             productRepository.save(product);
-        });
+        }
     }
 }
