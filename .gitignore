@@ -41,3 +41,6 @@ storage/images/**
 
 # Logs
 *.log
+
+# invoice PDfs #
+*.pdf
