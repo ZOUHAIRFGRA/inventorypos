@@ -1,34 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?> <!-- Added for Label and other controls -->
+<?import javafx.scene.control.*?>
 <?import io.github.palexdev.materialfx.controls.*?>
+<?import io.github.palexdev.mfxresources.fonts.*?>
+<?import javafx.geometry.*?> <!-- Added for Insets -->
 
 <BorderPane fx:id="adminLayout" xmlns:fx="http://javafx.com/fxml/1" 
             xmlns="http://javafx.com/javafx/17.0.12" 
             fx:controller="com.fouiguira.pos.inventorypos.controllers.AdminDashboardController">
     <!-- Left Sidebar for Navigation -->
     <left>
-        <VBox spacing="10" style="-fx-padding: 20; -fx-background-color: #f4f4f4;" prefWidth="200">
+        <VBox fx:id="sidebar" spacing="10" styleClass="sidebar" prefWidth="250">
+            <padding>
+                <Insets top="20" bottom="20" left="15" right="15" />
+            </padding>
             <children>
-                <Label text="Admin Dashboard" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
-                <MFXButton fx:id="dashboardButton" text="Overview" onAction="#loadDashboard" styleClass="button-primary" />
-                <MFXButton fx:id="productsButton" text="Products" onAction="#loadProducts" styleClass="button-primary" />
-                <MFXButton fx:id="salesButton" text="Sales" onAction="#loadSales" styleClass="button-primary" />
-                <MFXButton fx:id="historyButton" text="Sales History" onAction="#loadSalesHistory" styleClass="button-primary" />
-                <MFXButton fx:id="cashiersButton" text="Manage Cashiers" onAction="#loadCashiers" styleClass="button-primary" />
-                <MFXButton fx:id="invoicesButton" text="Invoices" onAction="#loadInvoices" styleClass="button-primary" />
-                <MFXButton fx:id="settingsButton" text="Settings" onAction="#loadSettings" styleClass="button-primary" />
-                <MFXButton fx:id="logoutButton" text="Logout" onAction="#handleLogout" styleClass="button-danger" />
+                <!-- Header/Logo -->
+                <Label text="Inventory POS" styleClass="sidebar-header" graphicTextGap="15">
+                    <graphic>
+                        <MFXFontIcon description="fas-boxes-stacked" size="24" color="white" />
+                    </graphic>
+                </Label>
+
+                <!-- Navigation Buttons -->
+                <MFXButton fx:id="dashboardButton" text="Overview" onAction="#loadDashboard" styleClass="sidebar-button">
+                    <graphic>
+                        <MFXFontIcon description="fas-gauge-high" size="20" color="white" />
+                    </graphic>
+                </MFXButton>
+                <MFXButton fx:id="productsButton" text="Products" onAction="#loadProducts" styleClass="sidebar-button">
+                    <graphic>
+                        <MFXFontIcon description="fas-box" size="20" color="white" />
+                    </graphic>
+                </MFXButton>
+                <MFXButton fx:id="categoryButton" text="Categories" onAction="#loadCategories" styleClass="sidebar-button">
+                    <graphic>
+                        <MFXFontIcon description="fas-layer-group" size="20" color="white" />
+                    </graphic>
+                </MFXButton>
+                <MFXButton fx:id="salesButton" text="Sales" onAction="#loadSales" styleClass="sidebar-button">
+                    <graphic>
+                        <MFXFontIcon description="fas-money-bill" size="20" color="white" />
+                    </graphic>
+                </MFXButton>
+                <MFXButton fx:id="historyButton" text="Sales History" onAction="#loadSalesHistory" styleClass="sidebar-button">
+                    <graphic>
+                        <MFXFontIcon description="fas-clock-rotate-left" size="20" color="white" />
+                    </graphic>
+                </MFXButton>
+                <MFXButton fx:id="cashiersButton" text="Manage Cashiers" onAction="#loadCashiers" styleClass="sidebar-button">
+                    <graphic>
+                        <MFXFontIcon description="fas-users" size="20" color="white" />
+                    </graphic>
+                </MFXButton>
+             
+                <MFXButton fx:id="settingsButton" text="Settings" onAction="#loadSettings" styleClass="sidebar-button">
+                    <graphic>
+                        <MFXFontIcon description="fas-gear" size="20" color="white" />
+                    </graphic>
+                </MFXButton>
+
+                <!-- Spacer to push Logout to bottom -->
+                <Region VBox.vgrow="ALWAYS" />
+
+                <!-- Logout Button -->
+                <MFXButton fx:id="logoutButton" text="Logout" onAction="#handleLogout" styleClass="sidebar-button, logout-button">
+                    <graphic>
+                        <MFXFontIcon description="fas-sign-out-alt" size="20" color="white" />
+                    </graphic>
+                </MFXButton>
             </children>
         </VBox>
     </left>
 
     <!-- Center Content Area -->
     <center>
-        <VBox fx:id="contentArea" spacing="10" style="-fx-padding: 20;" alignment="CENTER">
+        <VBox fx:id="contentArea" spacing="10" style="-fx-padding: 20" alignment="CENTER">
             <children>
-                <Label text="Welcome to Admin Dashboard" style="-fx-font-size: 24px;" />
-                <Label fx:id="messageLabel" text="" style="-fx-text-fill: green;" />
+                <Label text="Welcome to Admin Dashboard" style="-fx-font-size: 24px" />
+                <Label fx:id="messageLabel" text="" style="-fx-text-fill: green" />
             </children>
         </VBox>
     </center>

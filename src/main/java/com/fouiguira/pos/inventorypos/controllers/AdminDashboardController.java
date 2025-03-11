@@ -1,6 +1,5 @@
 package com.fouiguira.pos.inventorypos.controllers;
 
-import com.fouiguira.pos.inventorypos.entities.User;
 import com.fouiguira.pos.inventorypos.main.MainApp;
 import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
 import io.github.palexdev.materialfx.controls.MFXButton;
@@ -13,7 +12,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.io.IOException;
@@ -32,6 +30,11 @@ public class AdminDashboardController {
 
     @FXML
     private MFXButton productsButton;
+
+    @FXML
+    private MFXButton categoryButton;
+
+
 
     @FXML
     private MFXButton salesButton;
@@ -56,51 +59,34 @@ public class AdminDashboardController {
 
     private final UserService userService;
 
-    @Autowired
     public AdminDashboardController(UserService userService) {
         this.userService = userService;
     }
 
     @FXML
     public void initialize() {
-        // Load the default view (e.g., Overview)
         loadDashboard();
     }
 
     @FXML
-    public void loadDashboard() {
-        loadView("DashboardView.fxml"); // Placeholder for an overview dashboard
-    }
+    public void loadDashboard() { loadView("DashboardView.fxml"); }
 
     @FXML
-    public void loadProducts() {
-        loadView("ProductView.fxml");
-    }
+    public void loadProducts() { loadView("ProductView.fxml"); }
+    @FXML
+    public void loadCategories() { loadView("CategoryView.fxml"); }
 
     @FXML
-    public void loadSales() {
-        loadView("SalesHistoryView.fxml"); // Adjust to a sales-specific view if needed
-    }
+    public void loadSales() { loadView("SalesHistoryView.fxml"); }
 
     @FXML
-    public void loadSalesHistory() {
-        loadView("SalesHistoryView.fxml");
-    }
+    public void loadSalesHistory() { loadView("SalesHistoryView.fxml"); }
 
     @FXML
-    public void loadCashiers() {
-        loadView("CashierDashboard.fxml"); // Reuse or create a specific cashier management view
-    }
+    public void loadCashiers() { loadView("CashierDashboard.fxml"); }
 
     @FXML
-    public void loadInvoices() {
-        loadView("InvoiceView.fxml");
-    }
-
-    @FXML
-    public void loadSettings() {
-        loadView("SettingsView.fxml");
-    }
+    public void loadSettings() { loadView("SettingsView.fxml"); }
 
     @FXML
     public void handleLogout() {
@@ -112,6 +98,7 @@ public class AdminDashboardController {
             Parent root = loader.load();
             stage.setScene(new Scene(root));
             stage.setTitle("Inventory POS System - Login");
+            stage.setMaximized(true);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -129,28 +116,6 @@ public class AdminDashboardController {
         } catch (IOException e) {
             e.printStackTrace();
             messageLabel.setText("Error loading " + fxmlFile + ": " + e.getMessage());
-        }
-    }
-
-    // Optional: Add cashier method if you want it inline instead of a separate view
-    @FXML
-    public void handleAddCashier() {
-        // This could be moved to a CashierManagementController if preferred
-        String username = "newUsernameFieldValue"; // Replace with actual field if added back
-        String password = "newPasswordFieldValue"; // Replace with actual field if added back
-        if (!username.isEmpty() && !password.isEmpty()) {
-            User newCashier = new User();
-            newCashier.setUsername(username);
-            newCashier.setPassword(password); // Plain text for now; hash in production
-            newCashier.setRole(User.Role.CASHIER);
-            try {
-                userService.createUser(newCashier);
-                messageLabel.setText("Cashier '" + username + "' added successfully!");
-            } catch (RuntimeException e) {
-                messageLabel.setText(e.getMessage());
-            }
-        } else {
-            messageLabel.setText("Username and password cannot be empty!");
         }
     }
 }
