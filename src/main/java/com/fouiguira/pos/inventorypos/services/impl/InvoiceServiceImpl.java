@@ -1,23 +1,38 @@
 package com.fouiguira.pos.inventorypos.services.impl;
 
+import com.fouiguira.pos.inventorypos.controllers.SettingsController;
+import com.fouiguira.pos.inventorypos.entities.BusinessSettings;
 import com.fouiguira.pos.inventorypos.entities.Invoice;
 import com.fouiguira.pos.inventorypos.entities.Sale;
+import com.fouiguira.pos.inventorypos.entities.SaleProduct;
 import com.fouiguira.pos.inventorypos.entities.User;
 import com.fouiguira.pos.inventorypos.repositories.InvoiceRepository;
+import com.fouiguira.pos.inventorypos.services.interfaces.BusinessSettingsService;
 import com.fouiguira.pos.inventorypos.services.interfaces.InvoiceService;
 import com.fouiguira.pos.inventorypos.services.interfaces.SalesService;
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.HorizontalAlignment;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -25,11 +40,15 @@ import java.util.List;
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
 
-   private final InvoiceRepository invoiceRepository;
+    private final InvoiceRepository invoiceRepository;
     private SalesService salesService;
+    private final BusinessSettingsService settingsService;
+    private final SettingsController settingsController; // Inject SettingsController
 
-    public InvoiceServiceImpl(InvoiceRepository invoiceRepository) {
+    public InvoiceServiceImpl(InvoiceRepository invoiceRepository, BusinessSettingsService settingsService, SettingsController settingsController) {
         this.invoiceRepository = invoiceRepository;
+        this.settingsService = settingsService;
+        this.settingsController = settingsController;
     }
 
     @Autowired
@@ -103,44 +122,149 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<Invoice> invoices = invoiceRepository.findBySaleId(saleId);
         return invoices.isEmpty() ? null : invoices.get(0); // Return first invoice or null
     }
-
+    //TODO FIX PDF STYLES : IMG LAYOUT
+    @SuppressWarnings("resource")
     @Override
-public void generateInvoicePdf(Invoice invoice) {
-    try {
-        // Ensure the products collection is initialized
-        Sale sale = invoice.getSale();
-        sale.getProducts().size(); // This will initialize the products collection
+    public void generateInvoicePdf(Invoice invoice) {
+        BusinessSettings settings = settingsController.getCachedSettings(); // Use cached settings
+        System.out.println("Generating PDF with settings: " + (settings != null ? settings.getBusinessName() : "null"));
 
-        String fileName = "invoice_" + invoice.getId() + "_" + System.currentTimeMillis() + ".pdf";
-        PdfWriter writer = new PdfWriter(fileName);
-        PdfDocument pdf = new PdfDocument(writer);
-        Document document = new Document(pdf);
+        try {
+            Sale sale = invoice.getSale();
+            if (sale.getProducts() == null || sale.getProducts().isEmpty()) {
+                throw new IllegalStateException("Sale products not initialized");
+            }
 
-        document.add(new Paragraph("Inventory POS - Invoice #" + invoice.getId()));
-        document.add(new Paragraph("Date: " + invoice.getTimestamp()));
-        document.add(new Paragraph("Client: " + invoice.getClientName()));
-        document.add(new Paragraph("Cashier: " + invoice.getCashier().getUsername()));
-        document.add(new Paragraph("Status: " + invoice.getStatus()));
-        document.add(new Paragraph("Total Amount: $" + String.format("%.2f", invoice.getTotalAmount())));
+            String fileName = "invoice_" + invoice.getId() + "_" + System.currentTimeMillis() + ".pdf";
+            PdfWriter writer = new PdfWriter(fileName);
+            PdfDocument pdf = new PdfDocument(writer);
+            pdf.setDefaultPageSize(PageSize.A4);
+            Document document = new Document(pdf);
+            document.setMargins(36, 36, 36, 36);
 
-        Table table = new Table(4); // Added column for unit price
-        table.addCell(new Cell().add(new Paragraph("Product")));
-        table.addCell(new Cell().add(new Paragraph("Unit Price")));
-        table.addCell(new Cell().add(new Paragraph("Quantity")));
-        table.addCell(new Cell().add(new Paragraph("Total Price")));
-       sale.getProducts().forEach(sp -> {
-                table.addCell(new Cell().add(new Paragraph(sp.getProduct().getName())));
-                table.addCell(new Cell().add(new Paragraph("$" + String.format("%.2f", sp.getProduct().getPrice()))));
-                table.addCell(new Cell().add(new Paragraph(String.valueOf(sp.getQuantity()))));
-                table.addCell(new Cell().add(new Paragraph("$" + String.format("%.2f", sp.getProduct().getPrice() * sp.getQuantity()))));
-            });
-            document.add(table);
+            Image logo;
+            String logoPath = settings.getLogoPath();
+            File logoFile = new File(logoPath);
+            try {
+                if (logoFile.exists() && logoFile.isFile() && logoFile.length() > 0) {
+                    logo = new Image(ImageDataFactory.create(logoPath))
+                        .setWidth(100)
+                        .setAutoScaleHeight(true)
+                        .setHorizontalAlignment(HorizontalAlignment.LEFT)
+                        .setMarginBottom(10);
+                    System.out.println("Logo loaded from: " + logoPath);
+                } else {
+                    throw new IOException("Logo file invalid or empty: " + logoPath);
+                }
+            } catch (Exception e) {
+                System.out.println("Failed to load logo from " + logoPath + ": " + e.getMessage());
+                File blankImage = new File("config/default_logo.png");
+
+                logo = new Image(ImageDataFactory.create(blankImage.getAbsolutePath()))
+                    .setWidth(100)
+                    .setHorizontalAlignment(HorizontalAlignment.LEFT)
+                    .setMarginBottom(10);
+            }
+            document.add(logo);
+
+            // ... rest of the method unchanged
+            Paragraph header = new Paragraph()
+                .add(settings.getBusinessName() + "\n")
+                .add(settings.getAddress() != null ? settings.getAddress() + "\n" : "123 Business Street, City, Country\n")
+                .add(settings.getPhone() != null ? "Phone: " + settings.getPhone() + " | " : "Phone: (123) 456-7890 | ")
+                .add(settings.getEmail() != null ? "Email: " + settings.getEmail() : "Email: info@mybusiness.com")
+                .setTextAlignment(TextAlignment.CENTER)
+                .setFontSize(12)
+                .setBold();
+            document.add(header);
+
+            document.add(new Paragraph("INVOICE #" + invoice.getId())
+                .setTextAlignment(TextAlignment.RIGHT)
+                .setFontSize(14)
+                .setMarginTop(10)
+                .setBold());
+
+            Table detailsTable = new Table(2).useAllAvailableWidth();
+            detailsTable.setMarginTop(20);
+            detailsTable.addCell(createDetailCell("Date:", formatDate(invoice.getTimestamp())));
+            detailsTable.addCell(createDetailCell("Client:", invoice.getClientName()));
+            detailsTable.addCell(createDetailCell("Cashier:", invoice.getCashier().getUsername()));
+            detailsTable.addCell(createDetailCell("Payment Status:", invoice.getStatus().toString()));
+            document.add(detailsTable);
+
+            Table productsTable = new Table(UnitValue.createPercentArray(new float[]{40, 20, 20, 20}))
+                .useAllAvailableWidth()
+                .setMarginTop(20);
+            productsTable.setBorderTop(new SolidBorder(ColorConstants.BLACK, 1));
+            productsTable.setBorderBottom(new SolidBorder(ColorConstants.BLACK, 1));
+
+            productsTable.addHeaderCell(createHeaderCell("Product"));
+            productsTable.addHeaderCell(createHeaderCell("Unit Price"));
+            productsTable.addHeaderCell(createHeaderCell("Quantity"));
+            productsTable.addHeaderCell(createHeaderCell("Total Price"));
+
+            for (SaleProduct sp : sale.getProducts()) {
+                productsTable.addCell(createDataCell(sp.getProduct().getName()));
+                productsTable.addCell(createDataCell("$" + String.format("%.2f", sp.getProduct().getPrice())));
+                productsTable.addCell(createDataCell(String.valueOf(sp.getQuantity())));
+                productsTable.addCell(createDataCell("$" + String.format("%.2f", sp.getProduct().getPrice() * sp.getQuantity())));
+            }
+
+            productsTable.addFooterCell(new Cell(1, 3)
+                .add(new Paragraph("Total Amount"))
+                .setTextAlignment(TextAlignment.RIGHT)
+                .setFontSize(12)
+                .setBold());
+            productsTable.addFooterCell(new Cell()
+                .add(new Paragraph("$" + String.format("%.2f", invoice.getTotalAmount())))
+                .setTextAlignment(TextAlignment.RIGHT)
+                .setFontSize(12)
+                .setBold());
+            document.add(productsTable);
+
+            Paragraph footer = new Paragraph()
+                .add("Thank you for your business!\n")
+                .add("Payment Terms: Due upon receipt | Contact us for any inquiries.")
+                .setTextAlignment(TextAlignment.CENTER)
+                .setFontSize(10)
+                .setMarginTop(20)
+                .setFixedPosition(36, 20, pdf.getDefaultPageSize().getWidth() - 72);
+            document.add(footer);
 
             document.close();
             System.out.println("Invoice PDF generated: " + new File(fileName).getAbsolutePath());
         } catch (Exception e) {
             System.out.println("Failed to generate invoice PDF: " + e.getMessage());
+            throw new RuntimeException("Failed to generate invoice PDF: " + e.getMessage());
         }
+    } // Helper methods for styling
+    private Cell createHeaderCell(String text) {
+        return new Cell()
+                .add(new Paragraph(text))
+                .setBackgroundColor(ColorConstants.LIGHT_GRAY)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setFontSize(11)
+                .setBold()
+                .setPadding(5);
     }
 
+    private Cell createDataCell(String text) {
+        return new Cell()
+                .add(new Paragraph(text))
+                .setTextAlignment(TextAlignment.CENTER)
+                .setFontSize(10)
+                .setPadding(5);
+    }
+
+    private Cell createDetailCell(String label, String value) {
+        return new Cell()
+                .add(new Paragraph(label + " " + value))
+                .setBorder(Border.NO_BORDER)
+                .setFontSize(10)
+                .setPadding(2);
+    }
+
+    private String formatDate(Date date) {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+    }
 }

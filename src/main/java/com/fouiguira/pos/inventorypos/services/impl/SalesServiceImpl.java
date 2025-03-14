@@ -66,15 +66,20 @@ public class SalesServiceImpl implements SalesService {
                 .mapToDouble(Sale::getTotalPrice)
                 .sum();
     }
-
     @Override
     @Transactional(readOnly = true)
     public void printReceipt(Sale sale) {
-        Sale fullSale = getSaleById(sale.getId()); // Ensure products are loaded
+        // Fetch sale with products initialized within a transaction
+        Sale fullSale = saleRepository.findById(sale.getId())
+            .orElseThrow(() -> new RuntimeException("Sale not found with id: " + sale.getId()));
+        Hibernate.initialize(fullSale.getProducts()); // Ensure products are loaded
+
         Invoice invoice = invoiceService.getInvoiceBySaleId(fullSale.getId());
         if (invoice == null) {
             invoice = invoiceService.createInvoiceFromSale(fullSale.getId());
         }
+
+        // Transaction commits here, then generate PDF outside transaction
         invoiceService.generateInvoicePdf(invoice);
     }
 

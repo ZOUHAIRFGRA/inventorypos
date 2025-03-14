@@ -1,51 +1,51 @@
 package com.fouiguira.pos.inventorypos.config;
 
-import com.fouiguira.pos.inventorypos.repositories.UserRepository;
-import com.fouiguira.pos.inventorypos.repositories.ProductRepository;
-import com.fouiguira.pos.inventorypos.repositories.SaleRepository;
-import com.fouiguira.pos.inventorypos.repositories.CategoryRepository;
-import com.fouiguira.pos.inventorypos.repositories.InvoiceRepository;
+import com.fouiguira.pos.inventorypos.controllers.SettingsController;
+import com.fouiguira.pos.inventorypos.repositories.*;
 import com.fouiguira.pos.inventorypos.services.impl.*;
 import com.fouiguira.pos.inventorypos.services.interfaces.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableJpaRepositories(basePackages = "com.fouiguira.pos.inventorypos.repositories")
 public class AppConfig {
 
-    // @Bean
     public UserService userService(UserRepository userRepository) {
         return new UserServiceImpl(userRepository);
     }
 
-    // @Bean
     public ProductService productService(ProductRepository productRepository) {
         return new ProductServiceImpl(productRepository);
     }
 
-    // @Bean
     public CategoryService categoryService(CategoryRepository categoryRepository) {
-        return new CategoryServiceImpl(categoryRepository, null); // Fix null if CategoryServiceImpl needs a second dependency
+        return new CategoryServiceImpl(categoryRepository, null);
     }
 
-    // @Bean
-    public InvoiceService invoiceService(InvoiceRepository invoiceRepository, SalesService salesService) {
-        InvoiceServiceImpl invoiceServiceImpl = new InvoiceServiceImpl(invoiceRepository);
-        invoiceServiceImpl.setSalesService(salesService); // Setter injection since constructor doesn’t take SalesService
+    public BusinessSettingsService businessSettingsService(BusinessSettingsRepository settingsRepository) {
+        return new BusinessSettingsImpl(settingsRepository);
+    }
+
+    public InvoiceService invoiceService(InvoiceRepository invoiceRepository, SalesService salesService, BusinessSettingsService settingsService, SettingsController settingsController) {
+        InvoiceServiceImpl invoiceServiceImpl = new InvoiceServiceImpl(invoiceRepository, settingsService, settingsController);
+        invoiceServiceImpl.setSalesService(salesService);
         return invoiceServiceImpl;
     }
 
-    // @Bean
     public SalesService salesService(SaleRepository saleRepository, InvoiceService invoiceService) {
         SalesServiceImpl salesServiceImpl = new SalesServiceImpl(saleRepository);
-        salesServiceImpl.setInvoiceService(invoiceService); // Setter injection
+        salesServiceImpl.setInvoiceService(invoiceService);
         return salesServiceImpl;
     }
 
+    public SettingsController settingsController(UserService userService, BusinessSettingsService settingsService) {
+        return new SettingsController(userService, settingsService);
+    }
+
     @Bean
-    public Object configureServices(InvoiceService invoiceService, SalesService salesService) {
+    public Object configureServices(InvoiceService invoiceService, SalesService salesService, BusinessSettingsService businessSettingsService, SettingsController settingsController) {
         ((InvoiceServiceImpl) invoiceService).setSalesService(salesService);
         ((SalesServiceImpl) salesService).setInvoiceService(invoiceService);
         return new Object();
