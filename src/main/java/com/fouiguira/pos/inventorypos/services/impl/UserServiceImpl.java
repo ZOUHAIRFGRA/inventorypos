@@ -5,7 +5,7 @@ import com.fouiguira.pos.inventorypos.repositories.UserRepository;
 import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
+// import jakarta.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 
@@ -19,19 +19,19 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
     }
 
-    @PostConstruct
-    public void init() {
-        // Initialize admin user if no users exist
-        if (userRepository.count() == 0) {
-            User admin = new User();
-            admin.setUsername("admin");
-            admin.setPassword("admin123"); // Plain text for now; hash in production
-            admin.setRole(User.Role.OWNER);
-            admin.setCreatedAt(new Date());
-            admin.setUpdatedAt(new Date());
-            userRepository.save(admin);
-        }
-    }
+    // @PostConstruct
+    // public void init() {
+    //     // Initialize admin user if no users exist
+    //     if (userRepository.count() == 0) {
+    //         User admin = new User();
+    //         admin.setUsername("admin");
+    //         admin.setPassword("admin123"); // Plain text for now; hash in production
+    //         admin.setRole(User.Role.OWNER);
+    //         admin.setCreatedAt(new Date());
+    //         admin.setUpdatedAt(new Date());
+    //         userRepository.save(admin);
+    //     }
+    // }
 
     @Override
     public User getUserById(Long id) {
