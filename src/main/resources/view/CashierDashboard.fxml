@@ -1,55 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import io.github.palexdev.materialfx.controls.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import io.github.palexdev.materialfx.controls.MFXTextField?>
+<?import io.github.palexdev.materialfx.controls.MFXComboBox?>
+<?import io.github.palexdev.materialfx.controls.MFXTableView?>
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import javafx.scene.control.Label?>
 
-<ScrollPane fitToHeight="true" fitToWidth="true" xmlns:fx="http://javafx.com/fxml/1" 
-            xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.fouiguira.pos.inventorypos.controllers.CashierDashboardController">
-    <content>
-        <VBox spacing="20" style="-fx-padding: 20;" fx:id="rootVBox">
-            <children>
-                <!-- Title -->
-                <Label text="Cashier POS" styleClass="title-label" />
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.fouiguira.pos.inventorypos.controllers.CashierDashboardController"
+      spacing="10" prefWidth="1000" prefHeight="600" style="-fx-padding: 10;">
 
-                <!-- Search and Cart Section -->
-                <HBox spacing="20">
-                    <!-- Left: Product Search and Selection -->
-                    <VBox spacing="10" prefWidth="400">
-                        <HBox spacing="10">
-                            <MFXTextField fx:id="searchField" promptText="Search products..." onKeyReleased="#handleSearch" prefWidth="250" />
-                            <MFXComboBox fx:id="categoryComboBox" promptText="Category" onAction="#handleCategorySelection" prefWidth="150" />
-                        </HBox>
-                        <MFXTableView fx:id="productTable" styleClass="mfx-table-view" prefHeight="300" />
-                        <MFXButton fx:id="addToCartButton" text="Add to Cart" onAction="#handleAddToCart" styleClass="button-success" />
-                    </VBox>
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label fx:id="welcomeLabel" text="Welcome" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <MFXButton fx:id="logoutButton" text="Logout" onAction="#handleLogout" 
+                   style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-font-size: 14px;"/>
+    </HBox>
 
-                    <!-- Right: Cart and Checkout -->
-                    <VBox spacing="10" prefWidth="450" fx:id="cartVBox">
-                        <Label text="Cart" styleClass="section-title" />
-                        <MFXTableView fx:id="cartTable" styleClass="mfx-table-view" prefHeight="200" />
-                        <MFXTextField fx:id="clientNameField" promptText="Client Name (Required)" prefWidth="200" /> <!-- Updated prompt -->
-                        <HBox spacing="10" fx:id="totalHBox">
-                            <Label text="Total:" styleClass="label-bold" />
-                        </HBox>
-                        <HBox spacing="10">
-                            <MFXComboBox fx:id="paymentMethodComboBox" promptText="Payment Method" prefWidth="150" />
-                            <MFXButton fx:id="checkoutButton" text="Checkout" onAction="#handleCheckout" styleClass="button-success" />
-                            <MFXButton fx:id="clearCartButton" text="Clear" onAction="#handleClearCart" styleClass="button-danger" />
-                        </HBox>
-                    </VBox>
-                </HBox>
+    <!-- Search and Category Filter -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <MFXTextField fx:id="searchField" onAction="#handleSearch" prefWidth="200"/>
+        <MFXComboBox fx:id="categoryComboBox" onAction="#handleCategorySelection" prefWidth="150"/>
+        <MFXButton fx:id="addToCartButton" text="Add to Cart" onAction="#handleAddToCart" 
+                   style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+    </HBox>
 
-                <!-- Sales History -->
-                <VBox spacing="10">
-                    <Label text="Recent Sales" styleClass="section-title" />
-                    <MFXTableView fx:id="salesHistoryTable" styleClass="mfx-table-view" prefHeight="200" />
-                    <MFXButton fx:id="printReceiptButton" text="Print Receipt" onAction="#handlePrintReceipt" styleClass="button-warning" />
-                </VBox>
+    <!-- Product Table -->
+    <MFXTableView fx:id="productTable" prefHeight="200"/>
 
-                <!-- Logout Button -->
-                <MFXButton fx:id="logoutButton" text="Logout" onAction="#handleLogout" styleClass="button-danger" />
-            </children>
-        </VBox>
-    </content>
-</ScrollPane>
+    <!-- Cart Section -->
+    <VBox fx:id="cartVBox" spacing="10">
+        <Label text="Cart" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+        <MFXTableView fx:id="cartTable" prefHeight="150"/>
+        <HBox fx:id="totalHBox" spacing="10" alignment="CENTER_RIGHT">
+            <Label text="Total:" style="-fx-font-size: 16px;"/>
+            <!-- cartTotalLabel is added programmatically -->
+        </HBox>
+        <HBox spacing="10" alignment="CENTER">
+            <MFXTextField fx:id="clientNameField" prefWidth="200"/>
+            <MFXComboBox fx:id="paymentMethodComboBox" prefWidth="100"/>
+            <MFXButton fx:id="checkoutButton" text="Checkout" onAction="#handleCheckout" 
+                       style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+            <MFXButton fx:id="clearCartButton" text="Clear Cart" onAction="#handleClearCart" 
+                       style="-fx-background-color: #E91E63; -fx-text-fill: white;"/>
+        </HBox>
+    </VBox>
+
+    <!-- Sales History -->
+    <VBox spacing="10">
+        <Label text="Recent Sales" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+        <MFXTableView fx:id="salesHistoryTable" prefHeight="150"/>
+        <MFXButton fx:id="printReceiptButton" text="Print Receipt" onAction="#handlePrintReceipt" 
+                   style="-fx-background-color: #FF9800; -fx-text-fill: white;"/>
+    </VBox>
+
+</VBox>

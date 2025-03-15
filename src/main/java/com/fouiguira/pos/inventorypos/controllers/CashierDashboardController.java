@@ -1,15 +1,7 @@
 package com.fouiguira.pos.inventorypos.controllers;
 
-import com.fouiguira.pos.inventorypos.entities.Category;
-import com.fouiguira.pos.inventorypos.entities.Invoice;
-import com.fouiguira.pos.inventorypos.entities.Product;
-import com.fouiguira.pos.inventorypos.entities.Sale;
-import com.fouiguira.pos.inventorypos.entities.SaleProduct;
-import com.fouiguira.pos.inventorypos.services.interfaces.CategoryService;
-import com.fouiguira.pos.inventorypos.services.interfaces.InvoiceService;
-import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
-import com.fouiguira.pos.inventorypos.services.interfaces.SalesService;
-import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
+import com.fouiguira.pos.inventorypos.entities.*;
+import com.fouiguira.pos.inventorypos.services.interfaces.*;
 import io.github.palexdev.materialfx.controls.*;
 import io.github.palexdev.materialfx.controls.cell.MFXTableRowCell;
 import javafx.application.Platform;
@@ -27,6 +19,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 
 import java.io.File;
@@ -39,78 +32,82 @@ import java.util.List;
 @Controller
 public class CashierDashboardController {
 
-    @FXML
-    private MFXTextField searchField;
-    @FXML
-    private MFXComboBox<Category> categoryComboBox;
-    @FXML
-    private MFXTableView<Product> productTable;
+    @FXML private MFXTextField searchField;
+    @FXML private MFXComboBox<Category> categoryComboBox;
+    @FXML private MFXTableView<Product> productTable;
     private MFXTableColumn<Product> prodIdCol;
     private MFXTableColumn<Product> prodNameCol;
     private MFXTableColumn<Product> prodPriceCol;
     private MFXTableColumn<Product> prodStockCol;
     private MFXTableColumn<Product> prodImageCol;
-    @FXML
-    private MFXButton addToCartButton;
+    @FXML private MFXButton addToCartButton;
 
-    @FXML
-    private MFXTableView<SaleProduct> cartTable;
+    @FXML private MFXTableView<SaleProduct> cartTable;
     private MFXTableColumn<SaleProduct> cartNameCol;
     private MFXTableColumn<SaleProduct> cartQtyCol;
     private MFXTableColumn<SaleProduct> cartPriceCol;
     private MFXTableColumn<SaleProduct> cartTotalCol;
     private MFXTableColumn<SaleProduct> cartActionCol;
-    @FXML
-    private MFXTextField clientNameField;
-    @FXML
-    private Label cartTotalLabel;
-    @FXML
-    private MFXComboBox<String> paymentMethodComboBox;
-    @FXML
-    private MFXButton checkoutButton;
-    @FXML
-    private MFXButton clearCartButton;
+    @FXML private MFXTextField clientNameField;
+    @FXML private Label cartTotalLabel;
+    @FXML private MFXComboBox<String> paymentMethodComboBox;
+    @FXML private MFXButton checkoutButton;
+    @FXML private MFXButton clearCartButton;
 
-    @FXML
-    private MFXTableView<Sale> salesHistoryTable;
+    @FXML private MFXTableView<Sale> salesHistoryTable;
     private MFXTableColumn<Sale> salesIdCol;
     private MFXTableColumn<Sale> salesDateCol;
     private MFXTableColumn<Sale> salesTotalCol;
     private MFXTableColumn<Sale> salesMethodCol;
-    @FXML
-    private MFXButton printReceiptButton;
+    @FXML private MFXButton printReceiptButton;
 
-    @FXML
-    private VBox cartVBox;
-    @FXML
-    private HBox totalHBox;
-
-    @FXML
-    private MFXButton logoutButton;
+    @FXML private VBox cartVBox;
+    @FXML private HBox totalHBox;
+    @FXML private Label welcomeLabel;
+    @FXML private MFXButton logoutButton;
 
     private final ProductService productService;
     private final CategoryService categoryService;
     private final SalesService salesService;
     private final InvoiceService invoiceService;
     private final UserService userService;
+    private final ApplicationContext context; // For loading views
 
     private ObservableList<SaleProduct> cartItems = FXCollections.observableArrayList();
     private static final DecimalFormat df = new DecimalFormat("#,##0.00");
 
+    @Autowired
     public CashierDashboardController(ProductService productService, CategoryService categoryService,
-                                      SalesService salesService, InvoiceService invoiceService, UserService userService) {
+                                      SalesService salesService, InvoiceService invoiceService,
+                                      UserService userService, ApplicationContext context) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.salesService = salesService;
         this.invoiceService = invoiceService;
         this.userService = userService;
+        this.context = context;
     }
 
     @FXML
     public void initialize() {
+        User currentUser = userService.getCurrentUser();
+        if (currentUser == null) {
+            showAlert(Alert.AlertType.ERROR, "Error", "No user logged in.");
+            handleLogout();
+            return;
+        }
+
+        // Force password change if temporary
+        if (currentUser.isTemporaryPassword()) {
+            loadChangePasswordView();
+            return;
+        }
+
+        // Normal dashboard setup
         Platform.runLater(() -> {
+            welcomeLabel.setText("Welcome, " + currentUser.getUsername());
             cartTotalLabel = new Label("$0.00");
-            cartTotalLabel.setStyle("-fx-font-size: 16px;");
+            cartTotalLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
             totalHBox.getChildren().add(cartTotalLabel);
 
             setupTables();
@@ -177,7 +174,7 @@ public class CashierDashboardController {
                         cartTable.update();
                     } else {
                         qtyField.setText(String.valueOf(item.getQuantity()));
-                        showAlert(Alert.AlertType.WARNING, "Invalid quantity! Must be > 0 and ≤ stock (" + p.getStockQuantity() + ")");
+                        showAlert(Alert.AlertType.WARNING, "Warning", "Invalid quantity! Must be > 0 and ≤ stock (" + p.getStockQuantity() + ")");
                     }
                 } catch (NumberFormatException e) {
                     qtyField.setText(String.valueOf(item.getQuantity()));
@@ -191,7 +188,7 @@ public class CashierDashboardController {
         cartActionCol.setRowCellFactory(item -> {
             MFXTableRowCell<SaleProduct, Void> cell = new MFXTableRowCell<>(i -> null);
             MFXButton removeButton = new MFXButton("Remove");
-            removeButton.getStyleClass().add("button-danger");
+            removeButton.setStyle("-fx-background-color: #E91E63; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 5 10 5 10; -fx-background-radius: 3;");
             removeButton.setOnAction(e -> {
                 cartItems.remove(item);
                 updateCartTotal();
@@ -225,7 +222,6 @@ public class CashierDashboardController {
             public String toString(Category category) {
                 return category == null ? "All Categories" : category.getName();
             }
-
             @Override
             public Category fromString(String string) {
                 return categoryComboBox.getItems().stream()
@@ -274,7 +270,7 @@ public class CashierDashboardController {
     public void handleAddToCart() {
         Product selectedProduct = productTable.getSelectionModel().getSelectedValue();
         if (selectedProduct == null) {
-            showAlert(Alert.AlertType.WARNING, "Please select a product to add to cart!");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please select a product to add to cart!");
             return;
         }
         SaleProduct item = cartItems.stream()
@@ -292,19 +288,19 @@ public class CashierDashboardController {
             }
             updateCartTotal();
         } else {
-            showAlert(Alert.AlertType.WARNING, "Not enough stock available! Max: " + selectedProduct.getStockQuantity());
+            showAlert(Alert.AlertType.WARNING, "Warning", "Not enough stock available! Max: " + selectedProduct.getStockQuantity());
         }
     }
 
     @FXML
     public void handleCheckout() {
         if (cartItems.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Cart is empty!");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Cart is empty!");
             return;
         }
         String clientName = clientNameField.getText().trim();
         if (clientName.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Please enter a client name to complete the sale!");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please enter a client name to complete the sale!");
             return;
         }
 
@@ -327,18 +323,17 @@ public class CashierDashboardController {
 
         try {
             Sale savedSale = salesService.createSale(sale);
-            // Ensure the products collection is initialized
-            savedSale.getProducts().size();
+            savedSale.getProducts().size(); // Ensure collection is initialized
             Invoice invoice = invoiceService.createInvoiceFromSale(savedSale.getId());
             productService.updateStockAfterSale(cartItems);
             invoiceService.generateInvoicePdf(invoice);
-            showAlert(Alert.AlertType.INFORMATION, "Checkout successful! Invoice #" + invoice.getId() + " generated.");
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Checkout successful! Invoice #" + invoice.getId() + " generated.");
             clearCart();
             loadSalesHistory();
             loadProducts();
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Checkout failed: " + e.getMessage());
-            e.printStackTrace(); // Log for debugging
+            showAlert(Alert.AlertType.ERROR, "Error", "Checkout failed: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -348,34 +343,20 @@ public class CashierDashboardController {
         if (selectedSale != null) {
             try {
                 salesService.printReceipt(selectedSale);
-                showAlert(Alert.AlertType.INFORMATION, "Receipt printed successfully! Check the generated PDF.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Receipt printed successfully! Check the generated PDF.");
             } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR, "Failed to print receipt: " + e.getMessage());
-                e.printStackTrace(); // Log for debugging
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to print receipt: " + e.getMessage());
+                e.printStackTrace();
             }
         } else {
-            showAlert(Alert.AlertType.WARNING, "Please select a sale to print receipt!");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please select a sale to print receipt!");
         }
     }
+
     @FXML
     public void handleClearCart() {
         clearCart();
     }
-
-    // @FXML
-    // public void handlePrintReceipt() {
-    //     Sale selectedSale = salesHistoryTable.getSelectionModel().getSelectedValue();
-    //     if (selectedSale != null) {
-    //         try {
-    //             salesService.printReceipt(selectedSale);
-    //             showAlert(Alert.AlertType.INFORMATION, "Receipt printed successfully! Check the generated PDF.");
-    //         } catch (Exception e) {
-    //             showAlert(Alert.AlertType.ERROR, "Failed to print receipt: " + e.getMessage());
-    //         }
-    //     } else {
-    //         showAlert(Alert.AlertType.WARNING, "Please select a sale to print receipt!");
-    //     }
-    // }
 
     @FXML
     public void handleLogout() {
@@ -383,14 +364,36 @@ public class CashierDashboardController {
         try {
             Stage stage = (Stage) logoutButton.getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
-            loader.setControllerFactory(c -> new LoginController(userService)); // Adjust if LoginController differs
+            loader.setControllerFactory(context::getBean);
             Parent root = loader.load();
             stage.setScene(new Scene(root));
             stage.setTitle("Inventory POS System - Login");
+            String cssPath = getClass().getResource("/styles/styles.css") != null 
+            ? getClass().getResource("/styles/styles.css").toExternalForm() 
+            : null;
+            if (cssPath != null) {
+                stage.getScene().getStylesheets().add(cssPath);
+            }
+            stage.show();
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Logged out successfully. Contact an admin if you forget your password.");
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Error logging out: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadChangePasswordView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/change_password.fxml"));
+            loader.setControllerFactory(context::getBean);
+            Parent changePasswordView = loader.load();
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            stage.setScene(new Scene(changePasswordView));
+            stage.setTitle("Change Password");
             stage.show();
         } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load password change view: " + e.getMessage());
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error logging out: " + e.getMessage());
         }
     }
 
@@ -405,9 +408,9 @@ public class CashierDashboardController {
         updateCartTotal();
     }
 
-    private void showAlert(Alert.AlertType type, String message) {
+    private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
-        alert.setTitle(type == Alert.AlertType.ERROR ? "Error" : "Info");
+        alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
