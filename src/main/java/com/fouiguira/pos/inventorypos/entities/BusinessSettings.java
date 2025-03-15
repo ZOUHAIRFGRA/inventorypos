@@ -34,10 +34,13 @@ public class BusinessSettings {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt = new Date();
 
+    @Version // Add version field for optimistic locking
+    private Long version;
+
     @PrePersist
     public void onCreate() {
         if (businessName == null) businessName = "My Business Name";
-        if (logoPath == null) logoPath = "config/default_logo.png"; // Default logo path
+        if (logoPath == null) logoPath = "config/default_logo.png";
     }
 
     @PreUpdate

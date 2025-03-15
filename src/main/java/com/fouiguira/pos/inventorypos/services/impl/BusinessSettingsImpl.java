@@ -3,7 +3,6 @@ package com.fouiguira.pos.inventorypos.services.impl;
 import com.fouiguira.pos.inventorypos.entities.BusinessSettings;
 import com.fouiguira.pos.inventorypos.repositories.BusinessSettingsRepository;
 import com.fouiguira.pos.inventorypos.services.interfaces.BusinessSettingsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,43 +11,39 @@ public class BusinessSettingsImpl implements BusinessSettingsService {
 
     private final BusinessSettingsRepository settingsRepository;
 
-    @Autowired
     public BusinessSettingsImpl(BusinessSettingsRepository settingsRepository) {
         this.settingsRepository = settingsRepository;
     }
 
     @Override
-    @Transactional(readOnly = true, timeout = 5) // Timeout to fail fast if locked
+    @Transactional // Remove readOnly=true to allow default creation
     public BusinessSettings getSettings() {
         System.out.println("Fetching settings from DB...");
-        return settingsRepository.findAll().stream()
+        BusinessSettings settings = settingsRepository.findAll().stream()
             .findFirst()
             .orElseGet(() -> {
                 System.out.println("No settings found, creating default...");
                 BusinessSettings defaultSettings = new BusinessSettings();
-                // Save in a separate transaction to avoid locking
-                try {
-                    return saveDefaultSettings(defaultSettings);
-                } catch (Exception e) {
-                    System.out.println("Failed to save default settings: " + e.getMessage());
-                    return defaultSettings; // Return unsaved default if save fails
-                }
+                return saveDefaultSettings(defaultSettings);
             });
+        System.out.println("Settings fetched with ID: " + settings.getId() + ", Version: " + settings.getVersion());
+        return settings;
     }
 
     @Transactional
     private BusinessSettings saveDefaultSettings(BusinessSettings settings) {
-        return settingsRepository.save(settings);
+        BusinessSettings saved = settingsRepository.save(settings);
+        System.out.println("Default settings saved with ID: " + saved.getId());
+        return saved;
     }
 
     @Override
     @Transactional
     public BusinessSettings saveSettings(BusinessSettings settings) {
-        System.out.println("Saving settings: " + settings.getBusinessName());
-        BusinessSettings existing = settingsRepository.findAll().stream()
-            .findFirst()
-            .orElse(null);
-        if (existing != null) {
+        System.out.println("Saving settings: " + settings.getBusinessName() + ", ID: " + settings.getId() + ", Version: " + settings.getVersion());
+        if (settings.getId() != null) {
+            BusinessSettings existing = settingsRepository.findById(settings.getId())
+                .orElseThrow(() -> new RuntimeException("Settings with ID " + settings.getId() + " not found"));
             existing.setBusinessName(settings.getBusinessName());
             existing.setAddress(settings.getAddress());
             existing.setPhone(settings.getPhone());

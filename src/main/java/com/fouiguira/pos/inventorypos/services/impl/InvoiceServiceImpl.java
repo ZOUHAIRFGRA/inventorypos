@@ -26,6 +26,8 @@ import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -122,12 +124,15 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<Invoice> invoices = invoiceRepository.findBySaleId(saleId);
         return invoices.isEmpty() ? null : invoices.get(0); // Return first invoice or null
     }
-    //TODO FIX PDF STYLES : IMG LAYOUT
     @SuppressWarnings("resource")
     @Override
+    @Transactional(readOnly = true) // Ensure settings are fetched in a transaction
     public void generateInvoicePdf(Invoice invoice) {
-        BusinessSettings settings = settingsController.getCachedSettings(); // Use cached settings
-        System.out.println("Generating PDF with settings: " + (settings != null ? settings.getBusinessName() : "null"));
+        BusinessSettings settings = settingsService.getSettings(); // Fetch fresh settings transactionally
+        if (settings == null) {
+            throw new RuntimeException("Business settings not found");
+        }
+        System.out.println("Generating PDF with settings: " + settings.getBusinessName() + ", Version: " + settings.getVersion());
 
         try {
             Sale sale = invoice.getSale();
@@ -148,8 +153,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             try {
                 if (logoFile.exists() && logoFile.isFile() && logoFile.length() > 0) {
                     logo = new Image(ImageDataFactory.create(logoPath))
-                        .setWidth(100)
-                        .setAutoScaleHeight(true)
+                        .scaleToFit(100, 50)
                         .setHorizontalAlignment(HorizontalAlignment.LEFT)
                         .setMarginBottom(10);
                     System.out.println("Logo loaded from: " + logoPath);
@@ -159,23 +163,18 @@ public class InvoiceServiceImpl implements InvoiceService {
             } catch (Exception e) {
                 System.out.println("Failed to load logo from " + logoPath + ": " + e.getMessage());
                 File blankImage = new File("config/default_logo.png");
-
                 logo = new Image(ImageDataFactory.create(blankImage.getAbsolutePath()))
-                    .setWidth(100)
+                    .scaleToFit(100, 50)
                     .setHorizontalAlignment(HorizontalAlignment.LEFT)
                     .setMarginBottom(10);
             }
-            document.add(logo);
 
-            // ... rest of the method unchanged
             Paragraph header = new Paragraph()
-                .add(settings.getBusinessName() + "\n")
-                .add(settings.getAddress() != null ? settings.getAddress() + "\n" : "123 Business Street, City, Country\n")
-                .add(settings.getPhone() != null ? "Phone: " + settings.getPhone() + " | " : "Phone: (123) 456-7890 | ")
-                .add(settings.getEmail() != null ? "Email: " + settings.getEmail() : "Email: info@mybusiness.com")
-                .setTextAlignment(TextAlignment.CENTER)
-                .setFontSize(12)
-                .setBold();
+                .add(logo)
+                .add(new Paragraph(settings.getBusinessName())
+                    .setTextAlignment(TextAlignment.LEFT)
+                    .setFontSize(12)
+                    .setBold());
             document.add(header);
 
             document.add(new Paragraph("INVOICE #" + invoice.getId())
@@ -237,7 +236,8 @@ public class InvoiceServiceImpl implements InvoiceService {
             System.out.println("Failed to generate invoice PDF: " + e.getMessage());
             throw new RuntimeException("Failed to generate invoice PDF: " + e.getMessage());
         }
-    } // Helper methods for styling
+    }
+   
     private Cell createHeaderCell(String text) {
         return new Cell()
                 .add(new Paragraph(text))

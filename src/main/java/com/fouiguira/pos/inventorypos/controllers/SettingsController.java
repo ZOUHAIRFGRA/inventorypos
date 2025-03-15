@@ -5,6 +5,7 @@ import com.fouiguira.pos.inventorypos.services.interfaces.BusinessSettingsServic
 import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXTextField;
+import jakarta.persistence.OptimisticLockException;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+
 @Component
 public class SettingsController {
 
@@ -91,16 +93,21 @@ public class SettingsController {
     }
 
     private void loadSettings() {
-        if (cachedSettings == null) {
-            try {
-                cachedSettings = settingsService.getSettings();
-                System.out.println("Settings loaded: " + cachedSettings.getBusinessName());
-            } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to load settings: " + e.getMessage());
-                cachedSettings = new BusinessSettings(); // Fallback to defaults
-                System.out.println("Using fallback settings: " + cachedSettings.getBusinessName());
+        try {
+            cachedSettings = settingsService.getSettings();
+            if (cachedSettings.getId() == null) {
+                throw new RuntimeException("Settings loaded but not persisted to DB");
             }
+            System.out.println("Settings loaded: " + cachedSettings.getBusinessName() + ", Version: " + cachedSettings.getVersion());
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load settings: " + e.getMessage());
+            cachedSettings = settingsService.getSettings(); // Retry to ensure persistence
+            System.out.println("Retried settings load: " + cachedSettings.getBusinessName());
         }
+        updateFields();
+    }
+
+    private void updateFields() {
         businessNameField.setText(cachedSettings.getBusinessName());
         addressField.setText(cachedSettings.getAddress());
         phoneField.setText(cachedSettings.getPhone());
@@ -131,20 +138,30 @@ public class SettingsController {
 
     @FXML
     private void handleSaveBusinessInfo() {
-        cachedSettings.setBusinessName(businessNameField.getText());
-        cachedSettings.setAddress(addressField.getText());
-        cachedSettings.setPhone(phoneField.getText());
-        cachedSettings.setEmail(emailField.getText());
-        cachedSettings.setLogoPath(logoPathField.getText());
         try {
-            settingsService.saveSettings(cachedSettings);
+            BusinessSettings freshSettings = settingsService.getSettings();
+            System.out.println("Fetched fresh settings before save: " + freshSettings.getBusinessName() + ", Version: " + freshSettings.getVersion());
+            
+            freshSettings.setBusinessName(businessNameField.getText());
+            freshSettings.setAddress(addressField.getText());
+            freshSettings.setPhone(phoneField.getText());
+            freshSettings.setEmail(emailField.getText());
+            freshSettings.setLogoPath(logoPathField.getText());
+            
+            cachedSettings = settingsService.saveSettings(freshSettings);
+            System.out.println("Settings saved: " + cachedSettings.getBusinessName() + ", Version: " + cachedSettings.getVersion());
+            updateFields();
             showAlert(Alert.AlertType.INFORMATION, "Success", "Business information saved successfully!");
+        } catch (OptimisticLockException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to save: Settings were modified by another user. Please try again.");
+            System.err.println("OptimisticLockException: " + e.getMessage());
+            loadSettings();
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Failed to save business info: " + e.getMessage());
+            System.err.println("Failed to save business info: " + e.getMessage());
         }
     }
 
-   
     @FXML
     private void handleBackupData() {
         FileChooser fileChooser = new FileChooser();
@@ -180,10 +197,6 @@ public class SettingsController {
         String name = file.getName();
         int lastIndex = name.lastIndexOf('.');
         return lastIndex == -1 ? "png" : name.substring(lastIndex + 1);
-    }
-
-    private String handleChangePassword() {
-        return "Change Password";
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {
