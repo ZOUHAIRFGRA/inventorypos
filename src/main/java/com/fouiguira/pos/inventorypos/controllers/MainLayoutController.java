@@ -24,7 +24,7 @@ public class MainLayoutController {
     private BorderPane mainLayout;
 
     @FXML
-    private MFXButton dashboardButton,categoryButton, productsButton, salesHistoryButton, cashierButton, settingsButton, invoicesButton, exitButton;
+    private MFXButton dashboardButton,manage_cashiersButton,categoryButton, productsButton, salesHistoryButton, cashierButton, settingsButton, invoicesButton, exitButton;
 
     private final ApplicationContext context;
     private final UserService userService; // Now properly injected
@@ -52,6 +52,7 @@ public class MainLayoutController {
         productsButton.setOnAction(e -> loadView("ProductView.fxml"));
         salesHistoryButton.setOnAction(e -> loadView("SalesHistoryView.fxml"));
         cashierButton.setOnAction(e -> loadView("CashierDashboard.fxml"));
+        manage_cashiersButton.setOnAction(e -> loadView("manage_cashiers.fxml"));
         settingsButton.setOnAction(e -> loadView("SettingsView.fxml"));
         invoicesButton.setOnAction(e -> loadView("InvoiceView.fxml"));
         categoryButton.setOnAction(e -> loadView("CategoryView.fxml"));

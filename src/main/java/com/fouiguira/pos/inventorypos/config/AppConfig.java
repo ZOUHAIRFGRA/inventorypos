@@ -7,13 +7,18 @@ import com.fouiguira.pos.inventorypos.services.interfaces.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Configuration
 @EnableJpaRepositories(basePackages = "com.fouiguira.pos.inventorypos.repositories")
 public class AppConfig {
 
-    public UserService userService(UserRepository userRepository) {
-        return new UserServiceImpl(userRepository);
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    
+    public UserService userService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        return new UserServiceImpl(userRepository, passwordEncoder);
     }
 
     public ProductService productService(ProductRepository productRepository) {
