@@ -44,3 +44,4 @@ storage/images/**
 
 # invoice PDfs #
 *.pdf
+config/logo_*
