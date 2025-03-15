@@ -1,0 +1,105 @@
+package com.fouiguira.pos.inventorypos.controllers;
+
+import com.fouiguira.pos.inventorypos.entities.User;
+import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
+import io.github.palexdev.materialfx.controls.MFXButton;
+import io.github.palexdev.materialfx.controls.MFXPasswordField;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.stage.Stage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+
+@Component
+public class ChangePasswordController {
+
+    @FXML private MFXPasswordField currentPasswordField;
+    @FXML private MFXPasswordField newPasswordField;
+    @FXML private MFXPasswordField confirmPasswordField;
+    @FXML private MFXButton saveButton;
+    @FXML private MFXButton cancelButton;
+
+    private final UserService userService;
+    private final ApplicationContext context;
+
+    @Autowired
+    public ChangePasswordController(UserService userService, ApplicationContext context) {
+        this.userService = userService;
+        this.context = context;
+    }
+
+    @FXML
+    public void initialize() {
+        currentPasswordField.requestFocus();
+    }
+
+    @FXML
+    private void handleSavePassword() {
+        String currentPassword = currentPasswordField.getText().trim();
+        String newPassword = newPasswordField.getText().trim();
+        String confirmPassword = confirmPasswordField.getText().trim();
+
+        if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Warning", "All fields are required.");
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            showAlert(Alert.AlertType.ERROR, "Error", "New password and confirmation do not match.");
+            return;
+        }
+
+        try {
+            User currentUser = userService.getCurrentUser();
+            User authenticatedUser = userService.authenticate(currentUser.getUsername(), currentPassword);
+            if (currentUser == null || authenticatedUser == null) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Current password is incorrect.");
+                return;
+            }
+
+            currentUser.setPassword(newPassword); // Will be hashed in updateUser
+            currentUser.setTemporaryPassword(false);
+            userService.updateUser(currentUser.getId(), currentUser);
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Password updated successfully. Please log in with your new password.");
+            returnToLogin();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to update password: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleCancel() {
+        userService.logout();
+        returnToLogin();
+    }
+
+    private void returnToLogin() {
+        try {
+            Stage stage = (Stage) saveButton.getScene().getWindow();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
+            loader.setControllerFactory(context::getBean);
+            Parent root = loader.load();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Inventory POS System - Login");
+            stage.show();
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to return to login: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+}

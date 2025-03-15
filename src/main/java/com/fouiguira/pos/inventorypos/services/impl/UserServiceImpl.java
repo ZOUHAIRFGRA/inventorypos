@@ -3,9 +3,13 @@ package com.fouiguira.pos.inventorypos.services.impl;
 import com.fouiguira.pos.inventorypos.entities.User;
 import com.fouiguira.pos.inventorypos.repositories.UserRepository;
 import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-// import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
+
 import java.util.Date;
 import java.util.List;
 
@@ -13,25 +17,15 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private User currentUser; // Track the logged-in user
+    private final BCryptPasswordEncoder passwordEncoder;
+    private User currentUser;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    // @PostConstruct
-    // public void init() {
-    //     // Initialize admin user if no users exist
-    //     if (userRepository.count() == 0) {
-    //         User admin = new User();
-    //         admin.setUsername("admin");
-    //         admin.setPassword("admin123"); // Plain text for now; hash in production
-    //         admin.setRole(User.Role.OWNER);
-    //         admin.setCreatedAt(new Date());
-    //         admin.setUpdatedAt(new Date());
-    //         userRepository.save(admin);
-    //     }
-    // }
 
     @Override
     public User getUserById(Long id) {
@@ -49,10 +43,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
+@Transactional
     @Override
     public User createUser(User user) {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new RuntimeException("Username '" + user.getUsername() + "' already exists");
+        }
+        // If no password provided, generate a temporary one
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            String tempPassword = "Cashier" + System.currentTimeMillis();
+            user.setPassword(passwordEncoder.encode(tempPassword));
+            user.setTemporaryPassword(true);
+        } else {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setTemporaryPassword(false);
         }
         user.setCreatedAt(new Date());
         user.setUpdatedAt(new Date());
@@ -63,7 +67,11 @@ public class UserServiceImpl implements UserService {
     public User updateUser(Long id, User user) {
         User existing = getUserById(id);
         existing.setUsername(user.getUsername());
-        existing.setPassword(user.getPassword());
+        // Only update password if provided; otherwise, retain existing
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            existing.setPassword(passwordEncoder.encode(user.getPassword()));
+            existing.setTemporaryPassword(user.isTemporaryPassword());
+        }
         existing.setRole(user.getRole());
         existing.setUpdatedAt(new Date());
         return userRepository.save(existing);
@@ -80,20 +88,24 @@ public class UserServiceImpl implements UserService {
         return currentUser != null ? currentUser.getRole() : null;
     }
 
-    // New method for authentication
+    @Override
     public User authenticate(String username, String password) {
         User user = userRepository.findByUsername(username);
-        if (user != null && user.getPassword().equals(password)) { // Plain text comparison; hash in production
-            currentUser = user; // Set the current user
+        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+            currentUser = user;
+            System.out.println("Authentication successful for: " + username);
             return user;
         }
+        System.out.println("Authentication failed for: " + username);
         return null;
     }
 
+    @Override
     public User getCurrentUser() {
         return currentUser;
     }
 
+    @Override
     public void logout() {
         currentUser = null;
     }

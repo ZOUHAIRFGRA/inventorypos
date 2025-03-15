@@ -2,6 +2,7 @@ package com.fouiguira.pos.inventorypos.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.Date;
 
 @Entity
@@ -10,22 +11,25 @@ import java.util.Date;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id; // Unique identifier for each user
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String username;
 
     @Column(nullable = false)
-    private String username; // Username
-
-    @Column(nullable = false)
-    private String password; // Hashed password
+    private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role; // Role of the user (Owner, Cashier, Staff)
+    private Role role;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt = new Date(); // Timestamp of user creation
+    private Date createdAt = new Date();
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt = new Date(); // Timestamp of last update
+    private Date updatedAt = new Date();
+
+    @Column(nullable = false)
+    private boolean isTemporaryPassword = false;
 
     public enum Role {
         OWNER, CASHIER, STAFF

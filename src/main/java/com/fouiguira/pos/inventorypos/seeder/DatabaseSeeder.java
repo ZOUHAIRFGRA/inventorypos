@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import java.util.Date;
 
@@ -16,8 +17,10 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseSeeder.class);
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public DatabaseSeeder(UserRepository userRepository) {
+    public DatabaseSeeder(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
@@ -31,10 +34,10 @@ public class DatabaseSeeder implements CommandLineRunner {
             logger.info("⚡ Database is empty. Seeding default admin user...");
             User admin = new User();
             admin.setUsername("admin");
-            admin.setPassword("admin123"); // Hash in production
-            admin.setRole(User.Role.OWNER);
+            admin.setPassword(passwordEncoder.encode("admin123"));            admin.setRole(User.Role.OWNER);
             admin.setCreatedAt(new Date());
             admin.setUpdatedAt(new Date());
+            admin.setTemporaryPassword(false);
             userRepository.save(admin);
             System.out.println("✅ Default admin user created."+ admin);
             logger.info("✅ Default admin user created.");

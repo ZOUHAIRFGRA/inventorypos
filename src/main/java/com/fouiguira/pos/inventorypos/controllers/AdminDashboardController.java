@@ -83,7 +83,7 @@ public class AdminDashboardController {
     public void loadSalesHistory() { loadView("SalesHistoryView.fxml"); }
 
     @FXML
-    public void loadCashiers() { loadView("CashierDashboard.fxml"); }
+    public void loadCashiers() { loadView("manage_cashiers.fxml"); }
 
     @FXML
     public void loadSettings() { loadView("SettingsView.fxml"); }
@@ -98,6 +98,12 @@ public class AdminDashboardController {
             Parent root = loader.load();
             stage.setScene(new Scene(root));
             stage.setTitle("Inventory POS System - Login");
+            String cssPath = getClass().getResource("/styles/styles.css") != null 
+            ? getClass().getResource("/styles/styles.css").toExternalForm() 
+            : null;
+            if (cssPath != null) {
+                stage.getScene().getStylesheets().add(cssPath);
+            }
             stage.setMaximized(true);
             stage.show();
         } catch (IOException e) {
