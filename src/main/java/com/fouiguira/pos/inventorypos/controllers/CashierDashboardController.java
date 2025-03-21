@@ -13,8 +13,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -22,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -34,12 +34,11 @@ public class CashierDashboardController {
 
     @FXML private MFXTextField searchField;
     @FXML private MFXComboBox<Category> categoryComboBox;
-    @FXML private MFXTableView<Product> productTable;
-    private MFXTableColumn<Product> prodIdCol;
-    private MFXTableColumn<Product> prodNameCol;
-    private MFXTableColumn<Product> prodPriceCol;
-    private MFXTableColumn<Product> prodStockCol;
-    private MFXTableColumn<Product> prodImageCol;
+    @FXML private TableView<Product> productTable;
+    private TableColumn<Product, Long> prodIdCol;
+    private TableColumn<Product, String> prodNameCol;
+    private TableColumn<Product, Double> prodPriceCol;
+    private TableColumn<Product, Integer> prodStockCol;
     @FXML private MFXButton addToCartButton;
 
     @FXML private MFXTableView<SaleProduct> cartTable;
@@ -71,7 +70,7 @@ public class CashierDashboardController {
     private final SalesService salesService;
     private final InvoiceService invoiceService;
     private final UserService userService;
-    private final ApplicationContext context; // For loading views
+    private final ApplicationContext context;
 
     private ObservableList<SaleProduct> cartItems = FXCollections.observableArrayList();
     private static final DecimalFormat df = new DecimalFormat("#,##0.00");
@@ -97,62 +96,68 @@ public class CashierDashboardController {
             return;
         }
 
-        // Force password change if temporary
         if (currentUser.isTemporaryPassword()) {
             loadChangePasswordView();
             return;
         }
 
-        // Normal dashboard setup
-        Platform.runLater(() -> {
-            welcomeLabel.setText("Welcome, " + currentUser.getUsername());
-            cartTotalLabel = new Label("$0.00");
-            cartTotalLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
-            totalHBox.getChildren().add(cartTotalLabel);
+        // Check if productTable is injected
+        if (productTable == null) {
+            System.err.println("Error: productTable is null - FXML injection failed!");
+            return;
+        }
 
-            setupTables();
-            loadCategories();
-            loadProducts();
-            loadSalesHistory();
-            setupPaymentMethods();
-            searchField.setFloatingText("Search Products");
-            clientNameField.setFloatingText("Client Name (Required)");
+        welcomeLabel.setText("Welcome, " + currentUser.getUsername());
+        cartTotalLabel = new Label("$0.00");
+        cartTotalLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333333;");
+        totalHBox.getChildren().add(cartTotalLabel);
+
+        setupTables();
+        loadCategories();
+        loadProducts();
+        loadSalesHistory();
+        setupPaymentMethods();
+
+        // Debug table state
+        Platform.runLater(() -> {
+            System.out.println("Table visible: " + productTable.isVisible());
+            System.out.println("Table items size: " + (productTable.getItems() != null ? productTable.getItems().size() : "null"));
+            System.out.println("Table columns: " + productTable.getColumns());
         });
     }
 
     @SuppressWarnings("unchecked")
     private void setupTables() {
         // Product Table
-        prodIdCol = new MFXTableColumn<>("ID", true);
-        prodNameCol = new MFXTableColumn<>("Name", true);
-        prodPriceCol = new MFXTableColumn<>("Price", true);
-        prodStockCol = new MFXTableColumn<>("Stock", true);
-        prodImageCol = new MFXTableColumn<>("Image", true);
+        productTable.getColumns().clear();
+        prodIdCol = new TableColumn<>("ID");
+        prodNameCol = new TableColumn<>("Name");
+        prodPriceCol = new TableColumn<>("Price");
+        prodStockCol = new TableColumn<>("Stock");
 
-        prodIdCol.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getId));
-        prodNameCol.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getName));
-        prodPriceCol.setRowCellFactory(product -> new MFXTableRowCell<>(p -> "$" + df.format(p.getPrice())));
-        prodStockCol.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getStockQuantity));
-        prodImageCol.setRowCellFactory(product -> {
-            MFXTableRowCell<Product, String> cell = new MFXTableRowCell<>(Product::getImagePath);
-            ImageView imageView = new ImageView();
-            imageView.setFitWidth(50);
-            imageView.setFitHeight(50);
-            cell.setGraphic(imageView);
-            cell.textProperty().addListener((obs, oldText, newText) -> {
-                if (newText != null && !newText.isEmpty()) {
-                    File file = new File(newText);
-                    imageView.setImage(file.exists() ? new Image(file.toURI().toString(), 50, 50, true, true) : null);
+        prodIdCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        prodNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        prodPriceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+        prodStockCol.setCellValueFactory(new PropertyValueFactory<>("stockQuantity"));
+
+        prodPriceCol.setCellFactory(column -> new javafx.scene.control.TableCell<>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty || price == null) {
+                    setText(null);
                 } else {
-                    imageView.setImage(null);
+                    setText("$" + df.format(price));
                 }
-            });
-            return cell;
+            }
         });
-        productTable.getTableColumns().addAll(prodIdCol, prodNameCol, prodPriceCol, prodStockCol, prodImageCol);
-        productTable.getSelectionModel().setAllowsMultipleSelection(false);
 
-        // Cart Table
+        productTable.getColumns().addAll(prodIdCol, prodNameCol, prodPriceCol, prodStockCol);
+        productTable.getSelectionModel().setCellSelectionEnabled(false);
+        System.out.println("Product table columns set: " + productTable.getColumns());
+
+        // Cart Table (unchanged)
+        cartTable.getTableColumns().clear();
         cartNameCol = new MFXTableColumn<>("Name", true);
         cartQtyCol = new MFXTableColumn<>("Qty", true);
         cartPriceCol = new MFXTableColumn<>("Price", true);
@@ -200,7 +205,8 @@ public class CashierDashboardController {
         cartTable.setItems(cartItems);
         cartTable.getSelectionModel().setAllowsMultipleSelection(false);
 
-        // Sales History Table
+        // Sales History Table (unchanged)
+        salesHistoryTable.getTableColumns().clear();
         salesIdCol = new MFXTableColumn<>("ID", true);
         salesDateCol = new MFXTableColumn<>("Date", true);
         salesTotalCol = new MFXTableColumn<>("Total", true);
@@ -234,12 +240,16 @@ public class CashierDashboardController {
 
     private void loadProducts() {
         List<Product> products = productService.getAllProducts();
-        productTable.setItems(FXCollections.observableArrayList(products));
+        System.out.println("Loaded products: " + products);
+        ObservableList<Product> productList = FXCollections.observableArrayList(products);
+        productTable.setItems(productList);
+        System.out.println("Product table items set: " + productTable.getItems());
     }
 
     private void loadSalesHistory() {
         List<Sale> recentSales = salesService.getRecentSales(5);
         salesHistoryTable.setItems(FXCollections.observableArrayList(recentSales));
+        salesHistoryTable.update();
     }
 
     private void setupPaymentMethods() {
@@ -268,7 +278,7 @@ public class CashierDashboardController {
 
     @FXML
     public void handleAddToCart() {
-        Product selectedProduct = productTable.getSelectionModel().getSelectedValue();
+        Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
         if (selectedProduct == null) {
             showAlert(Alert.AlertType.WARNING, "Warning", "Please select a product to add to cart!");
             return;
@@ -323,7 +333,7 @@ public class CashierDashboardController {
 
         try {
             Sale savedSale = salesService.createSale(sale);
-            savedSale.getProducts().size(); // Ensure collection is initialized
+            savedSale.getProducts().size();
             Invoice invoice = invoiceService.createInvoiceFromSale(savedSale.getId());
             productService.updateStockAfterSale(cartItems);
             invoiceService.generateInvoicePdf(invoice);
@@ -369,8 +379,8 @@ public class CashierDashboardController {
             stage.setScene(new Scene(root));
             stage.setTitle("Inventory POS System - Login");
             String cssPath = getClass().getResource("/styles/styles.css") != null 
-            ? getClass().getResource("/styles/styles.css").toExternalForm() 
-            : null;
+                ? getClass().getResource("/styles/styles.css").toExternalForm() 
+                : null;
             if (cssPath != null) {
                 stage.getScene().getStylesheets().add(cssPath);
             }
