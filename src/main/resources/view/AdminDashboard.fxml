@@ -66,7 +66,7 @@
                 <!-- Logout Button -->
                 <MFXButton fx:id="logoutButton" text="Logout" onAction="#handleLogout" styleClass="sidebar-button, logout-button">
                     <graphic>
-                        <MFXFontIcon description="fas-sign-out-alt" size="20" color="white" />
+                        <MFXFontIcon description="fas-right-from-bracket" size="20" color="white" />
                     </graphic>
                 </MFXButton>
             </children>

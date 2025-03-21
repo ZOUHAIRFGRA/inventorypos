@@ -6,6 +6,7 @@ import com.fouiguira.pos.inventorypos.repositories.CategoryRepository;
 import com.fouiguira.pos.inventorypos.repositories.ProductRepository;
 import com.fouiguira.pos.inventorypos.services.interfaces.CategoryService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final ProductRepository productRepository; // Added to manage products
+    private final ProductRepository productRepository;
 
     public CategoryServiceImpl(CategoryRepository categoryRepository, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
@@ -22,43 +23,59 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAll();
+        System.out.println("getAllCategories fetched: " + categories);
+        return categories;
     }
 
     @Override
     public Category getCategoryByName(String name) {
-        return categoryRepository.findByName(name).orElse(null);
+        Category category = categoryRepository.findByName(name).orElse(null);
+        System.out.println("getCategoryByName '" + name + "' result: " + category);
+        return category;
     }
 
     @Override
     public Category getCategoryById(Long id) {
-        return categoryRepository.findById(id)
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+        System.out.println("getCategoryById " + id + " result: " + category);
+        return category;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Category createCategory(Category category) {
-        return categoryRepository.save(category);
+        System.out.println("createCategory started for: " + category);
+        Category saved = categoryRepository.save(category);
+        System.out.println("Category saved: " + saved);
+        System.out.println("After save, all categories: " + categoryRepository.findAll());
+        return saved;
     }
 
     @Override
     public Category updateCategory(Long id, Category category) {
+        System.out.println("updateCategory started for id " + id + " with: " + category);
         Category existing = getCategoryById(id);
         existing.setName(category.getName());
         existing.setDescription(category.getDescription());
-        return categoryRepository.save(existing);
+        Category updated = categoryRepository.save(existing);
+        System.out.println("Category updated: " + updated);
+        return updated;
     }
 
     @Override
     public void deleteCategory(Long id) {
+        System.out.println("deleteCategory started for id: " + id);
         Category category = getCategoryById(id);
-        // Find all products with this category and set their category to null
         List<Product> products = productRepository.findByCategory(category);
+        System.out.println("Products with category " + category + ": " + products.size());
         for (Product product : products) {
             product.setCategory(null);
             productRepository.save(product);
+            System.out.println("Cleared category for product: " + product);
         }
-        // Now delete the category
         categoryRepository.delete(category);
+        System.out.println("Category deleted: " + id);
     }
 }

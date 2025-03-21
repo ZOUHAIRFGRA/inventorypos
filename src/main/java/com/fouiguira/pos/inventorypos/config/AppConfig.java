@@ -25,8 +25,8 @@ public class AppConfig {
         return new ProductServiceImpl(productRepository);
     }
 
-    public CategoryService categoryService(CategoryRepository categoryRepository) {
-        return new CategoryServiceImpl(categoryRepository, null);
+    public CategoryService categoryService(CategoryRepository categoryRepository, ProductRepository productRepository) {
+        return new CategoryServiceImpl(categoryRepository, productRepository);
     }
 
     public BusinessSettingsService businessSettingsService(BusinessSettingsRepository settingsRepository) {
