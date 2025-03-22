@@ -3,7 +3,6 @@ package com.fouiguira.pos.inventorypos.controllers;
 import com.fouiguira.pos.inventorypos.entities.*;
 import com.fouiguira.pos.inventorypos.services.interfaces.*;
 import io.github.palexdev.materialfx.controls.*;
-import io.github.palexdev.materialfx.controls.cell.MFXTableRowCell;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,31 +10,23 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
-
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-
-import javafx.scene.control.TextField;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
-
-import java.io.InputStream;
 import java.util.Optional;
 
 @Controller
@@ -45,12 +36,11 @@ public class CashierDashboardController {
     @FXML private MFXComboBox<Category> categoryComboBox;
     @FXML private GridPane productGrid;
 
-    @FXML private MFXTableView<SaleProduct> cartTable;
-    private MFXTableColumn<SaleProduct> cartNameCol;
-    private MFXTableColumn<SaleProduct> cartQtyCol;
-    private MFXTableColumn<SaleProduct> cartPriceCol;
-    private MFXTableColumn<SaleProduct> cartTotalCol;
-    private MFXTableColumn<SaleProduct> cartActionCol;
+    @FXML private TableView<SaleProduct> cartTable;
+    private TableColumn<SaleProduct, Void> cartImageCol;
+    private TableColumn<SaleProduct, String> cartNameCol;
+    private TableColumn<SaleProduct, Integer> cartQtyCol;
+    private TableColumn<SaleProduct, Double> cartPriceCol;
     @FXML private MFXTextField clientNameField;
     @FXML private Label cartTotalLabel;
     @FXML private MFXComboBox<String> paymentMethodComboBox;
@@ -73,7 +63,6 @@ public class CashierDashboardController {
     private static final DecimalFormat df = new DecimalFormat("#,##0.00");
     private static final String PLACEHOLDER_IMAGE = "/images/placeholder.png";
 
-    @Autowired
     public CashierDashboardController(ProductService productService, CategoryService categoryService,
                                       SalesService salesService, InvoiceService invoiceService,
                                       UserService userService, ApplicationContext context) {
@@ -121,53 +110,87 @@ public class CashierDashboardController {
 
     @SuppressWarnings("unchecked")
     private void setupCartTable() {
-        cartTable.getTableColumns().clear();
-        cartNameCol = new MFXTableColumn<>("Name", true);
-        cartQtyCol = new MFXTableColumn<>("Qty", true);
-        cartPriceCol = new MFXTableColumn<>("Price", true);
-        cartTotalCol = new MFXTableColumn<>("Total", true);
-        cartActionCol = new MFXTableColumn<>("Action", false);
+        cartTable.getColumns().clear();
 
-        cartNameCol.setRowCellFactory(item -> new MFXTableRowCell<>(i -> i.getProduct().getName()));
-        cartQtyCol.setRowCellFactory(item -> {
-            MFXTableRowCell<SaleProduct, Integer> cell = new MFXTableRowCell<>(SaleProduct::getQuantity);
-            MFXTextField qtyField = new MFXTextField(String.valueOf(item.getQuantity()));
-            qtyField.setPrefWidth(50);
-            qtyField.textProperty().addListener((obs, oldVal, newVal) -> {
-                try {
-                    int newQty = Integer.parseInt(newVal);
-                    Product p = item.getProduct();
-                    if (newQty <= p.getStockQuantity() && newQty > 0) {
-                        item.setQuantity(newQty);
-                        updateCartTotal();
-                        cartTable.update();
+        // Image column
+        cartImageCol = new TableColumn<>("Image");
+        cartImageCol.setPrefWidth(60);
+        cartImageCol.setCellFactory(col -> new TableCell<>() {
+            private final ImageView imageView = new ImageView();
+            {
+                imageView.setFitWidth(30);
+                imageView.setFitHeight(30);
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                } else {
+                    SaleProduct saleProduct = getTableRow().getItem();
+                    String imagePath = saleProduct.getProduct().getImagePath();
+                    if (imagePath != null && !imagePath.isEmpty() && new File(imagePath).exists()) {
+                        imageView.setImage(new Image(new File(imagePath).toURI().toString()));
                     } else {
-                        qtyField.setText(String.valueOf(item.getQuantity()));
-                        showAlert(Alert.AlertType.WARNING, "Warning", "Invalid quantity! Must be > 0 and ≤ stock (" + p.getStockQuantity() + ")");
+                        imageView.setImage(new Image(getClass().getResourceAsStream(PLACEHOLDER_IMAGE)));
                     }
-                } catch (NumberFormatException e) {
-                    qtyField.setText(String.valueOf(item.getQuantity()));
+                    setGraphic(imageView);
                 }
-            });
-            cell.setGraphic(qtyField);
-            return cell;
+            }
         });
-        cartPriceCol.setRowCellFactory(item -> new MFXTableRowCell<>(i -> "$" + df.format(i.getProduct().getPrice())));
-        cartTotalCol.setRowCellFactory(item -> new MFXTableRowCell<>(i -> "$" + df.format(i.getQuantity() * i.getProduct().getPrice())));
-        cartActionCol.setRowCellFactory(item -> {
-            MFXTableRowCell<SaleProduct, Void> cell = new MFXTableRowCell<>(i -> null);
-            MFXButton removeButton = new MFXButton("Remove");
-            removeButton.setStyle("-fx-background-color: #E91E63; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 5 10 5 10; -fx-background-radius: 3;");
-            removeButton.setOnAction(e -> {
-                cartItems.remove(item);
-                updateCartTotal();
-            });
-            cell.setGraphic(removeButton);
-            return cell;
+
+        // Name column
+        cartNameCol = new TableColumn<>("Name");
+        cartNameCol.setPrefWidth(100);
+        cartNameCol.setCellValueFactory(cellData -> 
+            new javafx.beans.property.SimpleStringProperty(
+                cellData.getValue().getProduct().getName()
+            )
+        );
+
+        // Quantity column
+        cartQtyCol = new TableColumn<>("Qty");
+        cartQtyCol.setPrefWidth(60);
+        cartQtyCol.setCellValueFactory(cellData -> 
+            new javafx.beans.property.SimpleIntegerProperty(
+                cellData.getValue().getQuantity()
+            ).asObject()
+        );
+        cartQtyCol.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Integer quantity, boolean empty) {
+                super.updateItem(quantity, empty);
+                if (empty || quantity == null) {
+                    setText(null);
+                } else {
+                    setText(quantity.toString());
+                }
+            }
         });
-        cartTable.getTableColumns().addAll(cartNameCol, cartQtyCol, cartPriceCol, cartTotalCol, cartActionCol);
+
+        // Price column
+        cartPriceCol = new TableColumn<>("Price");
+        cartPriceCol.setPrefWidth(80);
+        cartPriceCol.setCellValueFactory(cellData ->
+            new javafx.beans.property.SimpleDoubleProperty(
+                cellData.getValue().getProduct().getPrice()
+            ).asObject()
+        );
+        cartPriceCol.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty || price == null) {
+                    setText(null);
+                } else {
+                    setText("$" + df.format(price));
+                }
+            }
+        });
+
+        cartTable.getColumns().addAll(cartImageCol, cartNameCol, cartQtyCol, cartPriceCol);
         cartTable.setItems(cartItems);
-        cartTable.getSelectionModel().setAllowsMultipleSelection(false);
+        cartTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     }
 
     private void loadCategories() {

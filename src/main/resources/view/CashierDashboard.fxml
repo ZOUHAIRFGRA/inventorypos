@@ -3,9 +3,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import io.github.palexdev.materialfx.controls.MFXTextField?>
 <?import io.github.palexdev.materialfx.controls.MFXComboBox?>
-<?import io.github.palexdev.materialfx.controls.MFXTableView?>
 <?import io.github.palexdev.materialfx.controls.MFXButton?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.image.ImageView?>
 
@@ -43,7 +43,7 @@
         <!-- Cart Section -->
         <VBox fx:id="cartVBox" spacing="10" prefWidth="280" style="-fx-background-color: #FFFFFF; -fx-padding: 10; -fx-border-radius: 5; -fx-background-radius: 5;" VBox.vgrow="ALWAYS">
             <Label text="Cart" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
-            <MFXTableView fx:id="cartTable" prefHeight="400" style="-fx-background-color: #FAFAFA; -fx-border-color: #E0E0E0; -fx-border-radius: 5; -fx-background-radius: 5;"/>
+            <TableView fx:id="cartTable" prefHeight="400" style="-fx-background-color: #FAFAFA; -fx-border-color: #E0E0E0; -fx-border-radius: 5; -fx-background-radius: 5;"/>
             <HBox fx:id="totalHBox" spacing="10" alignment="CENTER_RIGHT">
                 <Label text="Total:" style="-fx-font-size: 16px; -fx-text-fill: #333333;"/>
                 <!-- cartTotalLabel added programmatically -->
