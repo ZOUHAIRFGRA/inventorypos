@@ -7,6 +7,9 @@ import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.VBox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +20,9 @@ public class CashierManagementController {
     @FXML private MFXPasswordField passwordField;
     @FXML private MFXButton saveButton;
     @FXML private MFXButton clearButton;
+    @FXML private VBox passwordResultBox;
+    @FXML private MFXTextField generatedPasswordField;
+    @FXML private MFXButton copyPasswordButton;
 
     private final UserService userService;
 
@@ -28,7 +34,30 @@ public class CashierManagementController {
     @FXML
     public void initialize() {
         usernameField.requestFocus();
+        passwordResultBox.setVisible(false);
         System.out.println("CashierManagementController initialized");
+    }
+
+    @FXML
+    private void handleCopyPassword() {
+        String password = generatedPasswordField.getText();
+        if (password != null && !password.isEmpty()) {
+            final Clipboard clipboard = Clipboard.getSystemClipboard();
+            final ClipboardContent content = new ClipboardContent();
+            content.putString(password);
+            clipboard.setContent(content);
+            
+            // Show brief success feedback
+            copyPasswordButton.setText("Copied!");
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000);
+                    javafx.application.Platform.runLater(() -> copyPasswordButton.setText("Copy"));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+        }
     }
 
     @FXML
@@ -73,27 +102,70 @@ public class CashierManagementController {
                     System.out.println("Reset denied: Current user is not OWNER");
                     return;
                 }
+                
+                // Ask for confirmation before resetting password
+                if (!showConfirmationAlert("Reset Password", 
+                    "Are you sure you want to reset the password for cashier '" + username + "'?\n" +
+                    (password.isEmpty() ? "A temporary password will be generated." : "The specified password will be set."))) {
+                    return;
+                }
+
                 existingUser.setPassword(displayPassword);
                 existingUser.setTemporaryPassword(displayPassword != null && password.isEmpty());
                 userService.updateUser(existingUser.getId(), existingUser);
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Cashier " + username + " password reset to: " + displayPassword + ". Share this with the cashier.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Password reset successfully!");
+                showPasswordResult(displayPassword);
                 System.out.println("Password reset for existing user: " + username);
             } else {
+                // For new cashier creation with empty password
+                if (password.isEmpty()) {
+                    if (!showConfirmationAlert("Create Cashier", 
+                        "You are about to create a new cashier '" + username + "' with a generated temporary password.\n" +
+                        "The cashier will be required to change this password on first login.\n\n" +
+                        "Do you want to continue?")) {
+                        return;
+                    }
+                } else {
+                    // For new cashier with specified password
+                    if (!showConfirmationAlert("Create Cashier", 
+                        "You are about to create a new cashier '" + username + "' with the specified password.\n" +
+                        "Do you want to continue?")) {
+                        return;
+                    }
+                }
+
                 System.out.println("Creating new cashier: " + username);
                 userService.createUser(cashier);
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Cashier " + username + " created successfully!");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Cashier created successfully!");
+                showPasswordResult(displayPassword);
                 System.out.println("✅✅❎❎ Cashier created successfully"+cashier);
             }
 
             int newUserCount = userService.getAllUsers().size();
             System.out.println(" ✅✅❎❎ New number of users: " + newUserCount);
 
-            clearForm();
+            // Don't clear the form immediately, let the user copy the password first
+            usernameField.clear();
+            passwordField.clear();
+            usernameField.requestFocus();
         } catch (RuntimeException e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Failed to save/reset cashier: " + e.getMessage());
             System.err.println("Exception in handleSaveCashier: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void showPasswordResult(String password) {
+        generatedPasswordField.setText(password);
+        passwordResultBox.setVisible(true);
+    }
+
+    private boolean showConfirmationAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        return alert.showAndWait().filter(response -> response == javafx.scene.control.ButtonType.OK).isPresent();
     }
 
     @FXML
@@ -105,6 +177,7 @@ public class CashierManagementController {
     private void clearForm() {
         usernameField.clear();
         passwordField.clear();
+        passwordResultBox.setVisible(false);
         usernameField.requestFocus();
     }
 

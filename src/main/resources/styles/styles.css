@@ -604,4 +604,70 @@
     -fx-translate-y: 1;
 }
 
+.mfx-text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: #90A4AE;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 5 0 5 0;
+    -mfx-float-mode: BORDER;
+    -mfx-main-color: #2196F3;
+    -mfx-unfocus-color: #90A4AE;
+}
+
+.mfx-text-field:focused {
+    -fx-border-color: #2196F3;
+    -fx-border-width: 0 0 2 0;
+}
+
+.mfx-text-field .floating-text {
+    -fx-font-family: "Roboto";
+    -fx-text-fill: #90A4AE;
+    -fx-font-size: 12px;
+}
+
+.mfx-text-field:focused .floating-text {
+    -fx-text-fill: #2196F3;
+}
+
+.mfx-password-field {
+    -fx-background-color: transparent;
+    -fx-border-color: #90A4AE;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 5 0 5 0;
+    -mfx-float-mode: BORDER;
+    -mfx-main-color: #2196F3;
+    -mfx-unfocus-color: #90A4AE;
+}
+
+.mfx-password-field:focused {
+    -fx-border-color: #2196F3;
+    -fx-border-width: 0 0 2 0;
+}
+
+.mfx-password-field .floating-text {
+    -fx-font-family: "Roboto";
+    -fx-text-fill: #90A4AE;
+    -fx-font-size: 12px;
+}
+
+.mfx-password-field:focused .floating-text {
+    -fx-text-fill: #2196F3;
+}
+
+#generatedPasswordField {
+    -fx-background-color: white;
+    -fx-border-color: #E0E0E0;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 8;
+}
+
+#copyPasswordButton:hover {
+    -fx-background-color: #2980B9;
+}
+
+#copyPasswordButton:pressed {
+    -fx-background-color: #1F618D;
+}
+
 
