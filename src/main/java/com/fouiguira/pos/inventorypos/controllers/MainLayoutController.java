@@ -8,7 +8,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -86,9 +89,21 @@ public class MainLayoutController {
             loader.setControllerFactory(context::getBean);
             Parent view = loader.load();
             mainLayout.setCenter(view);
-            // Maximize the size of the loaded view
+            
+            // Remove any margins that might affect full-screen layout
             BorderPane.setMargin(view, new Insets(0));
             BorderPane.setAlignment(view, Pos.CENTER);
+            
+            // Make sure the main layout itself takes full size
+            mainLayout.setPrefWidth(Region.USE_COMPUTED_SIZE);
+            mainLayout.setPrefHeight(Region.USE_COMPUTED_SIZE);
+            mainLayout.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+            
+            // Force the stage to maximize if not already
+            Stage stage = (Stage) mainLayout.getScene().getWindow();
+            if (!stage.isMaximized()) {
+                stage.setMaximized(true);
+            }
         } catch (IOException e) {
             showAlert("Error", "Could not load view: " + e.getMessage());
             e.printStackTrace();

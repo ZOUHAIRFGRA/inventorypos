@@ -1,4 +1,4 @@
- @font-face {
+@font-face {
     -fx-font-family: 'Open Sans SemiBold';
     src: url('../fonts/OpenSans-SemiBold.ttf');
 }
@@ -347,6 +347,96 @@
 
 .button-delete:pressed {
     -fx-background-color: #992d22;
+}
+
+/* Cart Section Styling */
+.table-view {
+    -fx-background-color: white;
+    -fx-table-cell-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 5;
+}
+
+.table-view .column-header .label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+    -fx-alignment: center-left;
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f0f0f0 transparent;
+    -fx-padding: 5;
+}
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #e3f2fd;
+}
+
+.table-view .table-cell {
+    -fx-alignment: center-left;
+    -fx-padding: 8 5;
+    -fx-text-fill: #333333;
+}
+
+/* Cart Summary Section */
+.cart-summary {
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 15;
+}
+
+.cart-total {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2196F3;
+}
+
+.cart-item-count {
+    -fx-font-size: 14px;
+    -fx-text-fill: #666666;
+}
+
+/* Product Grid Styling */
+.product-tile {
+    -fx-background-color: white;
+    -fx-border-color: #E0E0E0;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);
+    -fx-padding: 10;
+    -fx-cursor: hand;
+}
+
+.product-tile:hover {
+    -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.2), 8, 0, 0, 2);
+    -fx-border-color: #2196F3;
+}
+
+.product-name {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-wrap-text: true;
+}
+
+.product-price {
+    -fx-font-size: 13px;
+    -fx-text-fill: #2196F3;
+    -fx-font-weight: bold;
 }
 
 

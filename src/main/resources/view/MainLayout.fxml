@@ -4,10 +4,11 @@
 <?import javafx.scene.control.*?>
 
 <BorderPane fx:id="mainLayout" xmlns:fx="http://javafx.com/fxml/1" 
-            xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.fouiguira.pos.inventorypos.controllers.MainLayoutController">
+            xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.fouiguira.pos.inventorypos.controllers.MainLayoutController"
+            maxWidth="Infinity" maxHeight="Infinity">
     <!-- Left: Sidebar -->
     <left>
-        <VBox styleClass="sidebar" spacing="15" prefWidth="200">
+        <VBox styleClass="sidebar" spacing="15" prefWidth="200" maxHeight="Infinity">
             <children>
                 <Label text="Inventory POS" styleClass="sidebar-title" />
                 <MFXButton fx:id="dashboardButton" text="Admin Dashboard" styleClass="sidebar-button" />
@@ -24,6 +25,6 @@
 
     <!-- Center: Content Area -->
     <center>
-        <Pane fx:id="contentArea" />
+        <StackPane fx:id="contentArea" maxWidth="Infinity" maxHeight="Infinity" />
     </center>
 </BorderPane>

@@ -24,33 +24,30 @@ public class MainApp extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
         loader.setControllerFactory(springContext::getBean);
 
-        // Debug: Print FXML path
-        System.out.println("Login.fxml path: " + getClass().getResource("/view/Login.fxml"));
-
-        // Load the FXML and create the scene
         Scene scene = new Scene(loader.load());
-
-        // Load CSS from resources/styles/
+        
+        // Load CSS
         String cssPath = getClass().getResource("/styles/styles.css") != null 
             ? getClass().getResource("/styles/styles.css").toExternalForm() 
             : null;
         if (cssPath != null) {
             scene.getStylesheets().add(cssPath);
-            System.out.println("Styles.css path: " + cssPath);
-        } else {
-            System.err.println("Error: styles.css not found at /styles/styles.css");
         }
 
-        // Set up the stage
+        // Configure stage for full-screen
         stage.setScene(scene);
         stage.setTitle("Inventory POS System");
         stage.setMaximized(true);
+        
+        // Set minimum size to prevent too small windows
+        stage.setMinWidth(1024);
+        stage.setMinHeight(768);
+        
         stage.show();
     }
 
     @Override
     public void stop() {
-        // Close Spring context when JavaFX stops
         if (springContext != null) {
             ((ConfigurableApplicationContext) springContext).close();
         }

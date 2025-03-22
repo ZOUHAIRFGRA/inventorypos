@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
 public class CashierDashboardController {
@@ -51,6 +52,7 @@ public class CashierDashboardController {
     @FXML private HBox totalHBox;
     @FXML private Label welcomeLabel;
     @FXML private MFXButton logoutButton;
+    @FXML private Label cartItemCountLabel;
 
     private final ProductService productService;
     private final CategoryService categoryService;
@@ -98,6 +100,7 @@ public class CashierDashboardController {
         cartTotalLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333333;");
         totalHBox.getChildren().add(cartTotalLabel);
 
+        setupKeyboardShortcuts();
         setupCartTable();
         loadCategories();
         loadProducts();
@@ -106,6 +109,25 @@ public class CashierDashboardController {
         Platform.runLater(() -> {
             System.out.println("Product grid children: " + productGrid.getChildren().size());
         });
+    }
+
+    private void setupKeyboardShortcuts() {
+        Scene scene = productGrid.getScene();
+        if (scene != null) {
+            scene.setOnKeyPressed(event -> {
+                if (event.isControlDown()) {
+                    switch (event.getCode()) {
+                        case F -> handleSearch();
+                        case C -> handleClearCart();
+                        case ENTER -> handleCheckout();
+                        case L -> handleLogout();
+                        default -> { /* Do nothing */ }
+                    }
+                }
+            });
+        } else {
+            Platform.runLater(this::setupKeyboardShortcuts);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -148,25 +170,75 @@ public class CashierDashboardController {
             )
         );
 
-        // Quantity column
-        cartQtyCol = new TableColumn<>("Qty");
-        cartQtyCol.setPrefWidth(60);
+        // Quantity column with adjustment buttons
+        cartQtyCol = new TableColumn<>("Quantity");
+        cartQtyCol.setPrefWidth(120);
+        cartQtyCol.setCellFactory(col -> new TableCell<>() {
+            private final HBox box = new HBox(5);
+            private final MFXButton minusBtn = new MFXButton();
+            private final Label qtyLabel = new Label();
+            private final MFXButton plusBtn = new MFXButton();
+            
+            {
+                box.setAlignment(javafx.geometry.Pos.CENTER);
+                String btnStyle = "-fx-min-width: 24px; -fx-min-height: 24px; -fx-max-width: 24px; -fx-max-height: 24px;";
+                
+                // Add minus icon
+                Label minusIcon = new Label("−");
+                minusIcon.setStyle("-fx-font-family: 'System'; -fx-font-weight: bold;");
+                minusBtn.setGraphic(minusIcon);
+                minusBtn.setStyle(btnStyle + "-fx-background-color: #E0E0E0; -fx-text-fill: #333333; -fx-background-radius: 12;");
+                
+                // Add plus icon
+                Label plusIcon = new Label("+");
+                plusIcon.setStyle("-fx-font-family: 'System'; -fx-font-weight: bold;");
+                plusBtn.setGraphic(plusIcon);
+                plusBtn.setStyle(btnStyle + "-fx-background-color: #E0E0E0; -fx-text-fill: #333333; -fx-background-radius: 12;");
+                
+                qtyLabel.setStyle("-fx-min-width: 30px; -fx-alignment: center; -fx-font-size: 13px;");
+                
+                minusBtn.setOnAction(e -> {
+                    SaleProduct item = getTableRow().getItem();
+                    if (item != null && item.getQuantity() > 1) {
+                        item.setQuantity(item.getQuantity() - 1);
+                        updateItem(item.getQuantity(), false);
+                        updateCartTotal();
+                    }
+                });
+                
+                plusBtn.setOnAction(e -> {
+                    SaleProduct item = getTableRow().getItem();
+                    if (item != null && item.getQuantity() < item.getProduct().getStockQuantity()) {
+                        item.setQuantity(item.getQuantity() + 1);
+                        updateItem(item.getQuantity(), false);
+                        updateCartTotal();
+                    }
+                });
+                
+                box.getChildren().addAll(minusBtn, qtyLabel, plusBtn);
+            }
+            
+            @Override
+            protected void updateItem(Integer quantity, boolean empty) {
+                super.updateItem(quantity, empty);
+                if (empty || quantity == null) {
+                    setGraphic(null);
+                } else {
+                    qtyLabel.setText(quantity.toString());
+                    SaleProduct item = getTableRow().getItem();
+                    if (item != null) {
+                        minusBtn.setDisable(quantity <= 1);
+                        plusBtn.setDisable(quantity >= item.getProduct().getStockQuantity());
+                    }
+                    setGraphic(box);
+                }
+            }
+        });
         cartQtyCol.setCellValueFactory(cellData -> 
             new javafx.beans.property.SimpleIntegerProperty(
                 cellData.getValue().getQuantity()
             ).asObject()
         );
-        cartQtyCol.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Integer quantity, boolean empty) {
-                super.updateItem(quantity, empty);
-                if (empty || quantity == null) {
-                    setText(null);
-                } else {
-                    setText(quantity.toString());
-                }
-            }
-        });
 
         // Price column
         cartPriceCol = new TableColumn<>("Price");
@@ -188,7 +260,34 @@ public class CashierDashboardController {
             }
         });
 
-        cartTable.getColumns().addAll(cartImageCol, cartNameCol, cartQtyCol, cartPriceCol);
+        // Remove button column
+        TableColumn<SaleProduct, Void> removeCol = new TableColumn<>("");
+        removeCol.setPrefWidth(50);
+        removeCol.setCellFactory(col -> new TableCell<>() {
+            private final MFXButton removeButton = new MFXButton("X");
+            {
+                removeButton.setStyle("-fx-background-color: #E91E63; -fx-text-fill: white; -fx-font-size: 10px; -fx-min-width: 24px; -fx-min-height: 24px; -fx-max-width: 24px; -fx-max-height: 24px; -fx-background-radius: 12;");
+                removeButton.setOnAction(e -> {
+                    SaleProduct item = getTableRow().getItem();
+                    if (item != null) {
+                        cartItems.remove(item);
+                        updateCartTotal();
+                    }
+                });
+            }
+            
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(removeButton);
+                }
+            }
+        });
+
+        cartTable.getColumns().addAll(cartImageCol, cartNameCol, cartQtyCol, cartPriceCol, removeCol);
         cartTable.setItems(cartItems);
         cartTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     }
@@ -235,7 +334,15 @@ public class CashierDashboardController {
     private VBox createProductTile(Product product) {
         VBox tile = new VBox(5);
         tile.setPrefSize(150, 150);
-        tile.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: #E0E0E0; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-alignment: center;");
+        
+        // Add warning style for low stock
+        String baseStyle = "-fx-background-color: #FFFFFF; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-alignment: center;";
+        if (product.getStockQuantity() < 5) {
+            tile.setStyle(baseStyle + "; -fx-border-color: #FFA726; -fx-effect: dropshadow(three-pass-box, #FFA726, 5, 0, 0, 0);");
+        } else {
+            tile.setStyle(baseStyle + "; -fx-border-color: #E0E0E0;");
+        }
+        
         tile.setOnMouseClicked(e -> handleAddToCart(product));
 
         ImageView imageView = new ImageView();
@@ -268,8 +375,21 @@ public class CashierDashboardController {
         nameLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-wrap-text: true; -fx-max-width: 130;");
         Label priceLabel = new Label("$" + df.format(product.getPrice()));
         priceLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666666;");
+        
+        // Add stock warning icon for low stock
+        HBox stockBox = new HBox(5);
+        stockBox.setAlignment(javafx.geometry.Pos.CENTER);
+        Label stockLabel = new Label("Available: " + product.getStockQuantity());
+        stockLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666666;");
+        if (product.getStockQuantity() < 5) {
+            Label warningLabel = new Label("⚠");
+            warningLabel.setStyle("-fx-text-fill: #FFA726; -fx-font-size: 12px;");
+            stockBox.getChildren().addAll(warningLabel, stockLabel);
+        } else {
+            stockBox.getChildren().add(stockLabel);
+        }
 
-        tile.getChildren().addAll(imageView, nameLabel, priceLabel);
+        tile.getChildren().addAll(imageView, nameLabel, priceLabel, stockBox);
         return tile;
     }
 
@@ -298,54 +418,134 @@ public class CashierDashboardController {
     }
 
     private void handleAddToCart(Product selectedProduct) {
-        Alert qtyAlert = new Alert(AlertType.CONFIRMATION);
-        qtyAlert.setTitle("Add to Cart");
-        qtyAlert.setHeaderText("Add " + selectedProduct.getName() + " to cart");
-        qtyAlert.setContentText("Enter quantity (Available: " + selectedProduct.getStockQuantity() + "):");
+        Dialog<Integer> qtyDialog = new Dialog<>();
+        qtyDialog.setTitle("Add to Cart");
+        qtyDialog.setHeaderText("Add " + selectedProduct.getName() + " to cart");
+
+        // Create custom content
+        VBox content = new VBox(10);
+        content.setAlignment(javafx.geometry.Pos.CENTER);
+
+        // Quantity selection with + and - buttons
+        HBox qtyBox = new HBox(10);
+        qtyBox.setAlignment(javafx.geometry.Pos.CENTER);
+
+        MFXButton minusBtn = new MFXButton();
+        Label minusIcon = new Label("−");
+        minusIcon.setStyle("-fx-font-family: 'System'; -fx-font-weight: bold;");
+        minusBtn.setGraphic(minusIcon);
+        
+        Label qtyLabel = new Label("1");
+        qtyLabel.setStyle("-fx-min-width: 50px; -fx-alignment: center; -fx-font-size: 16px;");
+        
+        MFXButton plusBtn = new MFXButton();
+        Label plusIcon = new Label("+");
+        plusIcon.setStyle("-fx-font-family: 'System'; -fx-font-weight: bold;");
+        plusBtn.setGraphic(plusIcon);
+
+        String btnStyle = "-fx-min-width: 30px; -fx-min-height: 30px; -fx-max-width: 30px; -fx-max-height: 30px; " +
+                         "-fx-background-color: #E0E0E0; -fx-text-fill: #333333; -fx-background-radius: 15;";
+        minusBtn.setStyle(btnStyle);
+        plusBtn.setStyle(btnStyle);
 
         TextField qtyField = new TextField("1");
-        qtyField.setPrefWidth(100);
-        VBox content = new VBox(10);
-        content.getChildren().addAll(new Label("Quantity:"), qtyField);
-        qtyAlert.getDialogPane().setContent(content);
-
-        qtyAlert.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
-        Optional<ButtonType> result = qtyAlert.showAndWait();
-
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                int qty = Integer.parseInt(qtyField.getText().trim());
-                if (qty <= 0) {
-                    showAlert(AlertType.WARNING, "Warning", "Quantity must be greater than 0!");
-                    return;
-                }
-                if (qty > selectedProduct.getStockQuantity()) {
-                    showAlert(AlertType.WARNING, "Warning", "Not enough stock! Available: " + selectedProduct.getStockQuantity());
-                    return;
-                }
-
-                SaleProduct item = cartItems.stream()
-                    .filter(i -> i.getProduct().getId().equals(selectedProduct.getId()))
-                    .findFirst()
-                    .orElse(new SaleProduct());
-                if (item.getProduct() == null) {
-                    item.setProduct(selectedProduct);
-                    item.setQuantity(0);
-                }
-                int newQty = item.getQuantity() + qty;
-                if (newQty <= selectedProduct.getStockQuantity()) {
-                    item.setQuantity(newQty);
-                    if (!cartItems.contains(item)) {
-                        cartItems.add(item);
-                    }
-                    updateCartTotal();
-                } else {
-                    showAlert(AlertType.WARNING, "Warning", "Total quantity exceeds stock! Available: " + selectedProduct.getStockQuantity());
-                }
-            } catch (NumberFormatException e) {
-                showAlert(AlertType.WARNING, "Warning", "Invalid quantity! Please enter a number.");
+        qtyField.setPrefWidth(50);
+        qtyField.setStyle("-fx-alignment: center;");
+        qtyField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal.matches("\\d*")) {
+                qtyField.setText(newVal.replaceAll("[^\\d]", ""));
             }
-        }
+            try {
+                int qty = Integer.parseInt(qtyField.getText());
+                minusBtn.setDisable(qty <= 1);
+                plusBtn.setDisable(qty >= selectedProduct.getStockQuantity());
+                qtyLabel.setText(String.valueOf(qty));
+            } catch (NumberFormatException e) {
+                qtyField.setText("1");
+            }
+        });
+
+        AtomicInteger quantity = new AtomicInteger(1);
+        minusBtn.setOnAction(e -> {
+            int qty = quantity.get();
+            if (qty > 1) {
+                quantity.decrementAndGet();
+                qtyField.setText(String.valueOf(quantity.get()));
+                qtyLabel.setText(String.valueOf(quantity.get()));
+            }
+        });
+
+        plusBtn.setOnAction(e -> {
+            int qty = quantity.get();
+            if (qty < selectedProduct.getStockQuantity()) {
+                quantity.incrementAndGet();
+                qtyField.setText(String.valueOf(quantity.get()));
+                qtyLabel.setText(String.valueOf(quantity.get()));
+            }
+        });
+
+        qtyBox.getChildren().addAll(minusBtn, qtyLabel, plusBtn);
+
+        Label stockLabel = new Label("Available: " + selectedProduct.getStockQuantity());
+        stockLabel.setStyle("-fx-text-fill: #666666;");
+
+        content.getChildren().addAll(
+            new Label("Quantity:"),
+            qtyBox,
+            stockLabel
+        );
+
+        // Set the custom content
+        qtyDialog.getDialogPane().setContent(content);
+
+        // Add buttons
+        ButtonType confirmButtonType = new ButtonType("Add to Cart", ButtonBar.ButtonData.OK_DONE);
+        qtyDialog.getDialogPane().getButtonTypes().addAll(confirmButtonType, ButtonType.CANCEL);
+
+        // Convert the result
+        qtyDialog.setResultConverter(dialogButton -> {
+            if (dialogButton == confirmButtonType) {
+                try {
+                    return quantity.get();
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        // Show the dialog and process the result
+        Optional<Integer> result = qtyDialog.showAndWait();
+        result.ifPresent(qty -> {
+            if (qty <= 0) {
+                showAlert(AlertType.WARNING, "Warning", "Quantity must be greater than 0!");
+                return;
+            }
+            if (qty > selectedProduct.getStockQuantity()) {
+                showAlert(AlertType.WARNING, "Warning", "Not enough stock! Available: " + selectedProduct.getStockQuantity());
+                return;
+            }
+
+            SaleProduct item = cartItems.stream()
+                .filter(i -> i.getProduct().getId().equals(selectedProduct.getId()))
+                .findFirst()
+                .orElse(new SaleProduct());
+            if (item.getProduct() == null) {
+                item.setProduct(selectedProduct);
+                item.setQuantity(0);
+            }
+            int newQty = item.getQuantity() + qty;
+            if (newQty <= selectedProduct.getStockQuantity()) {
+                item.setQuantity(newQty);
+                if (!cartItems.contains(item)) {
+                    cartItems.add(item);
+                }
+                updateCartTotal();
+                showAlert(AlertType.INFORMATION, "Success", "Added " + qty + " x " + selectedProduct.getName() + " to cart");
+            } else {
+                showAlert(AlertType.WARNING, "Warning", "Total quantity exceeds stock! Available: " + selectedProduct.getStockQuantity());
+            }
+        });
     }
 
     @FXML
@@ -438,7 +638,23 @@ public class CashierDashboardController {
 
     private void updateCartTotal() {
         double total = cartItems.stream().mapToDouble(i -> i.getQuantity() * i.getProduct().getPrice()).sum();
-        cartTotalLabel.setText("$" + df.format(total));
+        int totalItems = cartItems.stream().mapToInt(SaleProduct::getQuantity).sum();
+        cartTotalLabel.setText(String.format("$%,.2f", total));
+        cartItemCountLabel.setText(String.format("%d %s (%d unique)", 
+            totalItems,
+            totalItems != 1 ? "items" : "item",
+            cartItems.size()
+        ));
+
+        // Update button states
+        checkoutButton.setDisable(cartItems.isEmpty());
+        clearCartButton.setDisable(cartItems.isEmpty());
+
+        // Add tooltips for keyboard shortcuts
+        checkoutButton.setTooltip(new Tooltip("Complete sale (Ctrl+Enter)"));
+        clearCartButton.setTooltip(new Tooltip("Clear cart (Ctrl+C)"));
+        searchField.setTooltip(new Tooltip("Search products (Ctrl+F)"));
+        logoutButton.setTooltip(new Tooltip("Logout (Ctrl+L)"));
     }
 
     private void clearCart() {
