@@ -33,6 +33,7 @@ build/
 .vscode/
 
 inventory.db
+*.db
 
 storage/images/**
 
