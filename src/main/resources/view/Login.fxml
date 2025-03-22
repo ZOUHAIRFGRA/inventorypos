@@ -2,15 +2,77 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import io.github.palexdev.materialfx.controls.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
 
-<VBox alignment="CENTER" spacing="20" style="-fx-padding: 20;" styleClass="login-container" 
-      xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" 
-      fx:controller="com.fouiguira.pos.inventorypos.controllers.LoginController">
-    <children>
-        <Label text="Login" styleClass="login-title" />
-        <MFXTextField fx:id="usernameField" promptText="Username" prefWidth="200" />
-        <MFXPasswordField fx:id="passwordField" promptText="Password" prefWidth="200" />
-        <MFXButton fx:id="loginButton" text="Login" onAction="#handleLogin" styleClass="button-success" />
-        <Label fx:id="messageLabel" text="" style="-fx-text-fill: red;" />
-    </children>
-</VBox>
+<HBox xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" 
+      fx:controller="com.fouiguira.pos.inventorypos.controllers.LoginController"
+      alignment="CENTER" styleClass="login-container" style="-fx-fill-width: true;"
+       prefWidth="1280" prefHeight="700">
+      
+    <!-- Left side: Business Info -->
+    <VBox alignment="CENTER" spacing="20" styleClass="business-info" HBox.hgrow="ALWAYS"
+          style="-fx-padding: 40;">
+        <ImageView fx:id="logoImageView" styleClass="business-logo" 
+                   fitWidth="150" fitHeight="150" preserveRatio="true"/>
+        <VBox alignment="CENTER" maxWidth="300">
+            <Label fx:id="businessNameLabel" styleClass="business-name-label"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white; -fx-text-alignment: center; -fx-wrap-text: true;"
+                   alignment="CENTER"/>
+        </VBox>
+        <VBox alignment="CENTER" maxWidth="300">
+            <Label fx:id="businessAddressLabel" styleClass="business-address-label"
+                   style="-fx-font-size: 14px; -fx-text-fill: #ecf0f1; -fx-wrap-text: true; -fx-text-alignment: center;"
+                   alignment="CENTER"/>
+        </VBox>
+        <Label fx:id="businessPhoneLabel" styleClass="business-phone-label"
+               style="-fx-font-size: 14px; -fx-text-fill: #ecf0f1;"
+               alignment="CENTER"/>
+        <VBox alignment="CENTER" spacing="10" style="-fx-padding: 20 0 0 0;">
+            <Label text="Contact support for assistance:" 
+                   style="-fx-font-size: 12px; -fx-text-fill: #bdc3c7;"
+                   alignment="CENTER"/>
+            <Label fx:id="businessEmailLabel" styleClass="business-email-label"
+                   style="-fx-font-size: 14px; -fx-text-fill: #3498db; -fx-underline: true;"
+                   alignment="CENTER"/>
+        </VBox>
+    </VBox>
+    
+    <!-- Right side: Login Form -->
+    <VBox alignment="CENTER" spacing="20" styleClass="login-form-container" HBox.hgrow="ALWAYS">
+        <padding>
+            <Insets top="40" right="40" bottom="40" left="40" />
+        </padding>
+        
+        <VBox spacing="30" alignment="CENTER" styleClass="login-form">
+            <padding>
+                <Insets top="35" right="35" bottom="35" left="35" />
+            </padding>
+            
+            <Label fx:id="welcomeMessageLabel" 
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-wrap-text: true; -fx-text-alignment: center;"
+                   alignment="CENTER"/>
+            <Label text="Please log in to continue" 
+                   style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d; -fx-padding: 0 0 10 0;"
+                   alignment="CENTER"/>
+               
+            <VBox spacing="8" alignment="CENTER_LEFT" maxWidth="300">
+                <Label text="Username" styleClass="input-label"/>
+                <MFXTextField fx:id="usernameField" prefWidth="300" styleClass="login-input"/>
+            </VBox>
+            
+            <VBox spacing="8" alignment="CENTER_LEFT" maxWidth="300">
+                <Label text="Password" styleClass="input-label"/>
+                <MFXPasswordField fx:id="passwordField" prefWidth="300" styleClass="login-input"/>
+            </VBox>
+            
+            <Region prefHeight="10"/>
+            
+            <MFXButton fx:id="loginButton" text="Login" onAction="#handleLogin" 
+                      styleClass="login-button" prefWidth="300"/>
+                      
+            <Label fx:id="messageLabel" wrapText="true" alignment="CENTER"
+                   style="-fx-text-fill: #e74c3c; -fx-font-size: 14px;"/>
+        </VBox>
+    </VBox>
+</HBox>

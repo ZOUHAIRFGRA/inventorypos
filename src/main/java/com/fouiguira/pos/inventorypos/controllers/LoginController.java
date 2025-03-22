@@ -1,7 +1,9 @@
 package com.fouiguira.pos.inventorypos.controllers;
 
+import com.fouiguira.pos.inventorypos.entities.BusinessSettings;
 import com.fouiguira.pos.inventorypos.entities.User;
 import com.fouiguira.pos.inventorypos.main.MainApp;
+import com.fouiguira.pos.inventorypos.services.interfaces.BusinessSettingsService;
 import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXPasswordField;
@@ -11,30 +13,117 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.springframework.stereotype.Controller;
 
+import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
 
 @Controller
 public class LoginController {
 
-    @FXML
-    private MFXTextField usernameField;
-
-    @FXML
-    private MFXPasswordField passwordField;
-
-    @FXML
-    private MFXButton loginButton;
-
-    @FXML
-    private Label messageLabel;
+    @FXML private MFXTextField usernameField;
+    @FXML private MFXPasswordField passwordField;
+    @FXML private MFXButton loginButton;
+    @FXML private Label messageLabel;
+    @FXML private Label businessNameLabel;
+    @FXML private Label welcomeMessageLabel;
+    @FXML private ImageView logoImageView;
+    @FXML private Label businessAddressLabel;
+    @FXML private Label businessPhoneLabel;
+    @FXML private Label businessEmailLabel;
 
     private final UserService userService;
+    private final BusinessSettingsService settingsService;
 
-    public LoginController(UserService userService) {
+    public LoginController(UserService userService, BusinessSettingsService settingsService) {
         this.userService = userService;
+        this.settingsService = settingsService;
+    }
+
+    @FXML
+    public void initialize() {
+        try {
+            BusinessSettings settings = settingsService.getSettings();
+            
+            // Set business name with placeholder
+            String businessName = settings.getBusinessName();
+            if (businessName == null || businessName.trim().isEmpty()) {
+                businessName = "Welcome to Business Management System";
+            }
+            businessNameLabel.setText(businessName);
+            welcomeMessageLabel.setText("Welcome to " + businessName);
+            
+            // Set address with placeholder
+            String address = settings.getAddress();
+            businessAddressLabel.setText(address != null && !address.trim().isEmpty() 
+                ? address 
+                : "Address not configured");
+            
+            // Set phone with placeholder
+            String phone = settings.getPhone();
+            businessPhoneLabel.setText(phone != null && !phone.trim().isEmpty() 
+                ? phone 
+                : "Phone not configured");
+            
+            // Set email with placeholder
+            String email = settings.getEmail();
+            businessEmailLabel.setText(email != null && !email.trim().isEmpty() 
+                ? email 
+                : "Email not configured");
+
+            // Load logo image
+            String logoPath = settings.getLogoPath();
+            try {
+                Image logo;
+                if (logoPath != null && !logoPath.isEmpty() && new File(logoPath).exists()) {
+                    logo = new Image(new File(logoPath).toURI().toString());
+                } else {
+                    // Load default logo from resources
+                    InputStream is = getClass().getResourceAsStream("/images/icon.png");
+                    if (is != null) {
+                        logo = new Image(is);
+                        is.close();
+                    } else {
+                        throw new IOException("Default logo not found");
+                    }
+                }
+                logoImageView.setImage(logo);
+                logoImageView.setFitWidth(150);
+                logoImageView.setFitHeight(150);
+                logoImageView.setPreserveRatio(true);
+            } catch (Exception e) {
+                System.err.println("Error loading logo: " + e.getMessage());
+            }
+
+            // Style placeholder text with italic and lighter color
+            if (address == null || address.trim().isEmpty()) {
+                businessAddressLabel.setStyle(businessAddressLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+            }
+            if (phone == null || phone.trim().isEmpty()) {
+                businessPhoneLabel.setStyle(businessPhoneLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+            }
+            if (email == null || email.trim().isEmpty()) {
+                businessEmailLabel.setStyle(businessEmailLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error loading business settings: " + e.getMessage());
+            // Set default values if settings fail to load
+            businessNameLabel.setText("Business Management System");
+            welcomeMessageLabel.setText("Welcome to Business Management System");
+            businessAddressLabel.setText("Address not configured");
+            businessPhoneLabel.setText("Phone not configured");
+            businessEmailLabel.setText("Email not configured");
+            
+            // Style all placeholders
+            businessAddressLabel.setStyle(businessAddressLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+            businessPhoneLabel.setStyle(businessPhoneLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+            businessEmailLabel.setStyle(businessEmailLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+        }
     }
 
     @FXML

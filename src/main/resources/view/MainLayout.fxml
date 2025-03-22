@@ -5,7 +5,8 @@
 
 <BorderPane fx:id="mainLayout" xmlns:fx="http://javafx.com/fxml/1" 
             xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.fouiguira.pos.inventorypos.controllers.MainLayoutController"
-            maxWidth="Infinity" maxHeight="Infinity">
+            maxWidth="Infinity" maxHeight="Infinity"
+            prefWidth="1280" prefHeight="700">
     <!-- Left: Sidebar -->
     <left>
         <VBox styleClass="sidebar" spacing="15" prefWidth="200" maxHeight="Infinity">
