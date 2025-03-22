@@ -13,33 +13,37 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.HBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
+import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+
+import java.io.InputStream;
+import java.util.Optional;
+
 @Controller
 public class CashierDashboardController {
 
     @FXML private MFXTextField searchField;
     @FXML private MFXComboBox<Category> categoryComboBox;
-    @FXML private TableView<Product> productTable;
-    private TableColumn<Product, Long> prodIdCol;
-    private TableColumn<Product, String> prodNameCol;
-    private TableColumn<Product, Double> prodPriceCol;
-    private TableColumn<Product, Integer> prodStockCol;
-    @FXML private MFXButton addToCartButton;
+    @FXML private GridPane productGrid;
 
     @FXML private MFXTableView<SaleProduct> cartTable;
     private MFXTableColumn<SaleProduct> cartNameCol;
@@ -52,13 +56,6 @@ public class CashierDashboardController {
     @FXML private MFXComboBox<String> paymentMethodComboBox;
     @FXML private MFXButton checkoutButton;
     @FXML private MFXButton clearCartButton;
-
-    @FXML private MFXTableView<Sale> salesHistoryTable;
-    private MFXTableColumn<Sale> salesIdCol;
-    private MFXTableColumn<Sale> salesDateCol;
-    private MFXTableColumn<Sale> salesTotalCol;
-    private MFXTableColumn<Sale> salesMethodCol;
-    @FXML private MFXButton printReceiptButton;
 
     @FXML private VBox cartVBox;
     @FXML private HBox totalHBox;
@@ -74,6 +71,7 @@ public class CashierDashboardController {
 
     private ObservableList<SaleProduct> cartItems = FXCollections.observableArrayList();
     private static final DecimalFormat df = new DecimalFormat("#,##0.00");
+    private static final String PLACEHOLDER_IMAGE = "/images/placeholder.png";
 
     @Autowired
     public CashierDashboardController(ProductService productService, CategoryService categoryService,
@@ -101,9 +99,8 @@ public class CashierDashboardController {
             return;
         }
 
-        // Check if productTable is injected
-        if (productTable == null) {
-            System.err.println("Error: productTable is null - FXML injection failed!");
+        if (productGrid == null) {
+            System.err.println("Error: productGrid is null - FXML injection failed!");
             return;
         }
 
@@ -112,51 +109,18 @@ public class CashierDashboardController {
         cartTotalLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333333;");
         totalHBox.getChildren().add(cartTotalLabel);
 
-        setupTables();
+        setupCartTable();
         loadCategories();
         loadProducts();
-        loadSalesHistory();
         setupPaymentMethods();
 
-        // Debug table state
         Platform.runLater(() -> {
-            System.out.println("Table visible: " + productTable.isVisible());
-            System.out.println("Table items size: " + (productTable.getItems() != null ? productTable.getItems().size() : "null"));
-            System.out.println("Table columns: " + productTable.getColumns());
+            System.out.println("Product grid children: " + productGrid.getChildren().size());
         });
     }
 
     @SuppressWarnings("unchecked")
-    private void setupTables() {
-        // Product Table
-        productTable.getColumns().clear();
-        prodIdCol = new TableColumn<>("ID");
-        prodNameCol = new TableColumn<>("Name");
-        prodPriceCol = new TableColumn<>("Price");
-        prodStockCol = new TableColumn<>("Stock");
-
-        prodIdCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        prodNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-        prodPriceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-        prodStockCol.setCellValueFactory(new PropertyValueFactory<>("stockQuantity"));
-
-        prodPriceCol.setCellFactory(column -> new javafx.scene.control.TableCell<>() {
-            @Override
-            protected void updateItem(Double price, boolean empty) {
-                super.updateItem(price, empty);
-                if (empty || price == null) {
-                    setText(null);
-                } else {
-                    setText("$" + df.format(price));
-                }
-            }
-        });
-
-        productTable.getColumns().addAll(prodIdCol, prodNameCol, prodPriceCol, prodStockCol);
-        productTable.getSelectionModel().setCellSelectionEnabled(false);
-        System.out.println("Product table columns set: " + productTable.getColumns());
-
-        // Cart Table (unchanged)
+    private void setupCartTable() {
         cartTable.getTableColumns().clear();
         cartNameCol = new MFXTableColumn<>("Name", true);
         cartQtyCol = new MFXTableColumn<>("Qty", true);
@@ -204,20 +168,6 @@ public class CashierDashboardController {
         cartTable.getTableColumns().addAll(cartNameCol, cartQtyCol, cartPriceCol, cartTotalCol, cartActionCol);
         cartTable.setItems(cartItems);
         cartTable.getSelectionModel().setAllowsMultipleSelection(false);
-
-        // Sales History Table (unchanged)
-        salesHistoryTable.getTableColumns().clear();
-        salesIdCol = new MFXTableColumn<>("ID", true);
-        salesDateCol = new MFXTableColumn<>("Date", true);
-        salesTotalCol = new MFXTableColumn<>("Total", true);
-        salesMethodCol = new MFXTableColumn<>("Method", true);
-
-        salesIdCol.setRowCellFactory(sale -> new MFXTableRowCell<>(Sale::getId));
-        salesDateCol.setRowCellFactory(sale -> new MFXTableRowCell<>(s -> s.getTimestamp().toString()));
-        salesTotalCol.setRowCellFactory(sale -> new MFXTableRowCell<>(s -> "$" + df.format(s.getTotalPrice())));
-        salesMethodCol.setRowCellFactory(sale -> new MFXTableRowCell<>(Sale::getPaymentMethod));
-        salesHistoryTable.getTableColumns().addAll(salesIdCol, salesDateCol, salesTotalCol, salesMethodCol);
-        salesHistoryTable.getSelectionModel().setAllowsMultipleSelection(false);
     }
 
     private void loadCategories() {
@@ -241,15 +191,63 @@ public class CashierDashboardController {
     private void loadProducts() {
         List<Product> products = productService.getAllProducts();
         System.out.println("Loaded products: " + products);
-        ObservableList<Product> productList = FXCollections.observableArrayList(products);
-        productTable.setItems(productList);
-        System.out.println("Product table items set: " + productTable.getItems());
+        updateProductGrid(products);
     }
 
-    private void loadSalesHistory() {
-        List<Sale> recentSales = salesService.getRecentSales(5);
-        salesHistoryTable.setItems(FXCollections.observableArrayList(recentSales));
-        salesHistoryTable.update();
+    private void updateProductGrid(List<Product> products) {
+        productGrid.getChildren().clear();
+        int col = 0;
+        int row = 0;
+        for (Product product : products) {
+            VBox productTile = createProductTile(product);
+            productGrid.add(productTile, col, row);
+            col++;
+            if (col > 3) { // 4 products per row
+                col = 0;
+                row++;
+            }
+        }
+    }
+
+    private VBox createProductTile(Product product) {
+        VBox tile = new VBox(5);
+        tile.setPrefSize(150, 150);
+        tile.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: #E0E0E0; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-alignment: center;");
+        tile.setOnMouseClicked(e -> handleAddToCart(product));
+
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(100);
+        imageView.setFitHeight(100);
+        String imagePath = product.getImagePath();
+        Image image = null;
+
+        try {
+            if (imagePath != null && !imagePath.isEmpty() && new File(imagePath).exists()) {
+                image = new Image(new File(imagePath).toURI().toString());
+                System.out.println("Loaded product image: " + imagePath);
+            } else {
+                InputStream placeholderStream = getClass().getResourceAsStream(PLACEHOLDER_IMAGE);
+                if (placeholderStream != null) {
+                    image = new Image(placeholderStream);
+                    System.out.println("Loaded placeholder image: " + PLACEHOLDER_IMAGE);
+                } else {
+                    System.err.println("Placeholder image not found: " + PLACEHOLDER_IMAGE);
+                    image = new Image("https://via.placeholder.com/100x100.png?text=No+Image");
+                }
+            }
+            imageView.setImage(image);
+        } catch (Exception e) {
+            System.err.println("Error loading image for product " + product.getName() + ": " + e.getMessage());
+            imageView.setImage(new Image("https://via.placeholder.com/100x100.png?text=No+Image"));
+        }
+
+        Label nameLabel = new Label(product.getName());
+        nameLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-wrap-text: true; -fx-max-width: 130;");
+        Label priceLabel = new Label("$" + df.format(product.getPrice()));
+        priceLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666666;");
+
+        tile.getChildren().addAll(imageView, nameLabel, priceLabel);
+        return tile;
     }
 
     private void setupPaymentMethods() {
@@ -268,7 +266,7 @@ public class CashierDashboardController {
         if (!searchText.isEmpty()) {
             filteredProducts.removeIf(p -> !p.getName().toLowerCase().contains(searchText));
         }
-        productTable.setItems(FXCollections.observableArrayList(filteredProducts));
+        updateProductGrid(filteredProducts);
     }
 
     @FXML
@@ -276,29 +274,54 @@ public class CashierDashboardController {
         handleSearch();
     }
 
-    @FXML
-    public void handleAddToCart() {
-        Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
-        if (selectedProduct == null) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Please select a product to add to cart!");
-            return;
-        }
-        SaleProduct item = cartItems.stream()
-            .filter(i -> i.getProduct().getId().equals(selectedProduct.getId()))
-            .findFirst()
-            .orElse(new SaleProduct());
-        if (item.getProduct() == null) {
-            item.setProduct(selectedProduct);
-            item.setQuantity(0);
-        }
-        if (item.getQuantity() < selectedProduct.getStockQuantity()) {
-            item.setQuantity(item.getQuantity() + 1);
-            if (!cartItems.contains(item)) {
-                cartItems.add(item);
+    private void handleAddToCart(Product selectedProduct) {
+        Alert qtyAlert = new Alert(AlertType.CONFIRMATION);
+        qtyAlert.setTitle("Add to Cart");
+        qtyAlert.setHeaderText("Add " + selectedProduct.getName() + " to cart");
+        qtyAlert.setContentText("Enter quantity (Available: " + selectedProduct.getStockQuantity() + "):");
+
+        TextField qtyField = new TextField("1");
+        qtyField.setPrefWidth(100);
+        VBox content = new VBox(10);
+        content.getChildren().addAll(new Label("Quantity:"), qtyField);
+        qtyAlert.getDialogPane().setContent(content);
+
+        qtyAlert.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+        Optional<ButtonType> result = qtyAlert.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                int qty = Integer.parseInt(qtyField.getText().trim());
+                if (qty <= 0) {
+                    showAlert(AlertType.WARNING, "Warning", "Quantity must be greater than 0!");
+                    return;
+                }
+                if (qty > selectedProduct.getStockQuantity()) {
+                    showAlert(AlertType.WARNING, "Warning", "Not enough stock! Available: " + selectedProduct.getStockQuantity());
+                    return;
+                }
+
+                SaleProduct item = cartItems.stream()
+                    .filter(i -> i.getProduct().getId().equals(selectedProduct.getId()))
+                    .findFirst()
+                    .orElse(new SaleProduct());
+                if (item.getProduct() == null) {
+                    item.setProduct(selectedProduct);
+                    item.setQuantity(0);
+                }
+                int newQty = item.getQuantity() + qty;
+                if (newQty <= selectedProduct.getStockQuantity()) {
+                    item.setQuantity(newQty);
+                    if (!cartItems.contains(item)) {
+                        cartItems.add(item);
+                    }
+                    updateCartTotal();
+                } else {
+                    showAlert(AlertType.WARNING, "Warning", "Total quantity exceeds stock! Available: " + selectedProduct.getStockQuantity());
+                }
+            } catch (NumberFormatException e) {
+                showAlert(AlertType.WARNING, "Warning", "Invalid quantity! Please enter a number.");
             }
-            updateCartTotal();
-        } else {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Not enough stock available! Max: " + selectedProduct.getStockQuantity());
         }
     }
 
@@ -339,27 +362,10 @@ public class CashierDashboardController {
             invoiceService.generateInvoicePdf(invoice);
             showAlert(Alert.AlertType.INFORMATION, "Success", "Checkout successful! Invoice #" + invoice.getId() + " generated.");
             clearCart();
-            loadSalesHistory();
             loadProducts();
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Checkout failed: " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-
-    @FXML
-    public void handlePrintReceipt() {
-        Sale selectedSale = salesHistoryTable.getSelectionModel().getSelectedValue();
-        if (selectedSale != null) {
-            try {
-                salesService.printReceipt(selectedSale);
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Receipt printed successfully! Check the generated PDF.");
-            } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to print receipt: " + e.getMessage());
-                e.printStackTrace();
-            }
-        } else {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Please select a sale to print receipt!");
         }
     }
 
