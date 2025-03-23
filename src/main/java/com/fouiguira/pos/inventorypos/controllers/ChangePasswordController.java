@@ -10,7 +10,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +27,6 @@ public class ChangePasswordController {
     private final UserService userService;
     private final ApplicationContext context;
 
-    @Autowired
     public ChangePasswordController(UserService userService, ApplicationContext context) {
         this.userService = userService;
         this.context = context;

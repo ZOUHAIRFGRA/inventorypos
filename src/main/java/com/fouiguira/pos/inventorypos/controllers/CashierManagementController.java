@@ -10,7 +10,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,7 +25,6 @@ public class CashierManagementController {
 
     private final UserService userService;
 
-    @Autowired
     public CashierManagementController(UserService userService) {
         this.userService = userService;
     }
