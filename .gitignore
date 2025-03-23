@@ -46,3 +46,10 @@ storage/images/**
 # invoice PDfs #
 *.pdf
 config/logo_*
+
+
+
+# Backup files
+*.zip
+*.tar
+*.bak
