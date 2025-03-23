@@ -3,35 +3,47 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import io.github.palexdev.materialfx.controls.*?>
+<?import javafx.geometry.Insets?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.SettingsController"
-      spacing="20" style="-fx-padding: 20; -fx-background-color: #f4f4f4;">
-    <Label text="Settings" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.SettingsController"
+           fitToWidth="true" style="-fx-background: #f4f4f4; -fx-background-color: #f4f4f4;" 
+           maxHeight="1.7976931348623157E308">
+    
+    <VBox spacing="20" style="-fx-padding: 20;">
+        <Label text="Settings" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
 
-    <!-- Business Information Section -->
-    <VBox spacing="15" style="-fx-background-color: #fff; -fx-padding: 15; -fx-border-radius: 5; -fx-background-radius: 5;">
-        <Label text="Business Information" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #555;"/>
-        <MFXTextField fx:id="businessNameField" floatingText="Business Name" promptText="Enter business name" prefWidth="300"/>
-        <MFXTextField fx:id="addressField" floatingText="Address" promptText="Enter business address" prefWidth="300"/>
-        <MFXTextField fx:id="phoneField" floatingText="Phone" promptText="Enter phone number" prefWidth="300"/>
-        <MFXTextField fx:id="emailField" floatingText="Email" promptText="Enter email address" prefWidth="300"/>
-        <HBox spacing="10">
-            <MFXTextField fx:id="logoPathField" floatingText="Logo Path" promptText="Select a logo file" editable="false" prefWidth="240"/>
-            <MFXButton fx:id="uploadLogoButton" text="Upload Logo" onAction="#handleUploadLogo" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
-        </HBox>
-        <MFXButton fx:id="saveBusinessInfoButton" text="Save Business Info" onAction="#handleSaveBusinessInfo" style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+        <!-- Business Information Section -->
+        <VBox spacing="15" styleClass="settings-section">
+            <Label text="Business Information" styleClass="section-header"/>
+            <MFXTextField fx:id="businessNameField" floatingText="Business Name" promptText="Enter business name" prefWidth="300"/>
+            <MFXTextField fx:id="addressField" floatingText="Address" promptText="Enter business address" prefWidth="300"/>
+            <MFXTextField fx:id="phoneField" floatingText="Phone" promptText="Enter phone number" prefWidth="300"/>
+            <MFXTextField fx:id="emailField" floatingText="Email" promptText="Enter email address" prefWidth="300"/>
+            <HBox spacing="10">
+                <MFXTextField fx:id="logoPathField" floatingText="Logo Path" promptText="Select a logo file" editable="false" prefWidth="240"/>
+                <MFXButton fx:id="uploadLogoButton" text="Upload Logo" onAction="#handleUploadLogo" styleClass="button-success"/>
+            </HBox>
+            <MFXButton fx:id="saveBusinessInfoButton" text="Save Business Info" onAction="#handleSaveBusinessInfo" styleClass="button-primary"/>
+        </VBox>
+
+        <!-- Data Management Section -->
+        <VBox spacing="15" styleClass="settings-section">
+            <Label text="Data Management" styleClass="section-header"/>
+            <VBox spacing="10">
+                <Label text="Backup and Restore" styleClass="subsection-header"/>
+                <HBox spacing="10">
+                    <MFXButton fx:id="backupDataButton" text="Backup Data" onAction="#handleBackupData" styleClass="button-info"/>
+                    <MFXButton fx:id="restoreDataButton" text="Restore Data" onAction="#handleRestoreData" styleClass="button-warning"/>
+                </HBox>
+            </VBox>
+            <VBox spacing="10">
+                <Label text="Data Export" styleClass="subsection-header"/>
+                <HBox spacing="10">
+                    <MFXButton fx:id="exportSalesButton" text="Export Sales" onAction="#handleExportSales" styleClass="button-success"/>
+                    <MFXButton fx:id="exportProductsButton" text="Export Products" onAction="#handleExportProducts" styleClass="button-success"/>
+                    <MFXButton fx:id="exportInventoryButton" text="Export Inventory" onAction="#handleExportInventory" styleClass="button-success"/>
+                </HBox>
+            </VBox>
+        </VBox>
     </VBox>
-
-    <!-- User Settings Section -->
-    <VBox spacing="15" style="-fx-background-color: #fff; -fx-padding: 15; -fx-border-radius: 5; -fx-background-radius: 5;">
-        <Label text="User Settings" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #555;"/>
-        <!-- <MFXButton fx:id="changePasswordButton" text="Change Password" onAction="#handleChangePassword" style="-fx-background-color: #FF9800; -fx-text-fill: white;"/> -->
-    </VBox>
-
-    <!-- Data Management Section -->
-    <VBox spacing="15" style="-fx-background-color: #fff; -fx-padding: 15; -fx-border-radius: 5; -fx-background-radius: 5;">
-        <Label text="Data Management" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #555;"/>
-        <MFXButton fx:id="backupDataButton" text="Backup Data" onAction="#handleBackupData" style="-fx-background-color: #9C27B0; -fx-text-fill: white;"/>
-        <MFXButton fx:id="restoreDataButton" text="Restore Data" onAction="#handleRestoreData" style="-fx-background-color: #E91E63; -fx-text-fill: white;"/>
-    </VBox>
-</VBox>
+</ScrollPane>

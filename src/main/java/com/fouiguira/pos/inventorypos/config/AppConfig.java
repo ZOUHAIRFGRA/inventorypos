@@ -4,10 +4,12 @@ import com.fouiguira.pos.inventorypos.controllers.SettingsController;
 import com.fouiguira.pos.inventorypos.repositories.*;
 import com.fouiguira.pos.inventorypos.services.impl.*;
 import com.fouiguira.pos.inventorypos.services.interfaces.*;
+import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 @Configuration
 @EnableJpaRepositories(basePackages = "com.fouiguira.pos.inventorypos.repositories")
 public class AppConfig {
@@ -45,8 +47,16 @@ public class AppConfig {
         return salesServiceImpl;
     }
 
-    public SettingsController settingsController(UserService userService, BusinessSettingsService settingsService) {
-        return new SettingsController(userService, settingsService);
+    @Bean
+    public SettingsController settingsController(
+        UserService userService, 
+        BusinessSettingsService settingsService,
+        ProductService productService,
+        CategoryService categoryService,
+        SalesService salesService,
+        DataSource dataSource
+    ) {
+        return new SettingsController(userService, settingsService, productService, salesService, categoryService, dataSource);
     }
 
     @Bean
