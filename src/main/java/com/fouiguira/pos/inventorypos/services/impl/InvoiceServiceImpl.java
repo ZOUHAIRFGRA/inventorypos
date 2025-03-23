@@ -45,7 +45,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private SalesService salesService;
     private final BusinessSettingsService settingsService;
-    private final SettingsController settingsController; // Inject SettingsController
+    @SuppressWarnings("unused")
+    private final SettingsController settingsController;
+
 
     public InvoiceServiceImpl(InvoiceRepository invoiceRepository, BusinessSettingsService settingsService, SettingsController settingsController) {
         this.invoiceRepository = invoiceRepository;

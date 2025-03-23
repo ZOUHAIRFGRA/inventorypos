@@ -3,11 +3,9 @@ package com.fouiguira.pos.inventorypos.services.impl;
 import com.fouiguira.pos.inventorypos.entities.User;
 import com.fouiguira.pos.inventorypos.repositories.UserRepository;
 import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 
 import java.util.Date;
@@ -20,7 +18,6 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private User currentUser;
 
-    @Autowired
     public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;

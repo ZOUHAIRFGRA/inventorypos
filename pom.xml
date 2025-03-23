@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.3</version>
+		<version>3.4.4</version>
 		<relativePath />
 	</parent>
 
@@ -43,6 +43,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
 
 		<!-- DevTools for Hot Reload -->
@@ -102,7 +106,6 @@
 		<dependency>
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-community-dialects</artifactId>
-			<version>6.3.1.Final</version>
 		</dependency>
 
 		<!-- JFoenix (Material Design for JavaFX) -->
@@ -126,7 +129,6 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.5.16</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -135,7 +137,6 @@
    <dependency>
      <groupId>org.springframework.security</groupId>
      <artifactId>spring-security-core</artifactId>
-     <version>5.1.6.RELEASE</version>
    </dependency>
 
    <dependency>
@@ -143,6 +144,13 @@
     <artifactId>h2</artifactId>
     <scope>runtime</scope>
 </dependency>
+
+		<!-- OpenCSV for CSV export -->
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>5.7.1</version>
+		</dependency>
  </dependencies>
 
 	<build>

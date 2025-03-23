@@ -12,11 +12,9 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -67,7 +65,7 @@ public class SalesController {
     @FXML
     private Button printButton;
 
-    @Autowired
+    
     public SalesController(SalesService salesService, SaleProductService saleProductService, UserService userService) {
         this.salesService = salesService;
         this.saleProductService = saleProductService;
