@@ -8,9 +8,11 @@ import com.fouiguira.pos.inventorypos.services.interfaces.CategoryService;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
 import com.fouiguira.pos.inventorypos.services.interfaces.SalesService;
 import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXTextField;
 import jakarta.persistence.OptimisticLockException;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -20,15 +22,9 @@ import org.springframework.stereotype.Component;
 import com.opencsv.CSVWriter;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,8 +33,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 
 @Component
 public class SettingsController {
@@ -219,41 +213,48 @@ public class SettingsController {
         
         if (file != null) {
             try {
-                // Create a temporary folder for backup
-                File tempBackupDir = Files.createTempDirectory("pos_backup_").toFile();
-                tempBackupDir.deleteOnExit();
-
-                // Get a connection from the datasource and backup to temp dir
-                try (Connection conn = dataSource.getConnection()) {
-                    String tempBackupFile = new File(tempBackupDir, "inventory.mv.db").getAbsolutePath();
-                    String backupScript = "BACKUP TO '" + tempBackupFile + "'";
-                    try (Statement stmt = conn.createStatement()) {
-                        stmt.execute(backupScript);
-                        
-                        // Create zip file from the backup
-                        try (FileOutputStream fos = new FileOutputStream(file);
-                             ZipOutputStream zos = new ZipOutputStream(fos)) {
-                            
-                            // Add the database file to zip
-                            File dbBackupFile = new File(tempBackupFile);
-                            FileInputStream fis = new FileInputStream(dbBackupFile);
-                            ZipEntry zipEntry = new ZipEntry("inventory.mv.db");
-                            zos.putNextEntry(zipEntry);
-                            
-                            byte[] buffer = new byte[1024];
-                            int length;
-                            while ((length = fis.read(buffer)) > 0) {
-                                zos.write(buffer, 0, length);
-                            }
-                            
-                            zos.closeEntry();
-                            fis.close();
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Confirm Backup");
+                confirm.setHeaderText(null);
+                confirm.setContentText("The application needs to close to perform a clean backup. Save any unsaved work before continuing. Do you want to proceed?");
+                
+                if (confirm.showAndWait().orElse(null) == ButtonType.OK) {
+                    // Close all database connections by shutting down the datasource
+                    if (dataSource instanceof AutoCloseable) {
+                        try {
+                            ((AutoCloseable) dataSource).close();
+                        } catch (Exception e) {
+                            // Ignore close errors
                         }
+                    }
+
+                    // Create zip file containing the database
+                    try (FileOutputStream fos = new FileOutputStream(file);
+                         ZipOutputStream zos = new ZipOutputStream(fos)) {
                         
-                        showAlert(Alert.AlertType.INFORMATION, "Success", "Data backed up to: " + file.getAbsolutePath());
+                        // Add the database file to zip
+                        File dbFile = new File("inventory.mv.db");
+                        if (dbFile.exists()) {
+                            try (FileInputStream fis = new FileInputStream(dbFile)) {
+                                ZipEntry zipEntry = new ZipEntry("inventory.mv.db");
+                                zos.putNextEntry(zipEntry);
+                                
+                                byte[] buffer = new byte[1024];
+                                int length;
+                                while ((length = fis.read(buffer)) > 0) {
+                                    zos.write(buffer, 0, length);
+                                }
+                                
+                                zos.closeEntry();
+                            }
+                            showAlert(Alert.AlertType.INFORMATION, "Success", "Data backed up to: " + file.getAbsolutePath() + "\nApplication will now close.");
+                            System.exit(0); // Exit the application to ensure clean restart
+                        } else {
+                            throw new FileNotFoundException("Database file not found");
+                        }
                     }
                 }
-            } catch (SQLException | IOException e) {
+            } catch (IOException e) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Failed to backup data: " + e.getMessage());
                 System.err.println("Failed to backup data: " + e.getMessage());
             }
@@ -279,42 +280,88 @@ public class SettingsController {
                     File tempRestoreDir = Files.createTempDirectory("pos_restore_").toFile();
                     tempRestoreDir.deleteOnExit();
                     
-                    // Extract zip file
-                    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(file))) {
-                        ZipEntry zipEntry = zis.getNextEntry();
-                        if (zipEntry != null && zipEntry.getName().equals("inventory.mv.db")) {
-                            File extractedDb = new File(tempRestoreDir, "inventory.mv.db");
-                            try (FileOutputStream fos = new FileOutputStream(extractedDb)) {
-                                byte[] buffer = new byte[1024];
-                                int length;
-                                while ((length = zis.read(buffer)) > 0) {
-                                    fos.write(buffer, 0, length);
-                                }
-                            }
-                            
-                            // Get a connection from the datasource
-                            try (Connection conn = dataSource.getConnection()) {
-                                // Create a backup of current database before restore
-                                String currentBackup = "inventory_before_restore_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".zip";
-                                String backupScript = "BACKUP TO '" + currentBackup + "'";
-                                try (Statement stmt = conn.createStatement()) {
-                                    stmt.execute(backupScript);
+                    try {
+                        // Extract zip file
+                        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(file))) {
+                            ZipEntry zipEntry = zis.getNextEntry();
+                            if (zipEntry != null && zipEntry.getName().equals("inventory.mv.db")) {
+                                File extractedDb = new File(tempRestoreDir, "inventory.mv.db");
+                                try (FileOutputStream fos = new FileOutputStream(extractedDb)) {
+                                    byte[] buffer = new byte[1024];
+                                    int length;
+                                    while ((length = zis.read(buffer)) > 0) {
+                                        fos.write(buffer, 0, length);
+                                    }
                                 }
                                 
-                                // Execute RESTORE command using the extracted file
-                                String restoreScript = "RESTORE FROM '" + extractedDb.getAbsolutePath() + "'";
-                                try (Statement stmt = conn.createStatement()) {
-                                    stmt.execute(restoreScript);
-                                    showAlert(Alert.AlertType.INFORMATION, "Success", "Data restored successfully. Application will now close. Please restart.");
-                                    System.exit(0);
+                                // Close HikariCP connection pool if it's being used
+                                try {
+                                    if (dataSource instanceof HikariDataSource) {
+                                        ((HikariDataSource) dataSource).close();
+                                    } else if (dataSource instanceof AutoCloseable) {
+                                        ((AutoCloseable) dataSource).close();
+                                    }
+                                } catch (Exception e) {
+                                    System.err.println("Warning: Error closing datasource: " + e.getMessage());
                                 }
+
+                                // Wait a moment for connections to be released
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                }
+
+                                // Create backup folder if it doesn't exist
+                                File backupDir = new File("backups");
+                                if (!backupDir.exists()) {
+                                    backupDir.mkdir();
+                                }
+
+                                // Create a backup of current database before restore
+                                File currentDb = new File("inventory.mv.db");
+                                String backupName = "backups/inventory_before_restore_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".mv.db";
+                                if (currentDb.exists()) {
+                                    try {
+                                        Files.move(currentDb.toPath(), new File(backupName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                    } catch (IOException e) {
+                                        // If move fails, try copy instead
+                                        Files.copy(currentDb.toPath(), new File(backupName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                    }
+                                }
+
+                                // Copy over .trace.db file if it exists
+                                File currentTraceDb = new File("inventory.trace.db");
+                                if (currentTraceDb.exists()) {
+                                    String traceBackupName = backupName.replace(".mv.db", ".trace.db");
+                                    try {
+                                        Files.move(currentTraceDb.toPath(), new File(traceBackupName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                    } catch (IOException e) {
+                                        Files.copy(currentTraceDb.toPath(), new File(traceBackupName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                    }
+                                }
+
+                                // Delete lock file if it exists
+                                File lockFile = new File("inventory.lock.db");
+                                if (lockFile.exists()) {
+                                    lockFile.delete();
+                                }
+
+                                // Replace the current database file with the restored one
+                                Files.copy(extractedDb.toPath(), currentDb.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                
+                                showAlert(Alert.AlertType.INFORMATION, "Success", "Data restored successfully. Application will now close. Please restart.");
+                                Platform.exit(); // Use Platform.exit() for cleaner JavaFX shutdown
+                            } else {
+                                throw new IOException("Invalid backup file format");
                             }
-                        } else {
-                            throw new IOException("Invalid backup file format");
                         }
+                    } catch (Exception e) {
+                        showAlert(Alert.AlertType.ERROR, "Error", "Failed to restore data: " + e.getMessage());
+                        System.err.println("Failed to restore data: " + e.getMessage());
                     }
                 }
-            } catch (SQLException | IOException e) {
+            } catch (IOException e) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Failed to restore data: " + e.getMessage());
                 System.err.println("Failed to restore data: " + e.getMessage());
             }
@@ -323,7 +370,7 @@ public class SettingsController {
 
     @FXML
     private void handleExportSales() {
-        exportToCSV("sales_" + getTimestamp() + ".csv", 
+        exportToCSV("sales_" + getTimestamp(), 
             Arrays.asList("ID", "Date", "Client", "Cashier", "Total", "Payment Method"),
             () -> {
                 List<String[]> data = new ArrayList<>();
@@ -344,7 +391,7 @@ public class SettingsController {
 
     @FXML
     private void handleExportProducts() {
-        exportToCSV("products_" + getTimestamp() + ".csv", 
+        exportToCSV("products_" + getTimestamp(), 
             Arrays.asList("ID", "Name", "Category", "Price", "Stock", "Description"),
             () -> {
                 List<String[]> data = new ArrayList<>();
@@ -365,7 +412,7 @@ public class SettingsController {
 
     @FXML
     private void handleExportInventory() {
-        exportToCSV("inventory_" + getTimestamp() + ".csv", 
+        exportToCSV("inventory_" + getTimestamp(), 
             Arrays.asList("ID", "Product", "Current Stock", "Category", "Last Updated"),
             () -> {
                 List<String[]> data = new ArrayList<>();
