@@ -12,10 +12,14 @@ public interface SalesService {
     List<Sale> getRecentSales(int limit);
     List<Sale> getSalesByDate(LocalDate date);
     double getSalesTotalByDate(LocalDate date);
-    void printReceipt(Sale sale); // For printing
+    void printReceipt(Sale sale);
     void deleteSale(Long id);
     Sale getSaleById(Long id);
     List<Sale> getSalesByCashier(User cashier);
     List<Sale> getSalesByClientName(String clientName);
     List<Sale> getSalesByPaymentMethod(String paymentMethod);
+    
+    // New methods for dashboard
+    double getAverageTicketSize();
+    double getSalesGrowthRate();
 }

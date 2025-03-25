@@ -4,6 +4,7 @@ import com.fouiguira.pos.inventorypos.entities.Product;
 import com.fouiguira.pos.inventorypos.entities.SaleProduct;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ProductService {
     List<Product> getAllProducts();
@@ -14,4 +15,7 @@ public interface ProductService {
     void deleteProduct(Long id);
     List<Product> getLowStockProducts(int threshold);
     void updateStockAfterSale(List<SaleProduct> saleProducts);
+    
+    // New method for dashboard
+    Map<Product, Integer> getTopSellingProducts(int limit);
 }
