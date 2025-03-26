@@ -2,29 +2,118 @@
 <?import io.github.palexdev.materialfx.controls.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.Insets?>
 
 <ScrollPane fitToHeight="true" fitToWidth="true" xmlns:fx="http://javafx.com/fxml/1" 
             xmlns="http://javafx.com/javafx/17.0.12" 
             fx:controller="com.fouiguira.pos.inventorypos.controllers.DashboardController">
     <content>
-        <VBox spacing="20" style="-fx-padding: 20">
+        <VBox spacing="20" style="-fx-padding: 20;">
             <children>
-                <!-- Title -->
-                <Label text="Dashboard" styleClass="title-label" />
+                <!-- Header Section -->
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <Label text="Dashboard Overview" styleClass="dashboard-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="dateLabel" styleClass="date-label"/>
+                </HBox>
 
                 <!-- Summary Cards -->
+                <GridPane hgap="20" vgap="20">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="20"/>
+                        <ColumnConstraints percentWidth="20"/>
+                        <ColumnConstraints percentWidth="20"/>
+                        <ColumnConstraints percentWidth="20"/>
+                        <ColumnConstraints percentWidth="20"/>
+                    </columnConstraints>
+
+                    <!-- Today's Sales Card -->
+                    <VBox styleClass="dashboard-card" GridPane.columnIndex="0">
+                        <Label text="Today's Sales" styleClass="card-title"/>
+                        <Label fx:id="totalSalesLabel" styleClass="card-value"/>
+                    </VBox>
+
+                    <!-- Total Products Card -->
+                    <VBox styleClass="dashboard-card" GridPane.columnIndex="1">
+                        <Label text="Total Products" styleClass="card-title"/>
+                        <Label fx:id="totalProductsLabel" styleClass="card-value"/>
+                    </VBox>
+
+                    <!-- Total Users Card -->
+                    <VBox styleClass="dashboard-card" GridPane.columnIndex="2">
+                        <Label text="Total Users" styleClass="card-title"/>
+                        <Label fx:id="totalUsersLabel" styleClass="card-value"/>
+                    </VBox>
+
+                    <!-- Average Ticket Card -->
+                    <VBox styleClass="dashboard-card" GridPane.columnIndex="3">
+                        <Label text="Avg. Ticket" styleClass="card-title"/>
+                        <Label fx:id="avgTicketLabel" styleClass="card-value"/>
+                    </VBox>
+
+                    <!-- Growth Rate Card -->
+                    <VBox styleClass="dashboard-card" GridPane.columnIndex="4">
+                        <Label text="Daily Growth" styleClass="card-title"/>
+                        <Label fx:id="growthLabel" styleClass="card-value"/>
+                    </VBox>
+                </GridPane>
+
+                <!-- Charts Section -->
                 <HBox spacing="20">
-                    <VBox styleClass="card" prefWidth="200" prefHeight="100">
-                        <Label text="Total Sales" styleClass="section-title" />
-                        <Label fx:id="totalSalesLabel" text="0.00" style="-fx-font-size: 18px" />
+                    <!-- Sales Trend Chart -->
+                    <VBox styleClass="chart-container" HBox.hgrow="ALWAYS">
+                        <Label text="Sales Trend (Last 7 Days)" styleClass="section-title"/>
+                        <LineChart fx:id="salesTrendChart" legendVisible="false">
+                            <xAxis>
+                                <CategoryAxis label="Date"/>
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis label="Sales ($)"/>
+                            </yAxis>
+                        </LineChart>
                     </VBox>
-                    <VBox styleClass="card" prefWidth="200" prefHeight="100">
-                        <Label text="Products" styleClass="section-title" />
-                        <Label fx:id="totalProductsLabel" text="0" style="-fx-font-size: 18px" />
+
+                    <!-- Top Products Chart -->
+                    <VBox styleClass="chart-container" HBox.hgrow="ALWAYS">
+                        <Label text="Top Selling Products" styleClass="section-title"/>
+                        <BarChart fx:id="topProductsChart">
+                            <xAxis>
+                                <CategoryAxis label="Products"/>
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis label="Units Sold"/>
+                            </yAxis>
+                        </BarChart>
                     </VBox>
-                    <VBox styleClass="card" prefWidth="200" prefHeight="100">
-                        <Label text="Users" styleClass="section-title" />
-                        <Label fx:id="totalUsersLabel" text="0" style="-fx-font-size: 18px" />
+                </HBox>
+
+                <!-- Bottom Section -->
+                <HBox spacing="20">
+                    <!-- Category Distribution -->
+                    <VBox styleClass="chart-container" HBox.hgrow="ALWAYS">
+                        <Label text="Category Distribution" styleClass="section-title"/>
+                        <PieChart fx:id="categoryDistributionChart" />
+                    </VBox>
+
+                    <!-- Low Stock Alert -->
+                    <VBox styleClass="table-container" HBox.hgrow="ALWAYS">
+                        <Label text="Low Stock Alert" styleClass="section-title"/>
+                        <TableView fx:id="lowStockTable">
+                            <columns>
+                                <TableColumn fx:id="productNameColumn" text="Product" prefWidth="150"/>
+                                <TableColumn fx:id="categoryColumn" text="Category" prefWidth="100"/>
+                                <TableColumn fx:id="stockLevelColumn" text="Stock" prefWidth="80"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+
+                    <!-- Recent Sales -->
+                    <VBox styleClass="recent-sales-container" HBox.hgrow="ALWAYS">
+                        <Label text="Recent Sales" styleClass="section-title"/>
+                        <ScrollPane fitToWidth="true" prefHeight="200">
+                            <VBox fx:id="recentSalesBox" spacing="10"/>
+                        </ScrollPane>
                     </VBox>
                 </HBox>
             </children>

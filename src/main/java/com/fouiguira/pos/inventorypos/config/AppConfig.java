@@ -23,8 +23,8 @@ public class AppConfig {
         return new UserServiceImpl(userRepository, passwordEncoder);
     }
 
-    public ProductService productService(ProductRepository productRepository) {
-        return new ProductServiceImpl(productRepository);
+    public ProductService productService(ProductRepository productRepository, SaleProductRepository saleProductRepository) {
+        return new ProductServiceImpl(productRepository, saleProductRepository);
     }
 
     public CategoryService categoryService(CategoryRepository categoryRepository, ProductRepository productRepository) {
