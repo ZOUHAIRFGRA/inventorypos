@@ -3,22 +3,22 @@ package com.fouiguira.pos.inventorypos.services.impl;
 import com.fouiguira.pos.inventorypos.entities.Product;
 import com.fouiguira.pos.inventorypos.entities.SaleProduct;
 import com.fouiguira.pos.inventorypos.repositories.ProductRepository;
+import com.fouiguira.pos.inventorypos.repositories.SaleProductRepository;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
-
 import jakarta.transaction.Transactional;
-
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final SaleProductRepository saleProductRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, SaleProductRepository saleProductRepository) {
         this.productRepository = productRepository;
+        this.saleProductRepository = saleProductRepository;
     }
 
     @Override
@@ -80,5 +80,26 @@ public class ProductServiceImpl implements ProductService {
             product.setUpdatedAt(new Date());
             productRepository.save(product);
         }
+    }
+
+    @Override
+    public Map<Product, Integer> getTopSellingProducts(int limit) {
+        List<SaleProduct> allSaleProducts = saleProductRepository.findAll();
+        
+        Map<Product, Integer> productSales = allSaleProducts.stream()
+            .collect(Collectors.groupingBy(
+                SaleProduct::getProduct,
+                Collectors.summingInt(SaleProduct::getQuantity)
+            ));
+
+        return productSales.entrySet().stream()
+            .sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
+            .limit(limit)
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (e1, e2) -> e1,
+                LinkedHashMap::new
+            ));
     }
 }

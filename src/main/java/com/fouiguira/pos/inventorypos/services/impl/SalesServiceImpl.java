@@ -66,20 +66,18 @@ public class SalesServiceImpl implements SalesService {
                 .mapToDouble(Sale::getTotalPrice)
                 .sum();
     }
+
     @Override
     @Transactional(readOnly = true)
     public void printReceipt(Sale sale) {
-        // Fetch sale with products initialized within a transaction
         Sale fullSale = saleRepository.findById(sale.getId())
             .orElseThrow(() -> new RuntimeException("Sale not found with id: " + sale.getId()));
-        Hibernate.initialize(fullSale.getProducts()); // Ensure products are loaded
+        Hibernate.initialize(fullSale.getProducts());
 
         Invoice invoice = invoiceService.getInvoiceBySaleId(fullSale.getId());
         if (invoice == null) {
             invoice = invoiceService.createInvoiceFromSale(fullSale.getId());
         }
-
-        // Transaction commits here, then generate PDF outside transaction
         invoiceService.generateInvoicePdf(invoice);
     }
 
@@ -93,7 +91,7 @@ public class SalesServiceImpl implements SalesService {
     public Sale getSaleById(Long id) {
         Sale sale = saleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sale not found with id: " + id));
-        Hibernate.initialize(sale.getProducts()); // Force load products
+        Hibernate.initialize(sale.getProducts());
         return sale;
     }
 
@@ -110,5 +108,32 @@ public class SalesServiceImpl implements SalesService {
     @Override
     public List<Sale> getSalesByPaymentMethod(String paymentMethod) {
         return saleRepository.findByPaymentMethod(paymentMethod);
+    }
+
+    @Override
+    public double getAverageTicketSize() {
+        List<Sale> allSales = getAllSales();
+        if (allSales.isEmpty()) {
+            return 0.0;
+        }
+        double totalSales = allSales.stream()
+                .mapToDouble(Sale::getTotalPrice)
+                .sum();
+        return totalSales / allSales.size();
+    }
+
+    @Override
+    public double getSalesGrowthRate() {
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+        
+        double todaySales = getSalesTotalByDate(today);
+        double yesterdaySales = getSalesTotalByDate(yesterday);
+        
+        if (yesterdaySales == 0) {
+            return todaySales > 0 ? 100.0 : 0.0;
+        }
+        
+        return ((todaySales - yesterdaySales) / yesterdaySales) * 100.0;
     }
 }
