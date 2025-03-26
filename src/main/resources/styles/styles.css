@@ -954,4 +954,31 @@
     -fx-text-fill: #e74c3c;
 }
 
+/* Error States */
+.error-label {
+    -fx-text-fill: #e74c3c;
+    -fx-background-color: #ffebee;
+    -fx-background-radius: 4;
+    -fx-padding: 4 8;
+    -fx-font-size: 13px;
+}
+
+.info-label {
+    -fx-text-fill: #3498db;
+    -fx-background-color: #e3f2fd;
+    -fx-background-radius: 4;
+    -fx-padding: 4 8;
+    -fx-font-size: 13px;
+}
+
+.chart-placeholder-label {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 14px;
+}
+
+.table-placeholder-label {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 14px;
+}
+
 

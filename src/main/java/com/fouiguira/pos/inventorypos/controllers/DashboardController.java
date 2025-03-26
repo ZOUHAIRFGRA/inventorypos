@@ -2,7 +2,6 @@ package com.fouiguira.pos.inventorypos.controllers;
 
 import com.fouiguira.pos.inventorypos.entities.Product;
 import com.fouiguira.pos.inventorypos.entities.Sale;
-import com.fouiguira.pos.inventorypos.entities.Category;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
 import com.fouiguira.pos.inventorypos.services.interfaces.SalesService;
 import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
@@ -13,8 +12,6 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.collections.FXCollections;
@@ -27,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javafx.scene.layout.VBox;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 @Controller
 public class DashboardController {
@@ -52,6 +50,7 @@ public class DashboardController {
     private final SalesService salesService;
     private final ProductService productService;
     private final UserService userService;
+    @SuppressWarnings("unused")
     private final CategoryService categoryService;
     private final DecimalFormat df = new DecimalFormat("#,##0.00");
     
@@ -76,106 +75,209 @@ public class DashboardController {
     }
 
     private void updateSummaryMetrics() {
-        // Update basic metrics
-        double totalSales = salesService.getSalesTotalByDate(LocalDate.now());
-        long totalProducts = productService.getAllProducts().size();
-        long totalUsers = userService.getAllUsers().size();
+        try {
+            // Update basic metrics
+            double totalSales = salesService.getSalesTotalByDate(LocalDate.now());
+            totalSalesLabel.setText(String.format("$%s", df.format(totalSales)));
+        } catch (Exception e) {
+            totalSalesLabel.setText("N/A");
+            totalSalesLabel.getStyleClass().add("error-label");
+        }
         
-        totalSalesLabel.setText(String.format("$%s", df.format(totalSales)));
-        totalProductsLabel.setText(String.valueOf(totalProducts));
-        totalUsersLabel.setText(String.valueOf(totalUsers));
+        try {
+            long totalProducts = productService.getAllProducts().size();
+            totalProductsLabel.setText(String.valueOf(totalProducts));
+        } catch (Exception e) {
+            totalProductsLabel.setText("N/A");
+            totalProductsLabel.getStyleClass().add("error-label");
+        }
         
-        // Add new metrics
-        double avgTicket = salesService.getAverageTicketSize();
-        avgTicketLabel.setText(String.format("$%s", df.format(avgTicket)));
+        try {
+            long totalUsers = userService.getAllUsers().size();
+            totalUsersLabel.setText(String.valueOf(totalUsers));
+        } catch (Exception e) {
+            totalUsersLabel.setText("N/A");
+            totalUsersLabel.getStyleClass().add("error-label");
+        }
         
-        double growth = salesService.getSalesGrowthRate();
-        growthLabel.setText(String.format("%s%%", df.format(growth)));
-        growthLabel.getStyleClass().add(growth >= 0 ? "growth-label-positive" : "growth-label-negative");
+        try {
+            double avgTicket = salesService.getAverageTicketSize();
+            avgTicketLabel.setText(String.format("$%s", df.format(avgTicket)));
+        } catch (Exception e) {
+            avgTicketLabel.setText("N/A");
+            avgTicketLabel.getStyleClass().add("error-label");
+        }
+        
+        try {
+            double growth = salesService.getSalesGrowthRate();
+            growthLabel.setText(String.format("%s%%", df.format(growth)));
+            growthLabel.getStyleClass().add(growth >= 0 ? "growth-label-positive" : "growth-label-negative");
+        } catch (Exception e) {
+            growthLabel.setText("N/A");
+            growthLabel.getStyleClass().add("error-label");
+        }
     }
 
     private void setupSalesTrendChart() {
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Daily Sales");
-        
-        // Get last 7 days of sales
-        LocalDate today = LocalDate.now();
-        IntStream.range(0, 7).mapToObj(i -> today.minusDays(i))
-            .forEach(date -> {
-                series.getData().add(new XYChart.Data<>(
-                    date.format(DateTimeFormatter.ofPattern("MM/dd")),
-                    salesService.getSalesTotalByDate(date)
-                ));
-            });
-        
-        salesTrendChart.getData().add(series);
+        try {
+            salesTrendChart.getData().clear();
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            series.setName("Daily Sales");
+            
+            // Get last 7 days of sales
+            LocalDate today = LocalDate.now();
+            List<XYChart.Data<String, Number>> dataPoints = new ArrayList<>();
+            
+            IntStream.range(0, 7).mapToObj(i -> today.minusDays(i))
+                .forEach(date -> {
+                    try {
+                        dataPoints.add(new XYChart.Data<>(
+                            date.format(DateTimeFormatter.ofPattern("MM/dd")),
+                            salesService.getSalesTotalByDate(date)
+                        ));
+                    } catch (Exception e) {
+                        dataPoints.add(new XYChart.Data<>(
+                            date.format(DateTimeFormatter.ofPattern("MM/dd")),
+                            0
+                        ));
+                    }
+                });
+            
+            if (dataPoints.stream().allMatch(data -> ((Number)data.getYValue()).doubleValue() == 0)) {
+                // Handle empty state
+                Label noDataLabel = new Label("No sales data available");
+                noDataLabel.getStyleClass().add("chart-placeholder-label");
+                salesTrendChart.setVisible(false);
+                salesTrendChart.getParent().getChildrenUnmodifiable().add(noDataLabel);
+            } else {
+                salesTrendChart.setVisible(true);
+                series.getData().addAll(dataPoints);
+                salesTrendChart.getData().add(series);
+            }
+        } catch (Exception e) {
+            // Handle error state
+            Label errorLabel = new Label("Unable to load sales trend data");
+            errorLabel.getStyleClass().add("error-label");
+            salesTrendChart.setVisible(false);
+            salesTrendChart.getParent().getChildrenUnmodifiable().add(errorLabel);
+        }
     }
 
     private void setupTopProductsChart() {
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Units Sold");
-        
-        Map<Product, Integer> topProducts = productService.getTopSellingProducts(5);
-        topProducts.forEach((product, quantity) -> 
-            series.getData().add(new XYChart.Data<>(product.getName(), quantity))
-        );
-        
-        topProductsChart.getData().add(series);
+        try {
+            topProductsChart.getData().clear();
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            series.setName("Units Sold");
+            
+            Map<Product, Integer> topProducts = productService.getTopSellingProducts(5);
+            if (topProducts.isEmpty()) {
+                // Handle empty state
+                Label noDataLabel = new Label("No sales data available");
+                noDataLabel.getStyleClass().add("chart-placeholder-label");
+                topProductsChart.setVisible(false);
+                topProductsChart.getParent().getChildrenUnmodifiable().add(noDataLabel);
+            } else {
+                topProducts.forEach((product, quantity) -> 
+                    series.getData().add(new XYChart.Data<>(product.getName(), quantity))
+                );
+                topProductsChart.setVisible(true);
+                topProductsChart.getData().add(series);
+            }
+        } catch (Exception e) {
+            // Handle error state
+            Label errorLabel = new Label("Unable to load top products data");
+            errorLabel.getStyleClass().add("error-label");
+            topProductsChart.setVisible(false);
+            topProductsChart.getParent().getChildrenUnmodifiable().add(errorLabel);
+        }
     }
 
     private void setupCategoryDistributionChart() {
-        List<Product> products = productService.getAllProducts();
-        Map<String, Long> categoryCount = products.stream()
-            .collect(Collectors.groupingBy(
-                p -> p.getCategory() != null ? p.getCategory().getName() : "Uncategorized",
-                Collectors.counting()
-            ));
-        
-        categoryDistributionChart.setData(
-            categoryCount.entrySet().stream()
-                .map(entry -> new PieChart.Data(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toCollection(FXCollections::observableArrayList))
-        );
+        try {
+            categoryDistributionChart.getData().clear();
+            List<Product> products = productService.getAllProducts();
+            Map<String, Long> categoryCount = products.stream()
+                .collect(Collectors.groupingBy(
+                    p -> p.getCategory() != null ? p.getCategory().getName() : "Uncategorized",
+                    Collectors.counting()
+                ));
+            
+            if (categoryCount.isEmpty()) {
+                // Handle empty state
+                Label noDataLabel = new Label("No category data available");
+                noDataLabel.getStyleClass().add("chart-placeholder-label");
+                categoryDistributionChart.setVisible(false);
+                categoryDistributionChart.getParent().getChildrenUnmodifiable().add(noDataLabel);
+            } else {
+                categoryDistributionChart.setVisible(true);
+                categoryDistributionChart.setData(
+                    categoryCount.entrySet().stream()
+                        .map(entry -> new PieChart.Data(entry.getKey(), entry.getValue()))
+                        .collect(Collectors.toCollection(FXCollections::observableArrayList))
+                );
+            }
+        } catch (Exception e) {
+            // Handle error state
+            Label errorLabel = new Label("Unable to load category distribution data");
+            errorLabel.getStyleClass().add("error-label");
+            categoryDistributionChart.setVisible(false);
+            categoryDistributionChart.getParent().getChildrenUnmodifiable().add(errorLabel);
+        }
     }
 
     private void setupLowStockTable() {
-        List<Product> lowStockProducts = productService.getAllProducts().stream()
-            .filter(p -> p.getStockQuantity() < 5)
-            .collect(Collectors.toList());
-        
-        productNameColumn.setCellValueFactory(cellData -> 
-            new javafx.beans.property.SimpleStringProperty(cellData.getValue().getName()));
-        
-        stockLevelColumn.setCellValueFactory(cellData -> 
-            new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getStockQuantity()));
-        
-        categoryColumn.setCellValueFactory(cellData -> 
-            new javafx.beans.property.SimpleStringProperty(
-                cellData.getValue().getCategory() != null ? 
-                cellData.getValue().getCategory().getName() : "No Category"
-            ));
-        
-        lowStockTable.setItems(FXCollections.observableArrayList(lowStockProducts));
+        try {
+            List<Product> lowStockProducts = productService.getAllProducts().stream()
+                .filter(p -> p.getStockQuantity() < 5)
+                .collect(Collectors.toList());
+            
+            productNameColumn.setCellValueFactory(cellData -> 
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getName()));
+            
+            stockLevelColumn.setCellValueFactory(cellData -> 
+                new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getStockQuantity()));
+            
+            categoryColumn.setCellValueFactory(cellData -> 
+                new javafx.beans.property.SimpleStringProperty(
+                    cellData.getValue().getCategory() != null ? 
+                    cellData.getValue().getCategory().getName() : "No Category"
+                ));
+            
+            lowStockTable.setItems(FXCollections.observableArrayList(lowStockProducts));
+        } catch (Exception e) {
+            lowStockTable.setPlaceholder(new Label("Unable to load low stock data"));
+        }
     }
 
     private void loadRecentSales() {
-        List<Sale> recentSales = salesService.getRecentSales(5);
-        recentSales.forEach(sale -> {
-            Label saleLabel = new Label(String.format("%s - $%s (%s)",
-                sale.getClientName(),
-                df.format(sale.getTotalPrice()),
-                sale.getPaymentMethod()
-            ));
-            saleLabel.getStyleClass().add("recent-sale-item");
-            recentSalesBox.getChildren().add(saleLabel);
-        });
-    }
-
-    private void handleError() {
-        totalSalesLabel.setText("Error");
-        totalProductsLabel.setText("Error");
-        totalUsersLabel.setText("Error");
-        avgTicketLabel.setText("Error");
-        growthLabel.setText("Error");
+        try {
+            List<Sale> recentSales = salesService.getRecentSales(5);
+            recentSalesBox.getChildren().clear();
+            if (recentSales.isEmpty()) {
+                Label noSalesLabel = new Label("No recent sales");
+                noSalesLabel.getStyleClass().add("info-label");
+                recentSalesBox.getChildren().add(noSalesLabel);
+                return;
+            }
+            recentSales.forEach(sale -> {
+                try {
+                    Label saleLabel = new Label(String.format("%s - $%s (%s)",
+                        sale.getClientName(),
+                        df.format(sale.getTotalPrice()),
+                        sale.getPaymentMethod()
+                    ));
+                    saleLabel.getStyleClass().add("recent-sale-item");
+                    recentSalesBox.getChildren().add(saleLabel);
+                } catch (Exception e) {
+                    Label errorLabel = new Label("Error loading sale");
+                    errorLabel.getStyleClass().add("error-label");
+                    recentSalesBox.getChildren().add(errorLabel);
+                }
+            });
+        } catch (Exception e) {
+            Label errorLabel = new Label("Unable to load recent sales");
+            errorLabel.getStyleClass().add("error-label");
+            recentSalesBox.getChildren().add(errorLabel);
+        }
     }
 }
