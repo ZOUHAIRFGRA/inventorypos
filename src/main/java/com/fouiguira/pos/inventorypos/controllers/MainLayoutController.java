@@ -87,25 +87,26 @@ public class MainLayoutController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/" + fxmlFile));
             loader.setControllerFactory(context::getBean);
             Parent view = loader.load();
+            
+            // Set the view immediately without transitions
             mainLayout.setCenter(view);
             
-            // Remove any margins that might affect full-screen layout
+            // Ensure proper layout
             BorderPane.setMargin(view, new Insets(0));
             BorderPane.setAlignment(view, Pos.CENTER);
             
-            // Make sure the main layout itself takes full size
+            // Make sure the layout uses all available space
             mainLayout.setPrefWidth(Region.USE_COMPUTED_SIZE);
             mainLayout.setPrefHeight(Region.USE_COMPUTED_SIZE);
             mainLayout.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
             
-            // Force the stage to maximize if not already
             Stage stage = (Stage) mainLayout.getScene().getWindow();
             if (!stage.isMaximized()) {
                 stage.setMaximized(true);
             }
         } catch (IOException e) {
-            showAlert("Error", "Could not load view: " + e.getMessage());
             e.printStackTrace();
+            showAlert("Error", "Could not load view: " + fxmlFile);
         }
     }
 

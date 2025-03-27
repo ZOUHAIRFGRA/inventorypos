@@ -144,22 +144,21 @@ public class DashboardController {
                 });
             
             if (dataPoints.stream().allMatch(data -> ((Number)data.getYValue()).doubleValue() == 0)) {
-                // Handle empty state
-                Label noDataLabel = new Label("No sales data available");
-                noDataLabel.getStyleClass().add("chart-placeholder-label");
-                salesTrendChart.setVisible(false);
-                salesTrendChart.getParent().getChildrenUnmodifiable().add(noDataLabel);
+                // Handle empty state by showing placeholder in the chart
+                series.getData().add(new XYChart.Data<>("No Data", 0));
+                salesTrendChart.getData().add(series);
+                salesTrendChart.setStyle("-fx-background-color: #f5f5f5;");
             } else {
-                salesTrendChart.setVisible(true);
+                salesTrendChart.setStyle("");
                 series.getData().addAll(dataPoints);
                 salesTrendChart.getData().add(series);
             }
         } catch (Exception e) {
-            // Handle error state
-            Label errorLabel = new Label("Unable to load sales trend data");
-            errorLabel.getStyleClass().add("error-label");
-            salesTrendChart.setVisible(false);
-            salesTrendChart.getParent().getChildrenUnmodifiable().add(errorLabel);
+            // Handle error state by showing error in the chart
+            XYChart.Series<String, Number> errorSeries = new XYChart.Series<>();
+            errorSeries.getData().add(new XYChart.Data<>("Error", 0));
+            salesTrendChart.getData().add(errorSeries);
+            salesTrendChart.setStyle("-fx-background-color: #fff0f0;");
         }
     }
 
@@ -171,24 +170,23 @@ public class DashboardController {
             
             Map<Product, Integer> topProducts = productService.getTopSellingProducts(5);
             if (topProducts.isEmpty()) {
-                // Handle empty state
-                Label noDataLabel = new Label("No sales data available");
-                noDataLabel.getStyleClass().add("chart-placeholder-label");
-                topProductsChart.setVisible(false);
-                topProductsChart.getParent().getChildrenUnmodifiable().add(noDataLabel);
+                // Handle empty state by showing placeholder in the chart
+                series.getData().add(new XYChart.Data<>("No Data", 0));
+                topProductsChart.getData().add(series);
+                topProductsChart.setStyle("-fx-background-color: #f5f5f5;");
             } else {
+                topProductsChart.setStyle("");
                 topProducts.forEach((product, quantity) -> 
                     series.getData().add(new XYChart.Data<>(product.getName(), quantity))
                 );
-                topProductsChart.setVisible(true);
                 topProductsChart.getData().add(series);
             }
         } catch (Exception e) {
-            // Handle error state
-            Label errorLabel = new Label("Unable to load top products data");
-            errorLabel.getStyleClass().add("error-label");
-            topProductsChart.setVisible(false);
-            topProductsChart.getParent().getChildrenUnmodifiable().add(errorLabel);
+            // Handle error state by showing error in the chart
+            XYChart.Series<String, Number> errorSeries = new XYChart.Series<>();
+            errorSeries.getData().add(new XYChart.Data<>("Error", 0));
+            topProductsChart.getData().add(errorSeries);
+            topProductsChart.setStyle("-fx-background-color: #fff0f0;");
         }
     }
 
@@ -203,13 +201,11 @@ public class DashboardController {
                 ));
             
             if (categoryCount.isEmpty()) {
-                // Handle empty state
-                Label noDataLabel = new Label("No category data available");
-                noDataLabel.getStyleClass().add("chart-placeholder-label");
-                categoryDistributionChart.setVisible(false);
-                categoryDistributionChart.getParent().getChildrenUnmodifiable().add(noDataLabel);
+                // Handle empty state by showing placeholder in the chart
+                categoryDistributionChart.getData().add(new PieChart.Data("No Data", 1));
+                categoryDistributionChart.setStyle("-fx-background-color: #f5f5f5;");
             } else {
-                categoryDistributionChart.setVisible(true);
+                categoryDistributionChart.setStyle("");
                 categoryDistributionChart.setData(
                     categoryCount.entrySet().stream()
                         .map(entry -> new PieChart.Data(entry.getKey(), entry.getValue()))
@@ -217,11 +213,9 @@ public class DashboardController {
                 );
             }
         } catch (Exception e) {
-            // Handle error state
-            Label errorLabel = new Label("Unable to load category distribution data");
-            errorLabel.getStyleClass().add("error-label");
-            categoryDistributionChart.setVisible(false);
-            categoryDistributionChart.getParent().getChildrenUnmodifiable().add(errorLabel);
+            // Handle error state by showing error in the chart
+            categoryDistributionChart.getData().add(new PieChart.Data("Error", 1));
+            categoryDistributionChart.setStyle("-fx-background-color: #fff0f0;");
         }
     }
 

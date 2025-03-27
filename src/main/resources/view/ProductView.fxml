@@ -22,7 +22,7 @@
         <!-- Background with shadow -->
         <StackPane styleClass="content-panel" GridPane.columnSpan="2147483647" GridPane.rowSpan="2147483647">
             <GridPane.margin>
-                <Insets bottom="-15.0" left="-15.0" right="-15.0" />
+                <Insets bottom="-15.0" left="-15.0" right="-15.0" top="-15.0" />
             </GridPane.margin>
         </StackPane>
 
