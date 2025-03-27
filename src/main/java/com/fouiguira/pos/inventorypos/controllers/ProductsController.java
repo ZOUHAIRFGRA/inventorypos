@@ -11,23 +11,29 @@ import io.github.palexdev.materialfx.filter.DoubleFilter;
 import io.github.palexdev.materialfx.filter.IntegerFilter;
 import io.github.palexdev.materialfx.filter.LongFilter;
 import io.github.palexdev.materialfx.filter.StringFilter;
+import io.github.palexdev.materialfx.controls.MFXTextField;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.springframework.stereotype.Controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -60,6 +66,18 @@ public class ProductsController {
     @FXML
     private MFXButton addButton;
 
+    @FXML
+    private MFXTextField searchField;
+
+    @FXML
+    private Label totalProductsLabel;
+
+    @FXML
+    private Label lowStockLabel;
+
+    @FXML
+    private MFXButton exportButton;
+
     private final ProductService productService;
     private final CategoryService categoryService;
 
@@ -71,7 +89,9 @@ public class ProductsController {
     @FXML
     public void initialize() {
         setupTable();
+        setupSearch();
         loadProducts();
+        updateStatusBar();
     }
 
     @SuppressWarnings("unchecked")
@@ -156,9 +176,55 @@ public class ProductsController {
         productTable.autosizeColumnsOnInitialization();
     }
 
+    private void setupSearch() {
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                filterProducts(newValue);
+            }
+        });
+    }
+
+    private void filterProducts(String searchText) {
+        if (searchText.isEmpty()) {
+            loadProducts();
+            return;
+        }
+        
+        List<Product> allProducts = productService.getAllProducts();
+        List<Product> filteredProducts = allProducts.stream()
+            .filter(product -> 
+                product.getName().toLowerCase().contains(searchText.toLowerCase()) ||
+                (product.getCategory() != null && 
+                 product.getCategory().getName().toLowerCase().contains(searchText.toLowerCase())) ||
+                String.valueOf(product.getPrice()).contains(searchText) ||
+                String.valueOf(product.getStockQuantity()).contains(searchText)
+            )
+            .toList();
+        
+        productTable.setItems(FXCollections.observableArrayList(filteredProducts));
+        updateStatusBar();
+    }
+
     private void loadProducts() {
         List<Product> products = productService.getAllProducts();
         productTable.setItems(FXCollections.observableArrayList(products));
+        updateStatusBar();
+    }
+
+    private void updateStatusBar() {
+        List<Product> allProducts = productService.getAllProducts();
+        long lowStockCount = allProducts.stream()
+            .filter(p -> p.getStockQuantity() < 5)
+            .count();
+        
+        totalProductsLabel.setText(String.format("Total Products: %d", allProducts.size()));
+        
+        if (lowStockCount > 0) {
+            lowStockLabel.setText(String.format("Low Stock Alert: %d items", lowStockCount));
+            lowStockLabel.setVisible(true);
+        } else {
+            lowStockLabel.setVisible(false);
+        }
     }
 
     @FXML
@@ -232,6 +298,45 @@ public class ProductsController {
         scene.getStylesheets().add(getClass().getResource("/styles/styles.css").toExternalForm());
         stage.setScene(scene);
         stage.showAndWait();
+    }
+
+    @FXML
+    public void handleExport() {
+        // Implementation for exporting products to CSV
+        try {
+            List<Product> products = productService.getAllProducts();
+            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String fileName = "products_export_" + timestamp + ".csv";
+            
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setInitialFileName(fileName);
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv")
+            );
+            
+            File file = fileChooser.showSaveDialog(productTable.getScene().getWindow());
+            if (file != null) {
+                try (PrintWriter writer = new PrintWriter(file)) {
+                    // Write CSV header
+                    writer.println("ID,Name,Category,Price,Stock,Description");
+                    
+                    // Write product data
+                    for (Product product : products) {
+                        writer.println(String.format("%d,\"%s\",\"%s\",%.2f,%d,\"%s\"",
+                            product.getId(),
+                            product.getName(),
+                            product.getCategory() != null ? product.getCategory().getName() : "",
+                            product.getPrice(),
+                            product.getStockQuantity(),
+                            product.getDescription() != null ? product.getDescription() : ""
+                        ));
+                    }
+                }
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Products exported successfully to " + file.getName());
+            }
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to export products: " + e.getMessage());
+        }
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {
