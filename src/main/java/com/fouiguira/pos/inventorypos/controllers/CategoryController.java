@@ -58,25 +58,45 @@ public class CategoryController {
 
     @SuppressWarnings("unchecked")
     private void setupTable() {
-        colId.setRowCellFactory(category -> new MFXTableRowCell<>(Category::getId));
+        // ID Column
+        colId.setRowCellFactory(category -> {
+            MFXTableRowCell<Category, Long> cell = new MFXTableRowCell<>(Category::getId);
+            cell.setStyle("-fx-alignment: CENTER;");
+            return cell;
+        });
         colId.setComparator(Comparator.comparing(Category::getId));
 
-        colName.setRowCellFactory(category -> new MFXTableRowCell<>(Category::getName));
+        // Name Column
+        colName.setRowCellFactory(category -> {
+            MFXTableRowCell<Category, String> cell = new MFXTableRowCell<>(Category::getName);
+            cell.setStyle("-fx-font-weight: bold;");
+            return cell;
+        });
         colName.setComparator(Comparator.comparing(Category::getName));
 
-        colDescription.setRowCellFactory(category -> new MFXTableRowCell<>(c -> c.getDescription() != null ? c.getDescription() : "No description"));
+        // Description Column
+        colDescription.setRowCellFactory(category -> {
+            MFXTableRowCell<Category, String> cell = new MFXTableRowCell<>(
+                c -> c.getDescription() != null ? c.getDescription() : "No description"
+            );
+            cell.setWrapText(true);
+            return cell;
+        });
         colDescription.setComparator(Comparator.comparing(Category::getDescription, Comparator.nullsLast(Comparator.naturalOrder())));
 
+        // Actions Column
         colActions.setRowCellFactory(category -> {
             MFXTableRowCell<Category, Void> cell = new MFXTableRowCell<>(c -> null);
             cell.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
 
             MFXButton editButton = new MFXButton("Edit");
             editButton.getStyleClass().add("button-edit");
+            editButton.setStyle("-fx-min-width: 60px;");
             editButton.setOnAction(event -> openEditCategoryView(category));
 
             MFXButton deleteButton = new MFXButton("Delete");
             deleteButton.getStyleClass().add("button-delete");
+            deleteButton.setStyle("-fx-min-width: 60px;");
             deleteButton.setOnAction(event -> handleDeleteCategory(category));
 
             HBox actions = new HBox(10, editButton, deleteButton);
@@ -86,14 +106,20 @@ public class CategoryController {
             return cell;
         });
 
+        // Add filters
         categoryTable.getFilters().addAll(
             new LongFilter<>("ID", Category::getId),
             new StringFilter<>("Name", Category::getName),
-            new StringFilter<>("Description", Category::getDescription) // Added filter for description
+            new StringFilter<>("Description", Category::getDescription)
         );
 
+        // Table settings
         categoryTable.setFooterVisible(true);
         categoryTable.autosizeColumnsOnInitialization();
+        
+        // Make table fill available space
+        categoryTable.prefWidthProperty().bind(categoryTable.getParent().layoutBoundsProperty().map(bounds -> bounds.getWidth() - 60)); // 60 is for padding
+        categoryTable.prefHeightProperty().bind(categoryTable.getParent().layoutBoundsProperty().map(bounds -> bounds.getHeight() - 60));
     }
 
     private void loadCategories() {
@@ -117,6 +143,7 @@ public class CategoryController {
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open add category window");
         }
     }
 
@@ -135,20 +162,22 @@ public class CategoryController {
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open edit category window");
         }
     }
 
     private void handleDeleteCategory(Category category) {
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Delete Category");
-        confirmation.setHeaderText("Are you sure you want to delete " + category.getName() + "?");
-        confirmation.setContentText("This action cannot be undone.");
+        confirmation.setHeaderText("Delete " + category.getName());
+        confirmation.setContentText("Are you sure you want to delete this category? This action cannot be undone.");
+        
         confirmation.showAndWait().ifPresent(response -> {
             if (response == javafx.scene.control.ButtonType.OK) {
                 try {
                     categoryService.deleteCategory(category.getId());
                     loadCategories();
-                    showAlert(Alert.AlertType.INFORMATION, "Success", "Category deleted successfully!");
+                    showAlert(Alert.AlertType.INFORMATION, "Success", "Category deleted successfully");
                 } catch (Exception e) {
                     showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete category: " + e.getMessage());
                 }
