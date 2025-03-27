@@ -58,6 +58,18 @@ public class DatabaseSeeder implements CommandLineRunner {
             admin.setTemporaryPassword(false);
             userRepository.save(admin);
             logger.info("✅ Default admin user created.");
+
+            logger.info("⚡ Seeding default SupportAdmin user...");
+            User support = new User();
+            support.setUsername("fouiguira_support");
+            support.setPassword(passwordEncoder.encode("fouiguira_support"));
+            support.setRole(User.Role.SUPPORT_ADMIN);
+            support.setCreatedAt(new Date());
+            support.setUpdatedAt(new Date());
+            support.setTemporaryPassword(false);
+            userRepository.save(support);
+            logger.info("✅ Default support user created.");
+
         } else {
             logger.info("⚡ Database already contains {} user(s). No seeding needed.", userCount);
         }

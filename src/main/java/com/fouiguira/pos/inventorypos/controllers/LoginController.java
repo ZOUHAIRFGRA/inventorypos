@@ -25,16 +25,26 @@ import java.io.IOException;
 @Controller
 public class LoginController {
 
-    @FXML private MFXTextField usernameField;
-    @FXML private MFXPasswordField passwordField;
-    @FXML private MFXButton loginButton;
-    @FXML private Label messageLabel;
-    @FXML private Label businessNameLabel;
-    @FXML private Label welcomeMessageLabel;
-    @FXML private ImageView logoImageView;
-    @FXML private Label businessAddressLabel;
-    @FXML private Label businessPhoneLabel;
-    @FXML private Label businessEmailLabel;
+    @FXML
+    private MFXTextField usernameField;
+    @FXML
+    private MFXPasswordField passwordField;
+    @FXML
+    private MFXButton loginButton;
+    @FXML
+    private Label messageLabel;
+    @FXML
+    private Label businessNameLabel;
+    @FXML
+    private Label welcomeMessageLabel;
+    @FXML
+    private ImageView logoImageView;
+    @FXML
+    private Label businessAddressLabel;
+    @FXML
+    private Label businessPhoneLabel;
+    @FXML
+    private Label businessEmailLabel;
 
     private final UserService userService;
     private final BusinessSettingsService settingsService;
@@ -48,7 +58,7 @@ public class LoginController {
     public void initialize() {
         try {
             BusinessSettings settings = settingsService.getSettings();
-            
+
             // Set business name with placeholder
             String businessName = settings.getBusinessName();
             if (businessName == null || businessName.trim().isEmpty()) {
@@ -56,24 +66,24 @@ public class LoginController {
             }
             businessNameLabel.setText(businessName);
             welcomeMessageLabel.setText("Welcome to " + businessName);
-            
+
             // Set address with placeholder
             String address = settings.getAddress();
-            businessAddressLabel.setText(address != null && !address.trim().isEmpty() 
-                ? address 
-                : "Address not configured");
-            
+            businessAddressLabel.setText(address != null && !address.trim().isEmpty()
+                    ? address
+                    : "Address not configured");
+
             // Set phone with placeholder
             String phone = settings.getPhone();
-            businessPhoneLabel.setText(phone != null && !phone.trim().isEmpty() 
-                ? phone 
-                : "Phone not configured");
-            
+            businessPhoneLabel.setText(phone != null && !phone.trim().isEmpty()
+                    ? phone
+                    : "Phone not configured");
+
             // Set email with placeholder
             String email = settings.getEmail();
-            businessEmailLabel.setText(email != null && !email.trim().isEmpty() 
-                ? email 
-                : "Email not configured");
+            businessEmailLabel.setText(email != null && !email.trim().isEmpty()
+                    ? email
+                    : "Email not configured");
 
             // Load logo image
             String logoPath = settings.getLogoPath();
@@ -101,13 +111,16 @@ public class LoginController {
 
             // Style placeholder text with italic and lighter color
             if (address == null || address.trim().isEmpty()) {
-                businessAddressLabel.setStyle(businessAddressLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+                businessAddressLabel.setStyle(
+                        businessAddressLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
             }
             if (phone == null || phone.trim().isEmpty()) {
-                businessPhoneLabel.setStyle(businessPhoneLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+                businessPhoneLabel
+                        .setStyle(businessPhoneLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
             }
             if (email == null || email.trim().isEmpty()) {
-                businessEmailLabel.setStyle(businessEmailLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+                businessEmailLabel
+                        .setStyle(businessEmailLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
             }
 
         } catch (Exception e) {
@@ -118,11 +131,14 @@ public class LoginController {
             businessAddressLabel.setText("Address not configured");
             businessPhoneLabel.setText("Phone not configured");
             businessEmailLabel.setText("Email not configured");
-            
+
             // Style all placeholders
-            businessAddressLabel.setStyle(businessAddressLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
-            businessPhoneLabel.setStyle(businessPhoneLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
-            businessEmailLabel.setStyle(businessEmailLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+            businessAddressLabel
+                    .setStyle(businessAddressLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+            businessPhoneLabel
+                    .setStyle(businessPhoneLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
+            businessEmailLabel
+                    .setStyle(businessEmailLabel.getStyle() + "; -fx-font-style: italic; -fx-text-fill: #95a5a6;");
         }
     }
 
@@ -143,6 +159,9 @@ public class LoginController {
                 } else if (user.getRole() == User.Role.CASHIER) {
                     fxmlPath = "/view/CashierDashboard.fxml";
                     title = "Cashier Dashboard";
+                } else if (user.getRole() == User.Role.SUPPORT_ADMIN) {
+                    fxmlPath = "/view/SupportDashboard.fxml";
+                    title = "Support Administrator Dashboard";
                 } else {
                     messageLabel.setText("Role not supported!");
                     return;
@@ -163,9 +182,9 @@ public class LoginController {
 
                 // Create new scene and apply stylesheet
                 Scene scene = new Scene(root);
-                String cssPath = getClass().getResource("/styles/styles.css") != null 
-                    ? getClass().getResource("/styles/styles.css").toExternalForm() 
-                    : null;
+                String cssPath = getClass().getResource("/styles/styles.css") != null
+                        ? getClass().getResource("/styles/styles.css").toExternalForm()
+                        : null;
                 if (cssPath != null) {
                     scene.getStylesheets().add(cssPath);
                     System.out.println("LoginController: Applied styles.css to " + fxmlPath + " - " + cssPath);

@@ -32,6 +32,6 @@ public class User {
     private boolean isTemporaryPassword = false;
 
     public enum Role {
-        OWNER, CASHIER, STAFF
+        OWNER, CASHIER, STAFF, SUPPORT_ADMIN
     }
 }

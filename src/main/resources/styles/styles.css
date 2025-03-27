@@ -1138,4 +1138,53 @@
     -fx-border-width: 0 0 1 0;
 }
 
+/* Support Dashboard Styles */
+.support-dashboard {
+    -fx-background-color: #f5f5f5;
+    -fx-padding: 20px;
+}
+
+.support-dashboard .table-view {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);
+    -fx-background-radius: 5px;
+}
+
+.support-dashboard .table-view .column-header {
+    -fx-background-color: #2196f3;
+    -fx-text-fill: white;
+}
+
+.support-dashboard .table-row-cell:selected {
+    -fx-background-color: #bbdefb;
+}
+
+.support-dashboard .mfx-button {
+    -fx-padding: 8 16;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.support-dashboard .mfx-button:hover {
+    -fx-opacity: 0.9;
+}
+
+.support-dashboard .reset-password-box {
+    -fx-background-color: white;
+    -fx-padding: 20px;
+    -fx-spacing: 10px;
+    -fx-background-radius: 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);
+}
+
+.support-dashboard .status-label {
+    -fx-font-size: 14px;
+    -fx-padding: 5px 0;
+}
+
+.support-dashboard .logout-button {
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+}
+
 
