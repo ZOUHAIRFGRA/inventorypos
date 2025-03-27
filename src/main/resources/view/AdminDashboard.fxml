@@ -40,14 +40,14 @@
                         <MFXFontIcon description="fas-layer-group" size="20" color="white" />
                     </graphic>
                 </MFXButton>
-                <MFXButton fx:id="salesButton" text="Sales" onAction="#loadSales" styleClass="sidebar-button">
+                <!-- <MFXButton fx:id="salesButton" text="Sales" onAction="#loadSales" styleClass="sidebar-button">
                     <graphic>
                         <MFXFontIcon description="fas-money-bill" size="20" color="white" />
                     </graphic>
-                </MFXButton>
+                </MFXButton> -->
                 <MFXButton fx:id="historyButton" text="Sales History" onAction="#loadSalesHistory" styleClass="sidebar-button">
                     <graphic>
-                        <MFXFontIcon description="fas-clock-rotate-left" size="20" color="white" />
+                        <MFXFontIcon description="fas-money-bill" size="20" color="white" />
                     </graphic>
                 </MFXButton>
                 <MFXButton fx:id="cashiersButton" text="Manage Cashiers" onAction="#loadCashiers" styleClass="sidebar-button">

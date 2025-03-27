@@ -36,8 +36,8 @@ public class AdminDashboardController {
 
 
 
-    @FXML
-    private MFXButton salesButton;
+    // @FXML
+    // private MFXButton salesButton;
 
     @FXML
     private MFXButton historyButton;
@@ -76,8 +76,8 @@ public class AdminDashboardController {
     @FXML
     public void loadCategories() { loadView("CategoryView.fxml"); }
 
-    @FXML
-    public void loadSales() { loadView("SalesHistoryView.fxml"); }
+    // @FXML
+    // public void loadSales() { loadView("SalesHistoryView.fxml"); }
 
     @FXML
     public void loadSalesHistory() { loadView("SalesHistoryView.fxml"); }
