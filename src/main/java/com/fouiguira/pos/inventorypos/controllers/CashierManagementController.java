@@ -5,16 +5,25 @@ import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
 import org.springframework.stereotype.Component;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 @Component
 public class CashierManagementController {
 
+    @FXML private TableView<User> cashiersTable;
+    @FXML private TableColumn<User, String> usernameColumn;
+    @FXML private TableColumn<User, String> lastLoginColumn;
+    @FXML private TableColumn<User, String> statusColumn;
+    
     @FXML private MFXTextField usernameField;
     @FXML private MFXPasswordField passwordField;
     @FXML private MFXButton saveButton;
@@ -24,6 +33,8 @@ public class CashierManagementController {
     @FXML private MFXButton copyPasswordButton;
 
     private final UserService userService;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    private User selectedUser;
 
     public CashierManagementController(UserService userService) {
         this.userService = userService;
@@ -31,9 +42,134 @@ public class CashierManagementController {
 
     @FXML
     public void initialize() {
+        setupTable();
+        setupTableSelection();
+        loadCashiers();
         usernameField.requestFocus();
         passwordResultBox.setVisible(false);
-        System.out.println("CashierManagementController initialized");
+    }
+
+    private void setupTable() {
+        usernameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getUsername()));
+        lastLoginColumn.setCellValueFactory(data -> {
+            if (data.getValue().getUpdatedAt() != null) {
+                return new SimpleStringProperty(dateFormat.format(data.getValue().getUpdatedAt()));
+            }
+            return new SimpleStringProperty("Never");
+        });
+        statusColumn.setCellValueFactory(data -> {
+            User user = data.getValue();
+            String status = user.isTemporaryPassword() ? "Temporary Password" : "Active";
+            return new SimpleStringProperty(status);
+        });
+
+        
+        statusColumn.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(item);
+                    if (item.equals("Temporary Password")) {
+                        setStyle("-fx-text-fill: #FFA000;"); 
+                    } else {
+                        setStyle("-fx-text-fill: #4CAF50;"); 
+                    }
+                }
+            }
+        });
+    }
+
+    private void setupTableSelection() {
+        cashiersTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            selectedUser = newSelection;
+            if (newSelection != null) {
+                usernameField.setText(newSelection.getUsername());
+                passwordField.clear(); 
+                saveButton.setText("Update");
+            } else {
+                clearForm();
+                saveButton.setText("Save");
+            }
+        });
+    }
+
+    private void loadCashiers() {
+        List<User> cashiers = userService.getAllUsers().stream()
+            .filter(user -> user.getRole() == User.Role.CASHIER)
+            .toList();
+        cashiersTable.setItems(FXCollections.observableArrayList(cashiers));
+    }
+
+    @FXML
+    private void handleSaveCashier() {
+        String username = usernameField.getText().trim();
+        String password = passwordField.getText().trim();
+
+        if (username.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Username is required.");
+            return;
+        }
+
+        try {
+            if (selectedUser != null) {
+                
+                if (!showConfirmationAlert("Update Cashier", 
+                    "Are you sure you want to update cashier '" + username + "'?" +
+                    (password.isEmpty() ? "\nNo password change will be made." : "\nThe password will be updated."))) {
+                    return;
+                }
+
+                selectedUser.setUsername(username);
+                if (!password.isEmpty()) {
+                    selectedUser.setPassword(password);
+                    selectedUser.setTemporaryPassword(false);
+                }
+                userService.updateUser(selectedUser.getId(), selectedUser);
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Cashier updated successfully!");
+            } else {
+                
+                User cashier = new User();
+                cashier.setUsername(username);
+                String displayPassword;
+                
+                if (password.isEmpty()) {
+                    displayPassword = generateRandomPassword();
+                    cashier.setPassword(displayPassword);
+                    cashier.setTemporaryPassword(true);
+                } else {
+                    displayPassword = password;
+                    cashier.setPassword(password);
+                    cashier.setTemporaryPassword(false);
+                }
+                cashier.setRole(User.Role.CASHIER);
+
+                if (!showConfirmationAlert("Create Cashier", 
+                    "You are about to create a new cashier '" + username + "'" +
+                    (password.isEmpty() ? " with a generated temporary password." : " with the specified password.") +
+                    "\nDo you want to continue?")) {
+                    return;
+                }
+
+                userService.createUser(cashier);
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Cashier created successfully!");
+                showPasswordResult(displayPassword);
+            }
+
+            loadCashiers(); 
+            if (selectedUser == null) {
+                clearForm(); 
+            }
+        } catch (RuntimeException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to save/update cashier: " + e.getMessage());
+        }
+    }
+
+    private String generateRandomPassword() {
+        return "Cashier" + System.currentTimeMillis();
     }
 
     @FXML
@@ -45,7 +181,6 @@ public class CashierManagementController {
             content.putString(password);
             clipboard.setContent(content);
             
-            // Show brief success feedback
             copyPasswordButton.setText("Copied!");
             new Thread(() -> {
                 try {
@@ -59,98 +194,18 @@ public class CashierManagementController {
     }
 
     @FXML
-    private void handleSaveCashier() {
-        String username = usernameField.getText().trim();
-        String password = passwordField.getText().trim();
+    private void handleClearForm() {
+        clearForm();
+    }
 
-        System.out.println("handleSaveCashier called with username: " + username + ", password: " + (password.isEmpty() ? "(empty)" : "(provided)"));
-
-        if (username.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Username is required.");
-            System.out.println("Username is empty - operation aborted");
-            return;
-        }
-
-        try {
-            int currentUserCount = userService.getAllUsers().size();
-            System.out.println("Current number of users: " + currentUserCount);
-
-            User cashier = new User();
-            cashier.setUsername(username);
-            String displayPassword = null;
-            if (password.isEmpty()) {
-                displayPassword = "Cashier" + System.currentTimeMillis();
-                cashier.setPassword(displayPassword); // Will be hashed in service
-                cashier.setTemporaryPassword(true);
-                System.out.println("Generated temporary password: " + displayPassword);
-            } else {
-                displayPassword = password;
-                cashier.setPassword(password); // Will be hashed in service
-                cashier.setTemporaryPassword(false);
-                System.out.println("Using provided password");
-            }
-            cashier.setRole(User.Role.CASHIER);
-
-            User existingUser = userService.getUserByUsername(username);
-            System.out.println("Existing user check: " + (existingUser != null ? "Found user " + existingUser.getUsername() : "No existing user"));
-
-            if (existingUser != null) {
-                if (userService.getCurrentUserRole() != User.Role.OWNER) {
-                    showAlert(Alert.AlertType.ERROR, "Error", "Only owners can reset existing cashier passwords.");
-                    System.out.println("Reset denied: Current user is not OWNER");
-                    return;
-                }
-                
-                // Ask for confirmation before resetting password
-                if (!showConfirmationAlert("Reset Password", 
-                    "Are you sure you want to reset the password for cashier '" + username + "'?\n" +
-                    (password.isEmpty() ? "A temporary password will be generated." : "The specified password will be set."))) {
-                    return;
-                }
-
-                existingUser.setPassword(displayPassword);
-                existingUser.setTemporaryPassword(displayPassword != null && password.isEmpty());
-                userService.updateUser(existingUser.getId(), existingUser);
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Password reset successfully!");
-                showPasswordResult(displayPassword);
-                System.out.println("Password reset for existing user: " + username);
-            } else {
-                // For new cashier creation with empty password
-                if (password.isEmpty()) {
-                    if (!showConfirmationAlert("Create Cashier", 
-                        "You are about to create a new cashier '" + username + "' with a generated temporary password.\n" +
-                        "The cashier will be required to change this password on first login.\n\n" +
-                        "Do you want to continue?")) {
-                        return;
-                    }
-                } else {
-                    // For new cashier with specified password
-                    if (!showConfirmationAlert("Create Cashier", 
-                        "You are about to create a new cashier '" + username + "' with the specified password.\n" +
-                        "Do you want to continue?")) {
-                        return;
-                    }
-                }
-
-                System.out.println("Creating new cashier: " + username);
-                userService.createUser(cashier);
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Cashier created successfully!");
-                showPasswordResult(displayPassword);
-                System.out.println("✅✅❎❎ Cashier created successfully"+cashier);
-            }
-
-            int newUserCount = userService.getAllUsers().size();
-            System.out.println(" ✅✅❎❎ New number of users: " + newUserCount);
-
-            // Don't clear the form immediately, let the user copy the password first
-            usernameField.clear();
-            passwordField.clear();
-            usernameField.requestFocus();
-        } catch (RuntimeException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to save/reset cashier: " + e.getMessage());
-            System.err.println("Exception in handleSaveCashier: " + e.getMessage());
-            e.printStackTrace();
-        }
+    private void clearForm() {
+        usernameField.clear();
+        passwordField.clear();
+        passwordResultBox.setVisible(false);
+        selectedUser = null;
+        saveButton.setText("Save");
+        cashiersTable.getSelectionModel().clearSelection();
+        usernameField.requestFocus();
     }
 
     private void showPasswordResult(String password) {
@@ -163,20 +218,7 @@ public class CashierManagementController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-        return alert.showAndWait().filter(response -> response == javafx.scene.control.ButtonType.OK).isPresent();
-    }
-
-    @FXML
-    private void handleClearForm() {
-        clearForm();
-        System.out.println("Form cleared");
-    }
-
-    private void clearForm() {
-        usernameField.clear();
-        passwordField.clear();
-        passwordResultBox.setVisible(false);
-        usernameField.requestFocus();
+        return alert.showAndWait().filter(response -> response == ButtonType.OK).isPresent();
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {
