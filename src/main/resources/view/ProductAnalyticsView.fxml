@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.chart.*?>
 <?import io.github.palexdev.materialfx.controls.*?>
 <?import javafx.geometry.Insets?>
 
@@ -10,66 +9,19 @@
       spacing="20" style="-fx-padding: 20;">
 
     <HBox alignment="CENTER">
-        <Label text="Product Analytics" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <Label text="Product Profit Analysis" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
     </HBox>
 
-    <GridPane hgap="20" vgap="20">
-        <columnConstraints>
-            <ColumnConstraints percentWidth="50"/>
-            <ColumnConstraints percentWidth="50"/>
-        </columnConstraints>
-        <rowConstraints>
-            <RowConstraints vgrow="ALWAYS"/>
-            <RowConstraints vgrow="ALWAYS"/>
-        </rowConstraints>
-
-        <!-- Top Selling Products Chart -->
-        <VBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="0" 
-              style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 5;">
-            <Label text="Top Selling Products" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-            <BarChart fx:id="topSellingChart">
-                <xAxis>
-                    <CategoryAxis label="Products"/>
-                </xAxis>
-                <yAxis>
-                    <NumberAxis label="Units Sold"/>
-                </yAxis>
-            </BarChart>
-        </VBox>
-
-        <!-- Product Categories Distribution -->
-        <VBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="0"
-              style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 5;">
-            <Label text="Category Distribution" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-            <PieChart fx:id="categoryDistributionChart"/>
-        </VBox>
-
-        <!-- Stock Levels -->
-        <VBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="1"
-              style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 5;">
-            <Label text="Stock Levels" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-            <TableView fx:id="stockLevelsTable" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="productNameColumn" text="Product Name"/>
-                    <TableColumn fx:id="categoryColumn" text="Category"/>
-                    <TableColumn fx:id="stockColumn" text="Current Stock"/>
-                    <TableColumn fx:id="statusColumn" text="Status"/>
-                </columns>
-            </TableView>
-        </VBox>
-
-        <!-- Price Analysis -->
-        <VBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1"
-              style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 5;">
-            <Label text="Price Analysis" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-            <TableView fx:id="priceAnalysisTable" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="priceProductNameColumn" text="Product Name"/>
-                    <TableColumn fx:id="sellingPriceColumn" text="Selling Price"/>
-                    <TableColumn fx:id="purchasePriceColumn" text="Purchase Price"/>
-                    <TableColumn fx:id="marginColumn" text="Margin"/>
-                </columns>
-            </TableView>
-        </VBox>
-    </GridPane>
+    <!-- Price Analysis -->
+    <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 5;" VBox.vgrow="ALWAYS">
+        <Label text="Price and Profit Margin Analysis" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <TableView fx:id="priceAnalysisTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="priceProductNameColumn" text="Product Name" prefWidth="200"/>
+                <TableColumn fx:id="sellingPriceColumn" text="Selling Price" prefWidth="150"/>
+                <TableColumn fx:id="purchasePriceColumn" text="Purchase Price" prefWidth="150"/>
+                <TableColumn fx:id="marginColumn" text="Profit Margin" prefWidth="150"/>
+            </columns>
+        </TableView>
+    </VBox>
 </VBox>
