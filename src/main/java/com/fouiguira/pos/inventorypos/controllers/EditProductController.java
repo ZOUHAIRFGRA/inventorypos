@@ -23,32 +23,16 @@ import java.util.function.Consumer;
 
 public class EditProductController {
 
-    @FXML
-    private MFXTextField productNameField;
-
-    @FXML
-    private MFXComboBox<Category> categoryComboBox;
-
-    @FXML
-    private MFXTextField priceField;
-
-    @FXML
-    private MFXTextField stockField;
-
-    @FXML
-    private MFXTextField imagePathField;
-
-    @FXML
-    private TextArea descriptionField;
-
-    @FXML
-    private ImageView productImage;
-
-    @FXML
-    private MFXButton saveButton;
-
-    @FXML
-    private MFXButton cancelButton;
+    @FXML private MFXTextField productNameField;
+    @FXML private MFXComboBox<Category> categoryComboBox;
+    @FXML private MFXTextField priceField;
+    @FXML private MFXTextField purchasePriceField;
+    @FXML private MFXTextField stockField;
+    @FXML private MFXTextField imagePathField;
+    @FXML private TextArea descriptionField;
+    @FXML private ImageView productImage;
+    @FXML private MFXButton saveButton;
+    @FXML private MFXButton cancelButton;
 
     private final ProductService productService;
     private final CategoryService categoryService;
@@ -91,6 +75,8 @@ public class EditProductController {
     private void configureFields() {
         priceField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
             change.getControlNewText().matches("^[0-9]*\\.?[0-9]{0,2}$") ? change : null));
+        purchasePriceField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
+            change.getControlNewText().matches("^[0-9]*\\.?[0-9]{0,2}$") ? change : null));
         stockField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
             change.getControlNewText().matches("^[0-9]*$") ? change : null));
         imagePathField.setEditable(false);
@@ -99,6 +85,7 @@ public class EditProductController {
     private void populateFields() {
         productNameField.setText(productToEdit.getName());
         priceField.setText(String.valueOf(productToEdit.getPrice()));
+        purchasePriceField.setText(String.valueOf(productToEdit.getPurchasePrice()));
         stockField.setText(String.valueOf(productToEdit.getStockQuantity()));
         imagePathField.setText(productToEdit.getImagePath());
         descriptionField.setText(productToEdit.getDescription());
@@ -164,7 +151,9 @@ public class EditProductController {
         updatedProduct.setName(productNameField.getText());
         updatedProduct.setCategory(categoryComboBox.getValue());
         updatedProduct.setPrice(Double.parseDouble(priceField.getText()));
+        updatedProduct.setPurchasePrice(Double.parseDouble(purchasePriceField.getText()));
         updatedProduct.setStockQuantity(Integer.parseInt(stockField.getText()));
+        updatedProduct.setInitialStock(productToEdit.getInitialStock()); // Preserve initial stock
         updatedProduct.setImagePath(imagePathField.getText());
         updatedProduct.setDescription(descriptionField.getText());
         updatedProduct.setUpdatedAt(new Date());
@@ -185,15 +174,24 @@ public class EditProductController {
             showAlert(Alert.AlertType.WARNING, "Validation Error", "Price is required.");
             return false;
         }
+        if (purchasePriceField.getText().isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Validation Error", "Purchase price is required.");
+            return false;
+        }
         if (stockField.getText().isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Validation Error", "Stock quantity is required.");
             return false;
         }
         try {
-            Double.parseDouble(priceField.getText());
+            double price = Double.parseDouble(priceField.getText());
+            double purchasePrice = Double.parseDouble(purchasePriceField.getText());
+            if (purchasePrice >= price) {
+                showAlert(Alert.AlertType.WARNING, "Validation Error", "Purchase price must be less than selling price.");
+                return false;
+            }
             Integer.parseInt(stockField.getText());
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Price and stock must be valid numbers.");
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Price, purchase price and stock must be valid numbers.");
             return false;
         }
         return true;
