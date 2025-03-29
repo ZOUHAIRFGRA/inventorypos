@@ -19,43 +19,18 @@ import java.io.IOException;
 @Controller
 public class AdminDashboardController {
 
-    @FXML
-    private BorderPane adminLayout;
-
-    @FXML
-    private VBox contentArea;
-
-    @FXML
-    private MFXButton dashboardButton;
-
-    @FXML
-    private MFXButton productsButton;
-
-    @FXML
-    private MFXButton categoryButton;
-
-
-
-    // @FXML
-    // private MFXButton salesButton;
-
-    @FXML
-    private MFXButton historyButton;
-
-    @FXML
-    private MFXButton cashiersButton;
-
-    @FXML
-    private MFXButton invoicesButton;
-
-    @FXML
-    private MFXButton settingsButton;
-
-    @FXML
-    private MFXButton logoutButton;
-
-    @FXML
-    private Label messageLabel;
+    @FXML private BorderPane adminLayout;
+    @FXML private VBox contentArea;
+    @FXML private MFXButton dashboardButton;
+    @FXML private MFXButton productsButton;
+    @FXML private MFXButton categoryButton;
+    @FXML private MFXButton historyButton;
+    @FXML private MFXButton cashiersButton;
+    @FXML private MFXButton invoicesButton;
+    @FXML private MFXButton settingsButton;
+    @FXML private MFXButton logoutButton;
+    @FXML private MFXButton analyticsButton;
+    @FXML private Label messageLabel;
 
     private final UserService userService;
 
@@ -73,11 +48,9 @@ public class AdminDashboardController {
 
     @FXML
     public void loadProducts() { loadView("ProductView.fxml"); }
+
     @FXML
     public void loadCategories() { loadView("CategoryView.fxml"); }
-
-    // @FXML
-    // public void loadSales() { loadView("SalesHistoryView.fxml"); }
 
     @FXML
     public void loadSalesHistory() { loadView("SalesHistoryView.fxml"); }
@@ -87,6 +60,9 @@ public class AdminDashboardController {
 
     @FXML
     public void loadSettings() { loadView("SettingsView.fxml"); }
+
+    @FXML
+    public void loadProductAnalytics() { loadView("ProductAnalyticsView.fxml"); }
 
     @FXML
     public void handleLogout() {
@@ -115,13 +91,12 @@ public class AdminDashboardController {
     private void loadView(String fxmlFile) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/" + fxmlFile));
-            loader.setControllerFactory(MainApp.springContext::getBean);
+            loader.setControllerFactory(MainApp.springContext::getBean); // Use Spring's controller factory
             Parent view = loader.load();
             contentArea.getChildren().setAll(view);
-            messageLabel.setText("Loaded " + fxmlFile + " successfully!");
         } catch (IOException e) {
             e.printStackTrace();
-            messageLabel.setText("Error loading " + fxmlFile + ": " + e.getMessage());
+            messageLabel.setText("Error loading view: " + e.getMessage());
         }
     }
 }
