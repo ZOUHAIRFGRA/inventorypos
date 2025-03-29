@@ -1,5 +1,6 @@
 package com.fouiguira.pos.inventorypos.services.impl;
 
+import com.fouiguira.pos.inventorypos.entities.Product;
 import com.fouiguira.pos.inventorypos.entities.Sale;
 import com.fouiguira.pos.inventorypos.entities.SaleProduct;
 import com.fouiguira.pos.inventorypos.repositories.SaleProductRepository;
@@ -20,5 +21,10 @@ public class SaleProductServiceImpl implements SaleProductService {
     @Override
     public List<SaleProduct> getSaleProductsBySale(Sale sale) {
         return saleProductRepository.findBySale(sale);
+    }
+
+    @Override
+    public List<SaleProduct> getSaleProductsByProduct(Product product) {
+        return saleProductRepository.findByProduct(product);
     }
 }

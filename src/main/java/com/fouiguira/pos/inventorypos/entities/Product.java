@@ -17,22 +17,38 @@ public class Product {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = true) // Changed to nullable = true
+    @JoinColumn(name = "category_id", nullable = true)
     private Category category;
 
     @Column(nullable = false)
     private Double price;
 
     @Column(nullable = false)
-    private Integer stockQuantity;
+    private Double purchasePrice = 0.0;
+
+    @Column(nullable = false)
+    private Integer stockQuantity = 0;
 
     private String imagePath;
 
     private String description;
+
+    @Column(nullable = false)
+    private Integer initialStock = 0;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt = new Date();
+
+    @PrePersist
+    public void onPrePersist() {
+        if (initialStock == null) {
+            initialStock = stockQuantity;
+        }
+        if (stockQuantity == null) {
+            stockQuantity = 0;
+        }
+    }
 }
