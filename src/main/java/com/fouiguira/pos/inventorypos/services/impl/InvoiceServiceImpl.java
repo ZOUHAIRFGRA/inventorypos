@@ -206,9 +206,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
             for (SaleProduct sp : sale.getProducts()) {
                 productsTable.addCell(createDataCell(sp.getProduct().getName()));
-                productsTable.addCell(createDataCell("$" + String.format("%.2f", sp.getProduct().getPrice())));
+                productsTable.addCell(createDataCell( String.format("%.2f", sp.getProduct().getPrice())) + " DH");
                 productsTable.addCell(createDataCell(String.valueOf(sp.getQuantity())));
-                productsTable.addCell(createDataCell("$" + String.format("%.2f", sp.getProduct().getPrice() * sp.getQuantity())));
+                productsTable.addCell(createDataCell( String.format("%.2f", sp.getProduct().getPrice() * sp.getQuantity())) + " DH");
             }
 
             productsTable.addFooterCell(new Cell(1, 3)
@@ -217,7 +217,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .setFontSize(12)
                 .setBold());
             productsTable.addFooterCell(new Cell()
-                .add(new Paragraph("$" + String.format("%.2f", invoice.getTotalAmount())))
+                .add(new Paragraph( String.format("%.2f", invoice.getTotalAmount()) + " DH") )
                 .setTextAlignment(TextAlignment.RIGHT)
                 .setFontSize(12)
                 .setBold());

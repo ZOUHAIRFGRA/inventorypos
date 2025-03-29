@@ -87,6 +87,17 @@ public class SalesController {
     private void setupTable() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colClientName.setCellValueFactory(new PropertyValueFactory<>("clientName"));
+        colTotalPrice.setCellFactory(tc -> new TableCell<Sale, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("%.2f", item));
+                }
+            }
+        });
         colTotalPrice.setCellValueFactory(new PropertyValueFactory<>("totalPrice"));
         colTimestamp.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
         colCashier.setCellValueFactory(cellData -> {

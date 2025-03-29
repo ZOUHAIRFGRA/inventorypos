@@ -71,11 +71,11 @@ public class AddProductController {
 
     private void configureFields() {
         priceField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
-            change.getControlNewText().matches("^[0-9]*\\.?[0-9]{0,2}$") ? change : null));
+            change.getControlNewText().matches("^[0-9]*\\.?[0-9]{0,2}DH") ? change : null));
         purchasePriceField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
-            change.getControlNewText().matches("^[0-9]*\\.?[0-9]{0,2}$") ? change : null));
+            change.getControlNewText().matches("^[0-9]*\\.?[0-9]{0,2}DH") ? change : null));
         stockField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
-            change.getControlNewText().matches("^[0-9]*$") ? change : null));
+            change.getControlNewText().matches("^[0-9]*DH") ? change : null));
         imagePathField.setEditable(false);
     }
 

@@ -12,12 +12,44 @@
         <Label text="Product Profit Analysis" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
     </HBox>
 
+    <!-- Summary Section -->
+    <GridPane hgap="20" vgap="10" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 5;">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+        
+        <VBox spacing="5" GridPane.columnIndex="0">
+            <Label text="Average Margin" style="-fx-font-size: 14px;"/>
+            <Label fx:id="avgMarginLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        </VBox>
+        
+        <VBox spacing="5" GridPane.columnIndex="1">
+            <Label text="Highest Margin" style="-fx-font-size: 14px;"/>
+            <Label fx:id="highestMarginLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        </VBox>
+        
+        <VBox spacing="5" GridPane.columnIndex="2">
+            <Label text="Lowest Margin" style="-fx-font-size: 14px;"/>
+            <Label fx:id="lowestMarginLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        </VBox>
+    </GridPane>
+
+    <!-- Filters -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <MFXTextField fx:id="searchField" floatingText="Search Products" prefWidth="200"/>
+        <MFXComboBox fx:id="categoryFilter" floatingText="Filter by Category" prefWidth="150"/>
+        <MFXComboBox fx:id="marginFilter" floatingText="Margin Range" prefWidth="150"/>
+    </HBox>
+
     <!-- Price Analysis -->
     <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 5;" VBox.vgrow="ALWAYS">
         <Label text="Price and Profit Margin Analysis" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
         <TableView fx:id="priceAnalysisTable" VBox.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="priceProductNameColumn" text="Product Name" prefWidth="200"/>
+                <TableColumn fx:id="categoryColumn" text="Category" prefWidth="150"/>
                 <TableColumn fx:id="sellingPriceColumn" text="Selling Price" prefWidth="150"/>
                 <TableColumn fx:id="purchasePriceColumn" text="Purchase Price" prefWidth="150"/>
                 <TableColumn fx:id="marginColumn" text="Profit Margin" prefWidth="150"/>

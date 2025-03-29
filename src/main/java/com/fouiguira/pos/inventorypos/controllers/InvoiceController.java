@@ -48,7 +48,7 @@ public class InvoiceController {
         invoiceIdCol.setRowCellFactory(invoice -> new MFXTableRowCell<>(Invoice::getId));
         saleIdCol.setRowCellFactory(invoice -> new MFXTableRowCell<>(i -> i.getSale().getId()));
         timestampCol.setRowCellFactory(invoice -> new MFXTableRowCell<>(i -> i.getTimestamp().toString()));
-        totalAmountCol.setRowCellFactory(invoice -> new MFXTableRowCell<>(i -> "$" + df.format(i.getTotalAmount())));
+        totalAmountCol.setRowCellFactory(invoice -> new MFXTableRowCell<>(i -> df.format(i.getTotalAmount()) + " DH"));
         statusCol.setRowCellFactory(invoice -> new MFXTableRowCell<>(i -> i.getStatus().toString()));
         invoiceTable.getSelectionModel().setAllowsMultipleSelection(false);
     }

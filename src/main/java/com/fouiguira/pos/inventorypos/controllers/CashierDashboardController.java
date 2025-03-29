@@ -96,7 +96,7 @@ public class CashierDashboardController {
         }
 
         welcomeLabel.setText("Welcome, " + currentUser.getUsername());
-        cartTotalLabel = new Label("$0.00");
+        cartTotalLabel = new Label("0.00DH");
         cartTotalLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333333;");
         totalHBox.getChildren().add(cartTotalLabel);
 
@@ -255,7 +255,7 @@ public class CashierDashboardController {
                 if (empty || price == null) {
                     setText(null);
                 } else {
-                    setText("$" + df.format(price));
+                    setText(df.format(price) + "DH");
                 }
             }
         });
@@ -373,7 +373,7 @@ public class CashierDashboardController {
 
         Label nameLabel = new Label(product.getName());
         nameLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-wrap-text: true; -fx-max-width: 130;");
-        Label priceLabel = new Label("$" + df.format(product.getPrice()));
+        Label priceLabel = new Label( df.format(product.getPrice()) + " DH");
         priceLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666666;");
         
         // Add stock warning icon for low stock
@@ -639,7 +639,7 @@ public class CashierDashboardController {
     private void updateCartTotal() {
         double total = cartItems.stream().mapToDouble(i -> i.getQuantity() * i.getProduct().getPrice()).sum();
         int totalItems = cartItems.stream().mapToInt(SaleProduct::getQuantity).sum();
-        cartTotalLabel.setText(String.format("$%,.2f", total));
+        cartTotalLabel.setText(String.format("%.2f DH", total));
         cartItemCountLabel.setText(String.format("%d %s (%d unique)", 
             totalItems,
             totalItems != 1 ? "items" : "item",

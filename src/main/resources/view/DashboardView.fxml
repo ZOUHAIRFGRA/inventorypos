@@ -69,7 +69,7 @@
                                 <CategoryAxis label="Date"/>
                             </xAxis>
                             <yAxis>
-                                <NumberAxis label="Sales ($)"/>
+                                <NumberAxis label="Sales (DH)"/>
                             </yAxis>
                         </LineChart>
                     </VBox>

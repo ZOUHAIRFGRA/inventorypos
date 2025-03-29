@@ -78,7 +78,7 @@ public class DashboardController {
         try {
             // Update basic metrics
             double totalSales = salesService.getSalesTotalByDate(LocalDate.now());
-            totalSalesLabel.setText(String.format("$%s", df.format(totalSales)));
+            totalSalesLabel.setText(String.format("DH%s", df.format(totalSales)));
         } catch (Exception e) {
             totalSalesLabel.setText("N/A");
             totalSalesLabel.getStyleClass().add("error-label");
@@ -102,7 +102,7 @@ public class DashboardController {
         
         try {
             double avgTicket = salesService.getAverageTicketSize();
-            avgTicketLabel.setText(String.format("$%s", df.format(avgTicket)));
+            avgTicketLabel.setText(String.format("DH%s", df.format(avgTicket)));
         } catch (Exception e) {
             avgTicketLabel.setText("N/A");
             avgTicketLabel.getStyleClass().add("error-label");
@@ -255,7 +255,7 @@ public class DashboardController {
             }
             recentSales.forEach(sale -> {
                 try {
-                    Label saleLabel = new Label(String.format("%s - $%s (%s)",
+                    Label saleLabel = new Label(String.format("%s - DH%s (%s)",
                         sale.getClientName(),
                         df.format(sale.getTotalPrice()),
                         sale.getPaymentMethod()
