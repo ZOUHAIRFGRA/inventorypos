@@ -41,7 +41,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         seedUsers();
-        seedCategoriesAndProducts();
+        // seedCategoriesAndProducts();
     }
 
     private void seedUsers() {

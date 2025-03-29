@@ -1187,4 +1187,16 @@
     -fx-text-fill: white;
 }
 
+/* Splash Screen Styles */
+.splash-progress-bar > .bar {
+    -fx-background-color: #2196F3;
+    -fx-background-radius: 0;
+    -fx-padding: 3px;
+}
+
+.splash-progress-bar > .track {
+    -fx-background-color: #E0E0E0;
+    -fx-background-radius: 0;
+}
+
 
