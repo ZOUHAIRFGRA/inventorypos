@@ -70,12 +70,13 @@ public class AddProductController {
     }
 
     private void configureFields() {
+        // Only allow numbers and decimal points for price fields
         priceField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
-            change.getControlNewText().matches("^[0-9]*\\.?[0-9]{0,2}DH") ? change : null));
+            change.getControlNewText().matches("^\\d*\\.?\\d*$") ? change : null));
         purchasePriceField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
-            change.getControlNewText().matches("^[0-9]*\\.?[0-9]{0,2}DH") ? change : null));
+            change.getControlNewText().matches("^\\d*\\.?\\d*$") ? change : null));
         stockField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
-            change.getControlNewText().matches("^[0-9]*DH") ? change : null));
+            change.getControlNewText().matches("^\\d*$") ? change : null));
         imagePathField.setEditable(false);
     }
 
@@ -121,9 +122,18 @@ public class AddProductController {
         Product product = new Product();
         product.setName(productNameField.getText());
         product.setCategory(categoryComboBox.getValue());
-        product.setPrice(Double.parseDouble(priceField.getText()));
-        product.setPurchasePrice(Double.parseDouble(purchasePriceField.getText()));
-        int initialStock = Integer.parseInt(stockField.getText());
+        
+        String priceText = priceField.getText().trim();
+        String purchasePriceText = purchasePriceField.getText().trim();
+        
+        try {
+            product.setPrice(Double.parseDouble(priceText));
+            product.setPurchasePrice(Double.parseDouble(purchasePriceText));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid price format");
+        }
+        
+        int initialStock = Integer.parseInt(stockField.getText().trim());
         product.setStockQuantity(initialStock);
         product.setInitialStock(initialStock);
         product.setImagePath(imagePathField.getText());
@@ -134,7 +144,7 @@ public class AddProductController {
     }
 
     private boolean validateFields() {
-        if (productNameField.getText().isEmpty()) {
+        if (productNameField.getText().trim().isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Validation Error", "Product name is required.");
             return false;
         }
@@ -142,26 +152,39 @@ public class AddProductController {
             showAlert(Alert.AlertType.WARNING, "Validation Error", "Please select a category.");
             return false;
         }
-        if (priceField.getText().isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Validation Error", "Price is required.");
+        if (priceField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Validation Error", "Selling price is required.");
             return false;
         }
-        if (purchasePriceField.getText().isEmpty()) {
+        if (purchasePriceField.getText().trim().isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Validation Error", "Purchase price is required.");
             return false;
         }
-        if (stockField.getText().isEmpty()) {
+        if (stockField.getText().trim().isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Validation Error", "Stock quantity is required.");
             return false;
         }
+        
         try {
-            double price = Double.parseDouble(priceField.getText());
-            double purchasePrice = Double.parseDouble(purchasePriceField.getText());
+            double price = Double.parseDouble(priceField.getText().trim());
+            double purchasePrice = Double.parseDouble(purchasePriceField.getText().trim());
+            if (price <= 0) {
+                showAlert(Alert.AlertType.WARNING, "Validation Error", "Selling price must be greater than 0.");
+                return false;
+            }
+            if (purchasePrice <= 0) {
+                showAlert(Alert.AlertType.WARNING, "Validation Error", "Purchase price must be greater than 0.");
+                return false;
+            }
             if (purchasePrice >= price) {
                 showAlert(Alert.AlertType.WARNING, "Validation Error", "Purchase price must be less than selling price.");
                 return false;
             }
-            Integer.parseInt(stockField.getText());
+            int stock = Integer.parseInt(stockField.getText().trim());
+            if (stock < 0) {
+                showAlert(Alert.AlertType.WARNING, "Validation Error", "Stock quantity cannot be negative.");
+                return false;
+            }
         } catch (NumberFormatException e) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Price, purchase price and stock must be valid numbers.");
             return false;
