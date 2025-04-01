@@ -57,9 +57,7 @@ public class ProductsController {
     @FXML
     private MFXTableColumn<Product> colStock;
 
-    @FXML
-    private MFXTableColumn<Product> colImage;
-
+    
     @FXML
     private MFXTableColumn<Product> colActions;
 
@@ -111,39 +109,10 @@ public class ProductsController {
         colStock.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getStockQuantity));
         colStock.setComparator(Comparator.comparing(Product::getStockQuantity));
 
-        colImage.setRowCellFactory(product -> {
-            MFXTableRowCell<Product, String> cell = new MFXTableRowCell<>(p -> null);
-            cell.getStyleClass().add("image-cell");
-            ImageView imageView = new ImageView();
-            imageView.getStyleClass().add("image-view");
-            imageView.setFitWidth(50);
-            imageView.setFitHeight(50);
-            imageView.setPreserveRatio(true);
-            cell.setGraphic(imageView);
-            cell.setLeadingGraphic(imageView);
-            cell.setText(null);
-            cell.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
+        
+        
 
-            String imagePath = product.getImagePath();
-            if (imagePath != null && !imagePath.isEmpty()) {
-                File file = new File(imagePath);
-                if (file.exists()) {
-                    imageView.setImage(new Image(file.toURI().toString(), 50, 50, true, true));
-                }
-            }
 
-            cell.setOnMouseClicked(event -> {
-                if (imagePath != null && !imagePath.isEmpty()) {
-                    File file = new File(imagePath);
-                    if (file.exists()) {
-                        showEnlargedImage(imagePath);
-                    }
-                }
-            });
-            cell.setCursor(javafx.scene.Cursor.HAND);
-            return cell;
-        });
-        colImage.setComparator(Comparator.comparing(Product::getImagePath, Comparator.nullsLast(Comparator.naturalOrder())));
 
         colActions.setRowCellFactory(product -> {
             MFXTableRowCell<Product, Void> cell = new MFXTableRowCell<>(p -> null);
@@ -171,7 +140,22 @@ public class ProductsController {
                 }
             });
 
-            HBox actions = new HBox(10, editButton, deleteButton);
+            MFXButton viewImgButton = new MFXButton("View Img");
+            viewImgButton.getStyleClass().add("button-view-img");
+            viewImgButton.setOnAction(event -> {
+                Product selectedProduct = productTable.getSelectionModel().getSelectedValue();
+                if (selectedProduct != null) {
+                    String imagePath = selectedProduct.getImagePath();
+                    if (imagePath == null || imagePath.isEmpty()) {
+                        imagePath = "/images/placeholder.png";
+                    }
+                    showEnlargedImage(imagePath);
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a product to view its image.");
+                }
+            });
+
+            HBox actions = new HBox(10, editButton, deleteButton, viewImgButton);
             actions.setAlignment(javafx.geometry.Pos.CENTER);
             cell.setGraphic(actions);
 

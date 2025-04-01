@@ -41,7 +41,7 @@
         </HBox>
 
         <!-- Enhanced Product Table -->
-        <MFXTableView fx:id="productTable" prefHeight="500" styleClass="products-table-view" 
+        <MFXTableView fx:id="productTable" prefHeight="500" prefWidth="1000" styleClass="products-table-view" 
                       GridPane.rowIndex="1" GridPane.columnSpan="2147483647"
                       GridPane.vgrow="ALWAYS">
             <tableColumns>
@@ -50,8 +50,7 @@
                 <MFXTableColumn fx:id="colCategory" text="Category" prefWidth="180" />
                 <MFXTableColumn fx:id="colPrice" text="Price" prefWidth="120" />
                 <MFXTableColumn fx:id="colStock" text="Stock" prefWidth="120" />
-                <MFXTableColumn fx:id="colImage" text="Image" prefWidth="100" />
-                <MFXTableColumn fx:id="colActions" text="Actions" prefWidth="180" />
+                <MFXTableColumn fx:id="colActions" text="Actions" prefWidth="250" />
             </tableColumns>
             <GridPane.margin>
                 <Insets top="10"/>

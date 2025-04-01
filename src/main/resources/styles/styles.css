@@ -1028,7 +1028,24 @@
 
 .image-cell .image-view {
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 1);
-    -fx-background-radius: 4;
+}
+
+/* View Image Button Styling */
+.button-view-img {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-padding: 5 10;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.button-view-img:hover {
+    -fx-background-color: #2980b9;
+}
+
+.button-view-img:pressed {
+    -fx-background-color: #1f6391;
 }
 
 /* Action Buttons */
