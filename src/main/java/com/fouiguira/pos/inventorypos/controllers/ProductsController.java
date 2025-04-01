@@ -151,11 +151,25 @@ public class ProductsController {
 
             MFXButton editButton = new MFXButton("Edit");
             editButton.getStyleClass().add("button-edit");
-            editButton.setOnAction(event -> openEditProductView(product));
+            editButton.setOnAction(event -> {
+                Product selectedProduct = productTable.getSelectionModel().getSelectedValue();
+                if (selectedProduct != null) {
+                    openEditProductView(selectedProduct);
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a product to edit.");
+                }
+            });
 
             MFXButton deleteButton = new MFXButton("Delete");
             deleteButton.getStyleClass().add("button-delete");
-            deleteButton.setOnAction(event -> handleDeleteProduct(product));
+            deleteButton.setOnAction(event -> {
+                Product selectedProduct = productTable.getSelectionModel().getSelectedValue();
+                if (selectedProduct != null) {
+                    handleDeleteProduct(selectedProduct);
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a product to delete.");
+                }
+            });
 
             HBox actions = new HBox(10, editButton, deleteButton);
             actions.setAlignment(javafx.geometry.Pos.CENTER);
