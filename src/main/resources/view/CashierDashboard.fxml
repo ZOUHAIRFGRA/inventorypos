@@ -13,33 +13,37 @@
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="com.fouiguira.pos.inventorypos.controllers.CashierDashboardController"
-      spacing="10" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS" fillWidth="true"
-      style="-fx-padding: 15; -fx-background-color: #F5F5F5;"
-      prefWidth="1280" prefHeight="600">
+      spacing="15" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS" fillWidth="true"
+      style="-fx-padding: 20; -fx-background-color: #F9FAFB;"
+      prefWidth="1280" prefHeight="720">
 
     <!-- Header -->
-    <HBox alignment="CENTER_LEFT" spacing="10" maxWidth="Infinity" fillHeight="true"
-          style="-fx-background-color: #FFFFFF; -fx-padding: 10; -fx-border-radius: 5; -fx-background-radius: 5;">
-        <Label fx:id="welcomeLabel" text="Welcome" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
+    <HBox alignment="CENTER_LEFT" spacing="15" maxWidth="Infinity" fillHeight="true"
+          style="-fx-background-color: #FFFFFF; -fx-padding: 15; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <Label fx:id="welcomeLabel" text="Welcome" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
         <HBox HBox.hgrow="ALWAYS"/>
         <MFXButton fx:id="logoutButton" text="Logout" onAction="#handleLogout" 
-                   style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 16 8 16; -fx-background-radius: 5;"/>
+                   style="-fx-background-color: #FF5252; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;"/>
     </HBox>
 
     <!-- Main Layout: Products and Cart Side-by-Side -->
-    <HBox spacing="10" VBox.vgrow="ALWAYS" maxWidth="Infinity" fillHeight="true">
+    <HBox spacing="15" VBox.vgrow="ALWAYS" maxWidth="Infinity" fillHeight="true">
         <!-- Product Grid Section -->
-        <VBox spacing="10" HBox.hgrow="ALWAYS" maxWidth="Infinity" fillWidth="true"
-              style="-fx-background-color: #FFFFFF; -fx-padding: 10; -fx-border-radius: 5; -fx-background-radius: 5;">
+        <VBox spacing="15" HBox.hgrow="ALWAYS" maxWidth="Infinity" fillWidth="true"
+              style="-fx-background-color: #FFFFFF; -fx-padding: 15; -fx-border-radius: 8; -fx-background-radius: 8;">
             <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" HBox.hgrow="ALWAYS">
                 <VBox spacing="5">
-                    <Label text="Search Products" style="-fx-font-size: 12px; -fx-text-fill: #666666;"/>
-                    <MFXTextField fx:id="searchField" onAction="#handleSearch" minWidth="250" maxWidth="Infinity"
-                                  promptText="Enter product name" 
-                                  style="-fx-background-color: #F0F0F0; -fx-border-color: #CCCCCC; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8;"/>
+                    <Label text="Search Products" style="-fx-font-size: 14px; -fx-text-fill: #666666;"/>
+                    <HBox spacing="5">
+                        <MFXTextField fx:id="searchField" onAction="#handleSearch" minWidth="250" maxWidth="Infinity"
+                                      promptText="Enter product name" 
+                                      style="-fx-background-color: #F0F0F0; -fx-border-color: #CCCCCC; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8;"/>
+                        <MFXButton text="Clear" onAction="#handleClearSearch" 
+                                   style="-fx-background-color: #E0E0E0; -fx-text-fill: #333333; -fx-font-size: 12px; -fx-padding: 5 10; -fx-background-radius: 5;"/>
+                    </HBox>
                 </VBox>
                 <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="Category" style="-fx-font-size: 12px; -fx-text-fill: #666666;"/>
+                    <Label text="Category" style="-fx-font-size: 14px; -fx-text-fill: #666666;"/>
                     <MFXComboBox fx:id="categoryComboBox" onAction="#handleCategorySelection" minWidth="200"
                                  maxWidth="Infinity" 
                                  style="-fx-background-color: #F0F0F0; -fx-border-color: #CCCCCC; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8;"/>
@@ -49,8 +53,8 @@
             <!-- Scrollable Product Grid -->
             <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" fitToHeight="true" 
                        style="-fx-background-color: transparent; -fx-background: transparent;">
-                <GridPane fx:id="productGrid" hgap="10" vgap="10" maxWidth="Infinity" 
-                          alignment="TOP_LEFT" style="-fx-padding: 10;">
+                <GridPane fx:id="productGrid" hgap="15" vgap="15" maxWidth="Infinity" 
+                          alignment="TOP_LEFT" style="-fx-padding: 15;">
                     <columnConstraints>
                         <javafx.scene.layout.ColumnConstraints hgrow="ALWAYS" />
                         <javafx.scene.layout.ColumnConstraints hgrow="ALWAYS" />
@@ -62,47 +66,52 @@
         </VBox>
 
         <!-- Cart Section -->
-        <VBox fx:id="cartVBox" spacing="10" minWidth="350" maxWidth="400"
-              style="-fx-background-color: #FFFFFF; -fx-padding: 10; -fx-border-radius: 5; -fx-background-radius: 5;"
+        <VBox fx:id="cartVBox" spacing="15" minWidth="400" maxWidth="450"
+              style="-fx-background-color: #FFFFFF; -fx-padding: 15; -fx-border-radius: 8; -fx-background-radius: 8;"
               VBox.vgrow="ALWAYS">
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Cart" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
-                <Label fx:id="cartItemCountLabel" style="-fx-font-size: 14px; -fx-text-fill: #666666;"/>
-            </HBox>
-            
-            <!-- Scrollable Cart Table -->
-            <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
-                <TableView fx:id="cartTable" VBox.vgrow="ALWAYS"
-                          style="-fx-background-color: #FAFAFA; -fx-border-color: #E0E0E0; -fx-border-radius: 5; -fx-background-radius: 5;"/>
-            </ScrollPane>
-            
-            <!-- Cart Footer -->
-            <VBox spacing="10" style="-fx-padding: 10 0 0 0;">
-                <HBox fx:id="totalHBox" spacing="10" alignment="CENTER_RIGHT">
-                    <Label text="Total:" style="-fx-font-size: 16px; -fx-text-fill: #333333;"/>
-                </HBox>
-                
-                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
-                    <VBox spacing="10">
-                        <VBox spacing="5">
-                            <Label text="Client Name" style="-fx-font-size: 12px; -fx-text-fill: #666666;"/>
-                            <MFXTextField fx:id="clientNameField" prefWidth="250" promptText="Enter client name (required)" 
-                                          style="-fx-background-color: #F0F0F0; -fx-border-color: #CCCCCC; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8;"/>
-                        </VBox>
-                        <VBox spacing="5">
-                            <Label text="Payment Method" style="-fx-font-size: 12px; -fx-text-fill: #666666;"/>
-                            <MFXComboBox fx:id="paymentMethodComboBox" prefWidth="250" 
-                                         style="-fx-background-color: #F0F0F0; -fx-border-color: #CCCCCC; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8;"/>
-                        </VBox>
-                        <HBox spacing="10" alignment="CENTER">
-                            <MFXButton fx:id="checkoutButton" text="Checkout" onAction="#handleCheckout" 
-                                       style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 16 8 16; -fx-background-radius: 5;"/>
-                            <MFXButton fx:id="clearCartButton" text="Clear" onAction="#handleClearCart" 
-                                       style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 16 8 16; -fx-background-radius: 5;"/>
+            <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+                <VBox spacing="15">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Cart" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                        <Label fx:id="cartItemCountLabel" style="-fx-font-size: 14px; -fx-text-fill: #666666;"/>
+                    </HBox>
+                    
+                    <!-- Scrollable Cart Table -->
+                    <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+                        <TableView fx:id="cartTable" VBox.vgrow="ALWAYS"
+                                  style="-fx-background-color: #FAFAFA; -fx-border-color: #E0E0E0; -fx-border-radius: 5; -fx-background-radius: 5;"/>
+                    </ScrollPane>
+                    
+                    <!-- Cart Footer -->
+                    <VBox spacing="15" style="-fx-padding: 10 0 0 0;">
+                        <HBox fx:id="totalHBox" spacing="10" alignment="CENTER_RIGHT">
+                            <Label text="Total:" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
                         </HBox>
+                        
+                        <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: #FFFFFF; -fx-border-radius: 8; -fx-background-radius: 8; -fx-border-color: #E0E0E0; -fx-border-width: 1;">
+                            <Label text="Payment Details" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                            <VBox spacing="10" style="-fx-padding: 10;">
+                                <VBox spacing="5">
+                                    <Label text="Client Name" style="-fx-font-size: 14px; -fx-text-fill: #666666;"/>
+                                    <MFXTextField fx:id="clientNameField" prefWidth="350" promptText="Enter client name (required)" 
+                                                  style="-fx-background-color: #F9F9F9; -fx-border-color: #CCCCCC; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8;"/>
+                                </VBox>
+                                <VBox spacing="5">
+                                    <Label text="Payment Method" style="-fx-font-size: 14px; -fx-text-fill: #666666;"/>
+                                    <MFXComboBox fx:id="paymentMethodComboBox" prefWidth="350" 
+                                                 style="-fx-background-color: #F9F9F9; -fx-border-color: #CCCCCC; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8;"/>
+                                </VBox>
+                            </VBox>
+                            <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10;">
+                                <MFXButton fx:id="checkoutButton" text="Checkout" onAction="#handleCheckout" 
+                                           style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 12 24; -fx-background-radius: 5;"/>
+                                <MFXButton fx:id="clearCartButton" text="Clear" onAction="#handleClearCart" 
+                                           style="-fx-background-color: #FF5252; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 12 24; -fx-background-radius: 5;"/>
+                            </HBox>
+                        </VBox>
                     </VBox>
-                </ScrollPane>
-            </VBox>
+                </VBox>
+            </ScrollPane>
         </VBox>
     </HBox>
 </VBox>

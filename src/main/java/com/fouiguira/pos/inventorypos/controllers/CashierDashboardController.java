@@ -417,6 +417,12 @@ public class CashierDashboardController {
         handleSearch();
     }
 
+    @FXML
+    public void handleClearSearch() {
+        searchField.clear();
+        handleSearch(); // Refresh the product grid after clearing the search field
+    }
+
     private void handleAddToCart(Product selectedProduct) {
         Dialog<Integer> qtyDialog = new Dialog<>();
         qtyDialog.setTitle("Add to Cart");
