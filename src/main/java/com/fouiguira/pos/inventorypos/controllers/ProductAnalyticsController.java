@@ -99,8 +99,8 @@ public class ProductAnalyticsController {
             Product product = cellData.getValue();
             double profit = product.getPrice() - product.getPurchasePrice();
             double margin = calculateMargin(product);
-            // Show both profit and margin
-            String display = String.format("(%s%%) %s DH", df.format(margin), df.format(profit));
+            // Changed format to avoid the problematic string format
+            String display = df.format(margin) + "% (" + df.format(profit) + " DH)";
             return new javafx.beans.property.SimpleStringProperty(display);
         });
 
@@ -114,13 +114,12 @@ public class ProductAnalyticsController {
                     setStyle("");
                 } else {
                     setText(item);
-                    double margin = calculateMargin(getTableRow().getItem());
-                    if (margin < 10) {
-                        setStyle("-fx-text-fill: #D32F2F;"); // Red for low margins
-                    } else if (margin < 20) {
-                        setStyle("-fx-text-fill: #FFA726;"); // Orange for medium margins
-                    } else {
-                        setStyle("-fx-text-fill: #388E3C;"); // Green for good margins
+                    // Extract margin value for coloring (get value before the % symbol)
+                    try {
+                        double margin = Double.parseDouble(item.substring(0, item.indexOf('%')).replace(",", ""));
+                        setStyle(getMarginColor(margin));
+                    } catch (Exception e) {
+                        setStyle("");
                     }
                 }
             }
@@ -136,10 +135,14 @@ public class ProductAnalyticsController {
         // Set default sorting by absolute profit value (descending)
         marginColumn.setComparator((s1, s2) -> {
             if (s1 == null || s2 == null) return 0;
-            // Extract the profit value from the format "XX.XX (YYDH.YY%)"
-            double profit1 = Double.parseDouble(s1.substring(1, s1.indexOf(" ")).replace(",", ""));
-            double profit2 = Double.parseDouble(s2.substring(1, s2.indexOf(" ")).replace(",", ""));
-            return Double.compare(profit1, profit2);
+            try {
+                // Extract margin values for comparison
+                double margin1 = Double.parseDouble(s1.substring(0, s1.indexOf('%')).replace(",", ""));
+                double margin2 = Double.parseDouble(s2.substring(0, s2.indexOf('%')).replace(",", ""));
+                return Double.compare(margin1, margin2);
+            } catch (Exception e) {
+                return 0;
+            }
         });
     }
 

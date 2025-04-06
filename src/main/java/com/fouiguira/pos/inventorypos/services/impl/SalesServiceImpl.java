@@ -78,7 +78,13 @@ public class SalesServiceImpl implements SalesService {
         if (invoice == null) {
             invoice = invoiceService.createInvoiceFromSale(fullSale.getId());
         }
-        invoiceService.generateInvoicePdf(invoice);
+        
+        try {
+            // Generate the PDF
+            invoiceService.generateInvoicePdf(invoice);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate receipt: " + e.getMessage());
+        }
     }
 
     @Override

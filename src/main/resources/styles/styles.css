@@ -441,8 +441,8 @@
     -fx-background-radius: 5;
     -fx-border-radius: 5;
     -fx-border-color: #E0E0E0;
-    -fx-min-height: 500;
-    -fx-pref-height: 500;
+    -fx-min-height: 400;
+    -fx-pref-height: 400;
 }
 
 .table-view .column-header {

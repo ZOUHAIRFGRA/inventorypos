@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -142,8 +143,9 @@ public class InvoiceServiceImpl implements InvoiceService {
                 throw new IllegalStateException("Sale products not initialized");
             }
 
-            String fileName = "invoice_" + invoice.getId() + "_" + System.currentTimeMillis() + ".pdf";
-            PdfWriter writer = new PdfWriter(fileName);
+            String fileName = String.format("invoice_%d_%d.pdf", invoice.getId(), System.currentTimeMillis());
+            File pdfFile = new File(fileName);
+            PdfWriter writer = new PdfWriter(pdfFile);
             PdfDocument pdf = new PdfDocument(writer);
             pdf.setDefaultPageSize(PageSize.A4);
             Document document = new Document(pdf);
@@ -247,9 +249,28 @@ public class InvoiceServiceImpl implements InvoiceService {
             document.add(footer);
 
             document.close();
-            System.out.println("Invoice PDF generated: " + new File(fileName).getAbsolutePath());
+            System.out.println("Invoice PDF generated: " + pdfFile.getAbsolutePath());
+            
+            // Open the PDF file automatically
+            try {
+                if (Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().open(pdfFile);
+                } else {
+                    String os = System.getProperty("os.name").toLowerCase();
+                    ProcessBuilder pb;
+                    if (os.contains("windows")) {
+                        pb = new ProcessBuilder("cmd", "/c", pdfFile.getAbsolutePath());
+                    } else if (os.contains("mac")) {
+                        pb = new ProcessBuilder("open", pdfFile.getAbsolutePath());
+                    } else {
+                        pb = new ProcessBuilder("xdg-open", pdfFile.getAbsolutePath());
+                    }
+                    pb.start();
+                }
+            } catch (IOException e) {
+                System.out.println("Could not open PDF automatically: " + e.getMessage());
+            }
         } catch (Exception e) {
-            System.out.println("Failed to generate invoice PDF: " + e.getMessage());
             throw new RuntimeException("Failed to generate invoice PDF: " + e.getMessage());
         }
     }
