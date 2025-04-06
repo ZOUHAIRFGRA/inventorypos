@@ -157,7 +157,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                     logo = new Image(ImageDataFactory.create(logoPath))
                         .scaleToFit(100, 50)
                         .setHorizontalAlignment(HorizontalAlignment.LEFT)
-                        .setMarginBottom(10);
+                        .setMarginBottom(5); // Reduced margin between logo and business name
                     System.out.println("Logo loaded from: " + logoPath);
                 } else {
                     throw new IOException("Logo file invalid or empty: " + logoPath);
@@ -168,16 +168,30 @@ public class InvoiceServiceImpl implements InvoiceService {
                 logo = new Image(ImageDataFactory.create(blankImage.getAbsolutePath()))
                     .scaleToFit(100, 50)
                     .setHorizontalAlignment(HorizontalAlignment.LEFT)
-                    .setMarginBottom(10);
+                    .setMarginBottom(5); // Reduced margin between logo and business name
             }
 
-            Paragraph header = new Paragraph()
-                .add(logo)
+            // Create a table for the header to ensure proper alignment
+            Table headerTable = new Table(1).useAllAvailableWidth();
+            headerTable.setBorder(Border.NO_BORDER);
+            
+            Cell logoCell = new Cell().add(logo)
+                .setBorder(Border.NO_BORDER)
+                .setPadding(0)
+                .setMarginBottom(0);
+            
+            Cell businessNameCell = new Cell()
                 .add(new Paragraph(settings.getBusinessName())
                     .setTextAlignment(TextAlignment.LEFT)
-                    .setFontSize(12)
-                    .setBold());
-            document.add(header);
+                    .setFontSize(14) // Increased font size
+                    .setBold())
+                .setBorder(Border.NO_BORDER)
+                .setPadding(0)
+                .setMarginTop(0);
+            
+            headerTable.addCell(logoCell);
+            headerTable.addCell(businessNameCell);
+            document.add(headerTable);
 
             document.add(new Paragraph("INVOICE #" + invoice.getId())
                 .setTextAlignment(TextAlignment.RIGHT)
@@ -206,9 +220,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
             for (SaleProduct sp : sale.getProducts()) {
                 productsTable.addCell(createDataCell(sp.getProduct().getName()));
-                productsTable.addCell(createDataCell( String.format("%.2f", sp.getProduct().getPrice())) + " DH");
+                productsTable.addCell(createDataCell(String.format("%.2f DH", sp.getProduct().getPrice())));
                 productsTable.addCell(createDataCell(String.valueOf(sp.getQuantity())));
-                productsTable.addCell(createDataCell( String.format("%.2f", sp.getProduct().getPrice() * sp.getQuantity())) + " DH");
+                productsTable.addCell(createDataCell(String.format("%.2f DH", sp.getProduct().getPrice() * sp.getQuantity())));
             }
 
             productsTable.addFooterCell(new Cell(1, 3)
