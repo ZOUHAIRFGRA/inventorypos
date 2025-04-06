@@ -33,26 +33,40 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Controller
 public class CashierDashboardController {
 
-    @FXML private MFXTextField searchField;
-    @FXML private MFXComboBox<Category> categoryComboBox;
-    @FXML private GridPane productGrid;
+    @FXML
+    private MFXTextField searchField;
+    @FXML
+    private MFXComboBox<Category> categoryComboBox;
+    @FXML
+    private GridPane productGrid;
 
-    @FXML private TableView<SaleProduct> cartTable;
+    @FXML
+    private TableView<SaleProduct> cartTable;
     private TableColumn<SaleProduct, Void> cartImageCol;
     private TableColumn<SaleProduct, String> cartNameCol;
     private TableColumn<SaleProduct, Integer> cartQtyCol;
     private TableColumn<SaleProduct, Double> cartPriceCol;
-    @FXML private MFXTextField clientNameField;
-    @FXML private Label cartTotalLabel;
-    @FXML private MFXComboBox<String> paymentMethodComboBox;
-    @FXML private MFXButton checkoutButton;
-    @FXML private MFXButton clearCartButton;
+    @FXML
+    private MFXTextField clientNameField;
+    @FXML
+    private Label cartTotalLabel;
+    @FXML
+    private MFXComboBox<String> paymentMethodComboBox;
+    @FXML
+    private MFXButton checkoutButton;
+    @FXML
+    private MFXButton clearCartButton;
 
-    @FXML private VBox cartVBox;
-    @FXML private HBox totalHBox;
-    @FXML private Label welcomeLabel;
-    @FXML private MFXButton logoutButton;
-    @FXML private Label cartItemCountLabel;
+    @FXML
+    private VBox cartVBox;
+    @FXML
+    private HBox totalHBox;
+    @FXML
+    private Label welcomeLabel;
+    @FXML
+    private MFXButton logoutButton;
+    @FXML
+    private Label cartItemCountLabel;
 
     private final ProductService productService;
     private final CategoryService categoryService;
@@ -66,8 +80,8 @@ public class CashierDashboardController {
     private static final String PLACEHOLDER_IMAGE = "/images/placeholder.png";
 
     public CashierDashboardController(ProductService productService, CategoryService categoryService,
-                                      SalesService salesService, InvoiceService invoiceService,
-                                      UserService userService, ApplicationContext context) {
+            SalesService salesService, InvoiceService invoiceService,
+            UserService userService, ApplicationContext context) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.salesService = salesService;
@@ -121,7 +135,8 @@ public class CashierDashboardController {
                         case C -> handleClearCart();
                         case ENTER -> handleCheckout();
                         case L -> handleLogout();
-                        default -> { /* Do nothing */ }
+                        default -> {
+                            /* Do nothing */ }
                     }
                 }
             });
@@ -137,12 +152,14 @@ public class CashierDashboardController {
         // Image column
         cartImageCol = new TableColumn<>("Image");
         cartImageCol.setPrefWidth(60);
+        cartImageCol.setStyle("-fx-alignment: CENTER;"); // Center-align header
         cartImageCol.setCellFactory(col -> new TableCell<>() {
             private final ImageView imageView = new ImageView();
             {
                 imageView.setFitWidth(30);
                 imageView.setFitHeight(30);
             }
+
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
@@ -163,40 +180,49 @@ public class CashierDashboardController {
 
         // Name column
         cartNameCol = new TableColumn<>("Name");
-        cartNameCol.setPrefWidth(100);
-        cartNameCol.setCellValueFactory(cellData -> 
-            new javafx.beans.property.SimpleStringProperty(
-                cellData.getValue().getProduct().getName()
-            )
-        );
+        cartNameCol.setPrefWidth(120); // Increased width for better readability
+        cartNameCol.setStyle("-fx-alignment: CENTER;"); // Center-align header
+        cartNameCol.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
+                cellData.getValue().getProduct().getName()));
+        cartNameCol.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String name, boolean empty) {
+                super.updateItem(name, empty);
+                setText(empty ? null : name);
+                setStyle("-fx-alignment: CENTER;"); // Center-align content
+            }
+        });
 
         // Quantity column with adjustment buttons
         cartQtyCol = new TableColumn<>("Quantity");
         cartQtyCol.setPrefWidth(120);
+        cartQtyCol.setStyle("-fx-alignment: CENTER;"); // Center-align header
         cartQtyCol.setCellFactory(col -> new TableCell<>() {
             private final HBox box = new HBox(5);
             private final MFXButton minusBtn = new MFXButton();
             private final Label qtyLabel = new Label();
             private final MFXButton plusBtn = new MFXButton();
-            
+
             {
                 box.setAlignment(javafx.geometry.Pos.CENTER);
                 String btnStyle = "-fx-min-width: 24px; -fx-min-height: 24px; -fx-max-width: 24px; -fx-max-height: 24px;";
-                
+
                 // Add minus icon
                 Label minusIcon = new Label("−");
                 minusIcon.setStyle("-fx-font-family: 'System'; -fx-font-weight: bold;");
                 minusBtn.setGraphic(minusIcon);
-                minusBtn.setStyle(btnStyle + "-fx-background-color: #E0E0E0; -fx-text-fill: #333333; -fx-background-radius: 12;");
-                
+                minusBtn.setStyle(
+                        btnStyle + "-fx-background-color: #E0E0E0; -fx-text-fill: #333333; -fx-background-radius: 12;");
+
                 // Add plus icon
                 Label plusIcon = new Label("+");
                 plusIcon.setStyle("-fx-font-family: 'System'; -fx-font-weight: bold;");
                 plusBtn.setGraphic(plusIcon);
-                plusBtn.setStyle(btnStyle + "-fx-background-color: #E0E0E0; -fx-text-fill: #333333; -fx-background-radius: 12;");
-                
+                plusBtn.setStyle(
+                        btnStyle + "-fx-background-color: #E0E0E0; -fx-text-fill: #333333; -fx-background-radius: 12;");
+
                 qtyLabel.setStyle("-fx-min-width: 30px; -fx-alignment: center; -fx-font-size: 13px;");
-                
+
                 minusBtn.setOnAction(e -> {
                     SaleProduct item = getTableRow().getItem();
                     if (item != null && item.getQuantity() > 1) {
@@ -205,7 +231,7 @@ public class CashierDashboardController {
                         updateCartTotal();
                     }
                 });
-                
+
                 plusBtn.setOnAction(e -> {
                     SaleProduct item = getTableRow().getItem();
                     if (item != null && item.getQuantity() < item.getProduct().getStockQuantity()) {
@@ -214,10 +240,10 @@ public class CashierDashboardController {
                         updateCartTotal();
                     }
                 });
-                
+
                 box.getChildren().addAll(minusBtn, qtyLabel, plusBtn);
             }
-            
+
             @Override
             protected void updateItem(Integer quantity, boolean empty) {
                 super.updateItem(quantity, empty);
@@ -234,20 +260,15 @@ public class CashierDashboardController {
                 }
             }
         });
-        cartQtyCol.setCellValueFactory(cellData -> 
-            new javafx.beans.property.SimpleIntegerProperty(
-                cellData.getValue().getQuantity()
-            ).asObject()
-        );
+        cartQtyCol.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(
+                cellData.getValue().getQuantity()).asObject());
 
         // Price column
         cartPriceCol = new TableColumn<>("Price");
         cartPriceCol.setPrefWidth(80);
-        cartPriceCol.setCellValueFactory(cellData ->
-            new javafx.beans.property.SimpleDoubleProperty(
-                cellData.getValue().getProduct().getPrice()
-            ).asObject()
-        );
+        cartPriceCol.setStyle("-fx-alignment: CENTER;"); // Center-align header
+        cartPriceCol.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(
+                cellData.getValue().getProduct().getPrice()).asObject());
         cartPriceCol.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(Double price, boolean empty) {
@@ -256,6 +277,7 @@ public class CashierDashboardController {
                     setText(null);
                 } else {
                     setText(df.format(price) + "DH");
+                    setStyle("-fx-alignment: CENTER;"); // Center-align content
                 }
             }
         });
@@ -263,10 +285,12 @@ public class CashierDashboardController {
         // Remove button column
         TableColumn<SaleProduct, Void> removeCol = new TableColumn<>("");
         removeCol.setPrefWidth(50);
+        removeCol.setStyle("-fx-alignment: CENTER;"); // Center-align header
         removeCol.setCellFactory(col -> new TableCell<>() {
             private final MFXButton removeButton = new MFXButton("X");
             {
-                removeButton.setStyle("-fx-background-color: #E91E63; -fx-text-fill: white; -fx-font-size: 10px; -fx-min-width: 24px; -fx-min-height: 24px; -fx-max-width: 24px; -fx-max-height: 24px; -fx-background-radius: 12;");
+                removeButton.setStyle(
+                        "-fx-background-color: #E91E63; -fx-text-fill: white; -fx-font-size: 12px; -fx-min-width: 30px; -fx-min-height: 30px; -fx-max-width: 30px; -fx-max-height: 30px; -fx-background-radius: 15;");
                 removeButton.setOnAction(e -> {
                     SaleProduct item = getTableRow().getItem();
                     if (item != null) {
@@ -275,7 +299,7 @@ public class CashierDashboardController {
                     }
                 });
             }
-            
+
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
@@ -300,6 +324,7 @@ public class CashierDashboardController {
             public String toString(Category category) {
                 return category == null ? "All Categories" : category.getName();
             }
+
             @Override
             public Category fromString(String string) {
                 return categoryComboBox.getItems().stream()
@@ -334,15 +359,28 @@ public class CashierDashboardController {
     private VBox createProductTile(Product product) {
         VBox tile = new VBox(5);
         tile.setPrefSize(150, 150);
-        
+
         // Add warning style for low stock
         String baseStyle = "-fx-background-color: #FFFFFF; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-alignment: center;";
         if (product.getStockQuantity() < 5) {
-            tile.setStyle(baseStyle + "; -fx-border-color: #FFA726; -fx-effect: dropshadow(three-pass-box, #FFA726, 5, 0, 0, 0);");
+            tile.setStyle(baseStyle
+                    + "; -fx-border-color: #FFA726; -fx-effect: dropshadow(three-pass-box, #FFA726, 5, 0, 0, 0);");
         } else {
             tile.setStyle(baseStyle + "; -fx-border-color: #E0E0E0;");
         }
-        
+
+        // Add hover effect
+        tile.setOnMouseEntered(e -> tile.setStyle(baseStyle
+                + "; -fx-border-color: #4CAF50; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);"));
+        tile.setOnMouseExited(e -> {
+            if (product.getStockQuantity() < 5) {
+                tile.setStyle(baseStyle
+                        + "; -fx-border-color: #FFA726; -fx-effect: dropshadow(three-pass-box, #FFA726, 5, 0, 0, 0);");
+            } else {
+                tile.setStyle(baseStyle + "; -fx-border-color: #E0E0E0;");
+            }
+        });
+
         tile.setOnMouseClicked(e -> handleAddToCart(product));
 
         ImageView imageView = new ImageView();
@@ -373,9 +411,9 @@ public class CashierDashboardController {
 
         Label nameLabel = new Label(product.getName());
         nameLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-wrap-text: true; -fx-max-width: 130;");
-        Label priceLabel = new Label( df.format(product.getPrice()) + " DH");
+        Label priceLabel = new Label(df.format(product.getPrice()) + " DH");
         priceLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666666;");
-        
+
         // Add stock warning icon for low stock
         HBox stockBox = new HBox(5);
         stockBox.setAlignment(javafx.geometry.Pos.CENTER);
@@ -402,9 +440,9 @@ public class CashierDashboardController {
     public void handleSearch() {
         String searchText = searchField.getText().trim().toLowerCase();
         Category selectedCategory = categoryComboBox.getSelectionModel().getSelectedItem();
-        List<Product> filteredProducts = selectedCategory != null 
-            ? productService.getProductsByCategory(selectedCategory.getName()) 
-            : productService.getAllProducts();
+        List<Product> filteredProducts = selectedCategory != null
+                ? productService.getProductsByCategory(selectedCategory.getName())
+                : productService.getAllProducts();
 
         if (!searchText.isEmpty()) {
             filteredProducts.removeIf(p -> !p.getName().toLowerCase().contains(searchText));
@@ -440,17 +478,17 @@ public class CashierDashboardController {
         Label minusIcon = new Label("−");
         minusIcon.setStyle("-fx-font-family: 'System'; -fx-font-weight: bold;");
         minusBtn.setGraphic(minusIcon);
-        
+
         Label qtyLabel = new Label("1");
         qtyLabel.setStyle("-fx-min-width: 50px; -fx-alignment: center; -fx-font-size: 16px;");
-        
+
         MFXButton plusBtn = new MFXButton();
         Label plusIcon = new Label("+");
         plusIcon.setStyle("-fx-font-family: 'System'; -fx-font-weight: bold;");
         plusBtn.setGraphic(plusIcon);
 
         String btnStyle = "-fx-min-width: 30px; -fx-min-height: 30px; -fx-max-width: 30px; -fx-max-height: 30px; " +
-                         "-fx-background-color: #E0E0E0; -fx-text-fill: #333333; -fx-background-radius: 15;";
+                "-fx-background-color: #E0E0E0; -fx-text-fill: #333333; -fx-background-radius: 15;";
         minusBtn.setStyle(btnStyle);
         plusBtn.setStyle(btnStyle);
 
@@ -496,10 +534,9 @@ public class CashierDashboardController {
         stockLabel.setStyle("-fx-text-fill: #666666;");
 
         content.getChildren().addAll(
-            new Label("Quantity:"),
-            qtyBox,
-            stockLabel
-        );
+                new Label("Quantity:"),
+                qtyBox,
+                stockLabel);
 
         // Set the custom content
         qtyDialog.getDialogPane().setContent(content);
@@ -528,14 +565,15 @@ public class CashierDashboardController {
                 return;
             }
             if (qty > selectedProduct.getStockQuantity()) {
-                showAlert(AlertType.WARNING, "Warning", "Not enough stock! Available: " + selectedProduct.getStockQuantity());
+                showAlert(AlertType.WARNING, "Warning",
+                        "Not enough stock! Available: " + selectedProduct.getStockQuantity());
                 return;
             }
 
             SaleProduct item = cartItems.stream()
-                .filter(i -> i.getProduct().getId().equals(selectedProduct.getId()))
-                .findFirst()
-                .orElse(new SaleProduct());
+                    .filter(i -> i.getProduct().getId().equals(selectedProduct.getId()))
+                    .findFirst()
+                    .orElse(new SaleProduct());
             if (item.getProduct() == null) {
                 item.setProduct(selectedProduct);
                 item.setQuantity(0);
@@ -547,9 +585,11 @@ public class CashierDashboardController {
                     cartItems.add(item);
                 }
                 updateCartTotal();
-                showAlert(AlertType.INFORMATION, "Success", "Added " + qty + " x " + selectedProduct.getName() + " to cart");
+                showAlert(AlertType.INFORMATION, "Success",
+                        "Added " + qty + " x " + selectedProduct.getName() + " to cart");
             } else {
-                showAlert(AlertType.WARNING, "Warning", "Total quantity exceeds stock! Available: " + selectedProduct.getStockQuantity());
+                showAlert(AlertType.WARNING, "Warning",
+                        "Total quantity exceeds stock! Available: " + selectedProduct.getStockQuantity());
             }
         });
     }
@@ -589,7 +629,8 @@ public class CashierDashboardController {
             Invoice invoice = invoiceService.createInvoiceFromSale(savedSale.getId());
             productService.updateStockAfterSale(cartItems);
             invoiceService.generateInvoicePdf(invoice);
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Checkout successful! Invoice #" + invoice.getId() + " generated.");
+            showAlert(Alert.AlertType.INFORMATION, "Success",
+                    "Checkout successful! Invoice #" + invoice.getId() + " generated.");
             clearCart();
             loadProducts();
         } catch (Exception e) {
@@ -613,14 +654,15 @@ public class CashierDashboardController {
             Parent root = loader.load();
             stage.setScene(new Scene(root));
             stage.setTitle("Inventory POS System - Login");
-            String cssPath = getClass().getResource("/styles/styles.css") != null 
-                ? getClass().getResource("/styles/styles.css").toExternalForm() 
-                : null;
+            String cssPath = getClass().getResource("/styles/styles.css") != null
+                    ? getClass().getResource("/styles/styles.css").toExternalForm()
+                    : null;
             if (cssPath != null) {
                 stage.getScene().getStylesheets().add(cssPath);
             }
             stage.show();
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Logged out successfully. Contact an admin if you forget your password.");
+            showAlert(Alert.AlertType.INFORMATION, "Success",
+                    "Logged out successfully. Contact an admin if you forget your password.");
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Error logging out: " + e.getMessage());
             e.printStackTrace();
@@ -646,11 +688,10 @@ public class CashierDashboardController {
         double total = cartItems.stream().mapToDouble(i -> i.getQuantity() * i.getProduct().getPrice()).sum();
         int totalItems = cartItems.stream().mapToInt(SaleProduct::getQuantity).sum();
         cartTotalLabel.setText(String.format("%.2f DH", total));
-        cartItemCountLabel.setText(String.format("%d %s (%d unique)", 
-            totalItems,
-            totalItems != 1 ? "items" : "item",
-            cartItems.size()
-        ));
+        cartItemCountLabel.setText(String.format("%d %s (%d unique)",
+                totalItems,
+                totalItems != 1 ? "items" : "item",
+                cartItems.size()));
 
         // Update button states
         checkoutButton.setDisable(cartItems.isEmpty());
