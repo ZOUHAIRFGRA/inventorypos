@@ -7,6 +7,7 @@ import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXComboBox;
 import io.github.palexdev.materialfx.controls.MFXTextField;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -48,14 +49,22 @@ public class EditProductController {
 
     @FXML
     public void initialize() {
-        configureFields();
-        loadCategories(); // Load categories first
-        populateFields(); // Then populate fields
+        // First load categories
+        loadCategories();
+        
+        // Then populate fields (without formatters interfering)
+        if (productToEdit != null) {
+            populateFields();
+        }
+        
+        // Finally set up the text formatters
+        setupValidation();
     }
 
     private void loadCategories() {
         List<Category> categories = categoryService.getAllCategories();
         categoryComboBox.setItems(FXCollections.observableArrayList(categories));
+        
         categoryComboBox.setConverter(new javafx.util.StringConverter<Category>() {
             @Override
             public String toString(Category category) {
@@ -64,47 +73,75 @@ public class EditProductController {
 
             @Override
             public Category fromString(String string) {
+                if (string == null || string.trim().isEmpty()) {
+                    return null;
+                }
                 return categoryComboBox.getItems().stream()
-                        .filter(c -> c.getName().equals(string))
+                        .filter(c -> c.getName().equals(string.trim()))
                         .findFirst()
                         .orElse(null);
             }
         });
     }
 
-    private void configureFields() {
-        priceField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
-            change.getControlNewText().matches("^[0-9]*\\.?[0-9]{0,2}DH") ? change : null));
-        purchasePriceField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
-            change.getControlNewText().matches("^[0-9]*\\.?[0-9]{0,2}DH") ? change : null));
-        stockField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> 
-            change.getControlNewText().matches("^[0-9]*DH") ? change : null));
-        imagePathField.setEditable(false);
-    }
-
     private void populateFields() {
+        // Set the basic text fields
         productNameField.setText(productToEdit.getName());
-        priceField.setText(String.valueOf(productToEdit.getPrice()));
-        purchasePriceField.setText(String.valueOf(productToEdit.getPurchasePrice()));
-        stockField.setText(String.valueOf(productToEdit.getStockQuantity()));
-        imagePathField.setText(productToEdit.getImagePath());
         descriptionField.setText(productToEdit.getDescription());
-
-        // Set the existing category as selected
-        Category existingCategory = productToEdit.getCategory();
-        if (existingCategory != null) {
-            categoryComboBox.getItems().stream()
-                .filter(c -> c.getId().equals(existingCategory.getId())) // Match by ID
-                .findFirst()
-                .ifPresent(category -> categoryComboBox.selectItem(category)); // Use selectItem for MFXComboBox
+        
+        // Set the prices and stock quantity
+        priceField.setText(String.format("%.2f", productToEdit.getPrice()));
+        purchasePriceField.setText(String.format("%.2f", productToEdit.getPurchasePrice()));
+        stockField.setText(String.valueOf(productToEdit.getStockQuantity()));
+        
+        // Set the category by matching ID
+        if (productToEdit.getCategory() != null) {
+            Category productCategory = productToEdit.getCategory();
+            for (Category category : categoryComboBox.getItems()) {
+                if (category.getId().equals(productCategory.getId())) {
+                    categoryComboBox.setValue(category);
+                    break;
+                }
+            }
         }
-
+        
+        // Set image path and load image
+        imagePathField.setText(productToEdit.getImagePath());
         if (productToEdit.getImagePath() != null && !productToEdit.getImagePath().isEmpty()) {
             File file = new File(productToEdit.getImagePath());
             if (file.exists()) {
                 productImage.setImage(new Image(file.toURI().toString(), 150, 150, true, true));
             }
         }
+    }
+
+    private void setupValidation() {
+        // Set up text formatters that don't interfere with existing values
+        priceField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.isEmpty()) {
+                return change;
+            }
+            return newText.matches("^\\d*\\.?\\d*$") ? change : null;
+        }));
+        
+        purchasePriceField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.isEmpty()) {
+                return change;
+            }
+            return newText.matches("^\\d*\\.?\\d*$") ? change : null;
+        }));
+        
+        stockField.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.isEmpty()) {
+                return change;
+            }
+            return newText.matches("^\\d*$") ? change : null;
+        }));
+        
+        imagePathField.setEditable(false);
     }
 
     @FXML
