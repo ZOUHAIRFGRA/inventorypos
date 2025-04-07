@@ -45,6 +45,7 @@ public class ProductAnalyticsController {
 
     @FXML
     public void initialize() {
+        priceAnalysisTable.getStyleClass().add("price-analysis-table");
         setupFilters();
         setupTable();
         loadData();
