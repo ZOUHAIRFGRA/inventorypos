@@ -6,7 +6,8 @@
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.fouiguira.pos.inventorypos.controllers.AddProductController"
-      spacing="15" style="-fx-padding: 20;">
+      spacing="10" style="-fx-padding: 15;"
+       prefWidth="400" maxHeight="400" maxWidth="450">
 
     <HBox alignment="CENTER">
         <Label text="Add New Product" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>

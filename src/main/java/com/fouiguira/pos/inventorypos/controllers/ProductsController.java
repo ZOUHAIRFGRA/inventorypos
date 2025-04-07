@@ -55,9 +55,11 @@ public class ProductsController {
     private MFXTableColumn<Product> colPrice;
 
     @FXML
+    private MFXTableColumn<Product> colPurchasePrice;
+
+    @FXML
     private MFXTableColumn<Product> colStock;
 
-    
     @FXML
     private MFXTableColumn<Product> colActions;
 
@@ -106,13 +108,11 @@ public class ProductsController {
         colPrice.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getPrice));
         colPrice.setComparator(Comparator.comparing(Product::getPrice));
 
+        colPurchasePrice.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getPurchasePrice));
+        colPurchasePrice.setComparator(Comparator.comparing(Product::getPurchasePrice));
+
         colStock.setRowCellFactory(product -> new MFXTableRowCell<>(Product::getStockQuantity));
         colStock.setComparator(Comparator.comparing(Product::getStockQuantity));
-
-        
-        
-
-
 
         colActions.setRowCellFactory(product -> {
             MFXTableRowCell<Product, Void> cell = new MFXTableRowCell<>(p -> null);
@@ -167,6 +167,7 @@ public class ProductsController {
             new StringFilter<>("Name", Product::getName),
             new StringFilter<>("Category", p -> p.getCategory() != null ? p.getCategory().getName() : "No Category"),
             new DoubleFilter<>("Price", Product::getPrice),
+            new DoubleFilter<>("Purchase Price", Product::getPurchasePrice),
             new IntegerFilter<>("Stock", Product::getStockQuantity)
         );
 
@@ -195,6 +196,7 @@ public class ProductsController {
                 (product.getCategory() != null && 
                  product.getCategory().getName().toLowerCase().contains(searchText.toLowerCase())) ||
                 String.valueOf(product.getPrice()).contains(searchText) ||
+                String.valueOf(product.getPurchasePrice()).contains(searchText) ||
                 String.valueOf(product.getStockQuantity()).contains(searchText)
             )
             .toList();
@@ -316,15 +318,16 @@ public class ProductsController {
             if (file != null) {
                 try (PrintWriter writer = new PrintWriter(file)) {
                     // Write CSV header
-                    writer.println("ID,Name,Category,Price,Stock,Description");
+                    writer.println("ID,Name,Category,Price,Purchase Price,Stock,Description");
                     
                     // Write product data
                     for (Product product : products) {
-                        writer.println(String.format("%d,\"%s\",\"%s\",%.2f,%d,\"%s\"",
+                        writer.println(String.format("%d,\"%s\",\"%s\",%.2f,%.2f,%d,\"%s\"",
                             product.getId(),
                             product.getName(),
                             product.getCategory() != null ? product.getCategory().getName() : "",
                             product.getPrice(),
+                            product.getPurchasePrice(),
                             product.getStockQuantity(),
                             product.getDescription() != null ? product.getDescription() : ""
                         ));

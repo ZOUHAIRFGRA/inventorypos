@@ -48,7 +48,8 @@
                 <MFXTableColumn fx:id="colId" text="ID" prefWidth="80" />
                 <MFXTableColumn fx:id="colName" text="Name" prefWidth="250" />
                 <MFXTableColumn fx:id="colCategory" text="Category" prefWidth="180" />
-                <MFXTableColumn fx:id="colPrice" text="Price" prefWidth="120" />
+                <MFXTableColumn fx:id="colPrice" text="Selling Price" prefWidth="120" />
+                <MFXTableColumn fx:id="colPurchasePrice" text="Purchase Price" prefWidth="120" />
                 <MFXTableColumn fx:id="colStock" text="Stock" prefWidth="120" />
                 <MFXTableColumn fx:id="colActions" text="Actions" prefWidth="250" />
             </tableColumns>
