@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 public class EditProductController {
@@ -93,10 +94,10 @@ public class EditProductController {
             }
         }
         
-        // Then populate other fields
+        // Then populate other fields with explicit Locale.US for decimal format
         productNameField.setText(productToEdit.getName());
-        priceField.setText(String.format("%.2f", productToEdit.getPrice()));
-        purchasePriceField.setText(String.format("%.2f", productToEdit.getPurchasePrice()));
+        priceField.setText(String.format(Locale.US, "%.2f", productToEdit.getPrice()));
+        purchasePriceField.setText(String.format(Locale.US, "%.2f", productToEdit.getPurchasePrice()));
         stockField.setText(String.valueOf(productToEdit.getStockQuantity()));
         imagePathField.setText(productToEdit.getImagePath());
         descriptionField.setText(productToEdit.getDescription());
