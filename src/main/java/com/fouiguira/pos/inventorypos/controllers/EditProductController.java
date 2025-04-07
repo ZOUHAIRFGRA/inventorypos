@@ -49,16 +49,14 @@ public class EditProductController {
 
     @FXML
     public void initialize() {
-        // First load categories
         loadCategories();
-        
-        // Then populate fields (without formatters interfering)
-        if (productToEdit != null) {
-            populateFields();
-        }
-        
-        // Finally set up the text formatters
-        setupValidation();
+        // Move everything into Platform.runLater to ensure proper initialization order
+        Platform.runLater(() -> {
+            if (productToEdit != null) {
+                populateFields();
+                setupValidation();  // Setup validation after fields are populated
+            }
+        });
     }
 
     private void loadCategories() {
@@ -85,28 +83,25 @@ public class EditProductController {
     }
 
     private void populateFields() {
-        // Set the basic text fields
-        productNameField.setText(productToEdit.getName());
-        descriptionField.setText(productToEdit.getDescription());
-        
-        // Set the prices and stock quantity
-        priceField.setText(String.format("%.2f", productToEdit.getPrice()));
-        purchasePriceField.setText(String.format("%.2f", productToEdit.getPurchasePrice()));
-        stockField.setText(String.valueOf(productToEdit.getStockQuantity()));
-        
-        // Set the category by matching ID
+        // First populate the category
         if (productToEdit.getCategory() != null) {
-            Category productCategory = productToEdit.getCategory();
             for (Category category : categoryComboBox.getItems()) {
-                if (category.getId().equals(productCategory.getId())) {
+                if (category.getId().equals(productToEdit.getCategory().getId())) {
                     categoryComboBox.setValue(category);
                     break;
                 }
             }
         }
         
-        // Set image path and load image
+        // Then populate other fields
+        productNameField.setText(productToEdit.getName());
+        priceField.setText(String.format("%.2f", productToEdit.getPrice()));
+        purchasePriceField.setText(String.format("%.2f", productToEdit.getPurchasePrice()));
+        stockField.setText(String.valueOf(productToEdit.getStockQuantity()));
         imagePathField.setText(productToEdit.getImagePath());
+        descriptionField.setText(productToEdit.getDescription());
+
+        // Load image if it exists
         if (productToEdit.getImagePath() != null && !productToEdit.getImagePath().isEmpty()) {
             File file = new File(productToEdit.getImagePath());
             if (file.exists()) {
