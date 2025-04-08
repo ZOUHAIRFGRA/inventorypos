@@ -8,11 +8,11 @@
           styleClass="grid-pane" vgap="10.0" xmlns="http://javafx.com/javafx/17.0.12" 
           xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fouiguira.pos.inventorypos.controllers.CategoryController">
     <columnConstraints>
-        <ColumnConstraints halignment="CENTER" minWidth="10.0" hgrow="ALWAYS" />
+        <ColumnConstraints halignment="CENTER" minWidth="10.0" />
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
+        <RowConstraints minHeight="10.0" prefHeight="32.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
     </rowConstraints>
     <padding>
         <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
@@ -21,25 +21,24 @@
         <!-- Background with shadow -->
         <StackPane styleClass="content-panel" GridPane.columnSpan="2147483647" GridPane.rowSpan="2147483647">
             <GridPane.margin>
-                <Insets bottom="-15.0"  top="-15.0" />
+                <Insets bottom="-15.0" left="-15.0" right="-15.0" top="-15.0" />
             </GridPane.margin>
         </StackPane>
 
         <!-- Header with title and add button -->
-        <HBox alignment="CENTER" spacing="20" GridPane.columnSpan="2147483647" styleClass="header-container">
+        <HBox alignment="CENTER" spacing="20" GridPane.columnSpan="2147483647">
             <Label text="Categories" styleClass="view-header"/>
             <Region HBox.hgrow="ALWAYS" />
             <MFXButton fx:id="addButton" text="Add Category" onAction="#openAddCategoryView" 
                       styleClass="button-primary"/>
-
         </HBox>
 
         <!-- Enhanced Category Table -->
-        <MFXTableView fx:id="categoryTable" styleClass="products-table-view" 
+        <MFXTableView fx:id="categoryTable" prefHeight="500" prefWidth="1000" styleClass="products-table-view" 
                       GridPane.rowIndex="1" GridPane.columnSpan="2147483647"
                       GridPane.vgrow="ALWAYS">
             <tableColumns>
-                <MFXTableColumn fx:id="colId" text="ID" prefWidth="100" />
+                <MFXTableColumn fx:id="colId" text="ID" prefWidth="80" />
                 <MFXTableColumn fx:id="colName" text="Name" prefWidth="300" />
                 <MFXTableColumn fx:id="colDescription" text="Description" prefWidth="400" />
                 <MFXTableColumn fx:id="colActions" text="Actions" prefWidth="200" />

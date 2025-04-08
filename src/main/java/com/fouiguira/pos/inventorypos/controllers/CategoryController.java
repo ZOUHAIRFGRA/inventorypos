@@ -116,10 +116,6 @@ public class CategoryController {
         // Table settings
         categoryTable.setFooterVisible(true);
         categoryTable.autosizeColumnsOnInitialization();
-        
-        // Make table fill available space
-        categoryTable.prefWidthProperty().bind(categoryTable.getParent().layoutBoundsProperty().map(bounds -> bounds.getWidth() - 60)); // 60 is for padding
-        categoryTable.prefHeightProperty().bind(categoryTable.getParent().layoutBoundsProperty().map(bounds -> bounds.getHeight() - 60));
     }
 
     private void loadCategories() {
@@ -143,7 +139,7 @@ public class CategoryController {
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not open add category window");
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open add category window: " + e.getMessage());
         }
     }
 
@@ -162,22 +158,22 @@ public class CategoryController {
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not open edit category window");
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open edit category window: " + e.getMessage());
         }
     }
 
     private void handleDeleteCategory(Category category) {
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Delete Category");
-        confirmation.setHeaderText("Delete " + category.getName());
-        confirmation.setContentText("Are you sure you want to delete this category? This action cannot be undone.");
-        
+        confirmation.setHeaderText("Are you sure you want to delete " + category.getName() + "?");
+        confirmation.setContentText("This action cannot be undone.");
+
         confirmation.showAndWait().ifPresent(response -> {
             if (response == javafx.scene.control.ButtonType.OK) {
                 try {
                     categoryService.deleteCategory(category.getId());
                     loadCategories();
-                    showAlert(Alert.AlertType.INFORMATION, "Success", "Category deleted successfully");
+                    showAlert(Alert.AlertType.INFORMATION, "Success", "Category deleted successfully!");
                 } catch (Exception e) {
                     showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete category: " + e.getMessage());
                 }
