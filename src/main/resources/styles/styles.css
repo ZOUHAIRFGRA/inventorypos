@@ -40,36 +40,95 @@
 }
 /* Sidebar Styling */
 .sidebar {
-    -fx-background-color: #2c3e50;
-    -fx-border-color: #34495e;
+    -fx-background-color: #1a2f6d; /* Recommended color for consistency with login page */
+    -fx-border-color: #2b4db3; /* Slightly lighter shade for the border */
     -fx-border-width: 0 1 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5); /* Subtle shadow for depth */
 }
 
+/* Sidebar Header */
 .sidebar-header {
-    -fx-font-size: 20px;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: white;
-    -fx-padding: 10 0 20 0;
+    -fx-padding: 15 0 25 0;
 }
 
+/* Sidebar Buttons */
 .sidebar-button {
     -fx-background-color: transparent;
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-alignment: center-left;
-    -fx-padding: 10 15 10 15;
+    -fx-padding: 12 15 12 15;
     -fx-cursor: hand;
     -fx-max-width: Infinity;
+    -fx-transition: all 0.2s ease-in-out;
 }
 
+/* Hover State for Sidebar Buttons */
 .sidebar-button:hover {
-    -fx-background-color: #34495e;
+    -fx-background-color: #2b4db3; /* Lighter shade of the sidebar color */
+    -fx-text-fill: white;
 }
 
+/* Pressed State for Sidebar Buttons */
 .sidebar-button:pressed {
-    -fx-background-color: #1abc9c;
+    -fx-background-color: #152b6b; /* Darker shade for pressed state */
+    -fx-text-fill: white;
 }
 
+/* Active State for Sidebar Buttons (to indicate the selected menu item) */
+.sidebar-button.active {
+    -fx-background-color: #2b4db3; /* Same as hover for consistency */
+    -fx-border-color: #66b0ff; /* Light blue accent to indicate active */
+    -fx-border-width: 0 0 0 3; /* Left border to highlight active item */
+    -fx-text-fill: white;
+}
+
+/* Logout Button Specific Styling */
+.logout-button {
+    -fx-text-fill: #e74c3c; /* Red to indicate a destructive action */
+}
+
+.logout-button .mfx-font-icon {
+    -fx-fill: #e74c3c; /* Match the icon color to the text */
+}
+
+.logout-button:hover {
+    -fx-background-color: #e74c3c; /* Red background on hover */
+    -fx-text-fill: white;
+}
+
+.logout-button:hover .mfx-font-icon {
+    -fx-fill: white; /* White icon on hover */
+}
+
+.logout-button:pressed {
+    -fx-background-color: #c0392b; /* Darker red for pressed state */
+    -fx-text-fill: white;
+}
+
+.logout-button:pressed .mfx-font-icon {
+    -fx-fill: white;
+}
+
+/* Ensure Icons Remain White for Non-Logout Buttons */
+.sidebar-button .mfx-font-icon {
+    -fx-fill: white;
+}
+
+.sidebar-button:hover .mfx-font-icon {
+    -fx-fill: white;
+}
+
+.sidebar-button:pressed .mfx-font-icon {
+    -fx-fill: white;
+}
+
+.sidebar-button.active .mfx-font-icon {
+    -fx-fill: white;
+}
 .logout-button {
     -fx-background-color: transparent;
 }

@@ -3,13 +3,12 @@
 <?import javafx.scene.control.*?>
 <?import io.github.palexdev.materialfx.controls.*?>
 <?import io.github.palexdev.mfxresources.fonts.*?>
-<?import javafx.geometry.*?> <!-- Added for Insets -->
+<?import javafx.geometry.*?>
 
 <BorderPane fx:id="adminLayout" xmlns:fx="http://javafx.com/fxml/1" 
             xmlns="http://javafx.com/javafx/17.0.12" 
             fx:controller="com.fouiguira.pos.inventorypos.controllers.AdminDashboardController"
-            prefWidth="1280" prefHeight="670"
-            >
+            prefWidth="1280" prefHeight="670">
     <!-- Left Sidebar for Navigation -->
     <left>
         <VBox fx:id="sidebar" spacing="10" styleClass="sidebar" prefWidth="250">
@@ -55,7 +54,6 @@
                         <MFXFontIcon description="fas-users" size="20" color="white" />
                     </graphic>
                 </MFXButton>
-             
                 <MFXButton fx:id="settingsButton" text="Settings" onAction="#loadSettings" styleClass="sidebar-button">
                     <graphic>
                         <MFXFontIcon description="fas-gear" size="20" color="white" />
