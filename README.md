@@ -4,33 +4,109 @@ A desktop Point of Sale (POS) system for inventory management built with Spring 
 
 ## Features
 
-- **User Role Management**
-  - Owner/Admin access
-  - Cashier access
-  - Role-based access control
+### User Role Management
+- **Multi-level Access Control**
+  - Owner/Admin full system access
+  - Cashier restricted access
+  - Staff limited access
+  - Support admin for system maintenance
+- **Security Features**
+  - Secure password hashing
+  - Password reset functionality
+  - Temporary password system
+  - Session management
 
-- **Product Management**
+### Product Management
+- **Comprehensive Product Control**
   - Add, edit, and delete products
-  - Image support for products
-  - Category management
-  - Stock tracking
+  - Bulk product import/export
+  - Product image management
+  - Custom product descriptions
+  - Barcode support
+- **Category Management**
+  - Create and manage categories
+  - Category-based filtering
+  - Category analytics
+- **Inventory Control**
+  - Real-time stock tracking
+  - Low stock alerts
+  - Stock history
+  - Auto stock updates on sales
+  - Initial stock tracking
 
-- **Sales Management**
-  - Point of Sale interface for cashiers
-  - Shopping cart functionality
+### Sales Management
+- **Modern POS Interface**
+  - Intuitive product search
+  - Quick category filters
+  - Real-time stock validation
+  - Dynamic pricing updates
+- **Advanced Cart Features**
+  - Multiple items management
+  - Quantity adjustments
+  - Real-time total calculation
+  - Cart save/restore
+  - Quick item removal
+- **Payment Processing**
   - Multiple payment methods
-  - Sales history tracking
-  - Receipt generation (PDF)
+  - Split payment support
+  - Payment validation
+  - Change calculation
+- **Receipt System**
+  - Custom receipt generation
+  - PDF receipt export
+  - Digital receipt copies
+  - Receipt reprint functionality
 
-- **Invoice Management**
-  - Generate and manage invoices
-  - PDF invoice generation
+### Analytics & Reporting
+- **Sales Analytics**
+  - Daily/Monthly/Annual reports
+  - Sales trend analysis
+  - Top selling products
+  - Revenue tracking
+- **Product Analytics**
+  - Stock level analysis
+  - Product performance metrics
+  - Margin calculations
+  - Category-wise analysis
+- **Export Capabilities**
+  - Sales data export
+  - Inventory reports
+  - Custom report generation
+  - Multiple export formats
+
+### Business Management
+- **Business Settings**
+  - Company information management
+  - Logo customization
+  - Contact details
+  - Business hours
+- **Data Management**
+  - Automated backups
+  - Data restore functionality
+  - Data export tools
+  - System logs
+- **Invoice System**
+  - Professional invoice generation
+  - Invoice customization
+  - PDF export
   - Invoice history tracking
 
-- **Business Settings**
-  - Customize business information
-  - Logo management
-  - Backup and restore functionality
+### User Interface
+- **Modern Design**
+  - Material design components
+  - Responsive layouts
+  - Dark/Light theme support
+  - Custom styling
+- **Usability Features**
+  - Keyboard shortcuts
+  - Quick actions
+  - Search functionality
+  - Sorting and filtering
+- **Notifications**
+  - Low stock alerts
+  - Sale completion alerts
+  - System notifications
+  - Error notifications
 
 ## Technology Stack
 
@@ -131,7 +207,15 @@ Please read CONTRIBUTING.md for details on our code of conduct and the process f
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License (CC BY-NC-ND 4.0). This means:
+
+- ✅ You can use and share the code
+- ✅ You can contribute via pull requests
+- ❌ You cannot use it commercially
+- ❌ You cannot distribute modified versions
+- ❌ You must provide attribution
+
+See the [LICENSE](LICENSE) file for details.
 
 ## Support
 
