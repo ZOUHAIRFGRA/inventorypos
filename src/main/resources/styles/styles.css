@@ -104,74 +104,7 @@
     -fx-text-fill: #333333;
 }
 
-/* Login-specific Red Styles */
-.login-container {
-    -fx-background-color: #ffffff;
-}
 
-.login-title {
-    -fx-text-fill: #ff0000;
-    -fx-font-size: 24px;
-    -fx-font-weight: bold;
-}
-
-.button-success {
-    -fx-background-color: #ff3333;
-    -fx-text-fill: white;
-}
-
-.button-success:hover {
-    -fx-background-color: #cc0000;
-}
-
-/* Login View Styling */
-.login-container .mfx-text-field, .login-container .mfx-password-field {
-    -fx-background-color: #f8f9fa;
-    -fx-border-color: #e9ecef;
-    -fx-border-radius: 5;
-    -fx-background-radius: 5;
-    -fx-font-size: 14px;
-    -fx-padding: 8;
-}
-
-.login-container .mfx-text-field:focused, .login-container .mfx-password-field:focused {
-    -fx-border-color: #2c3e50;
-}
-
-.login-container .mfx-text-field .floating-text, .login-container .mfx-password-field .floating-text {
-    -fx-background-color: white;
-    -fx-padding: 0 5;
-}
-
-.login-container .mfx-text-field .floating-text.float, .login-container .mfx-password-field .floating-text.float {
-    -fx-background-color: white;
-    -fx-translate-y: -16;
-    -fx-text-fill: #2c3e50;
-}
-
-.login-button {
-    -fx-background-color: #2c3e50;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-padding: 10 40;
-    -fx-background-radius: 5;
-    -fx-cursor: hand;
-    -fx-transition: background-color 0.2s;
-}
-
-.login-button:hover {
-    -fx-background-color: #34495e;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);
-}
-
-.login-button:pressed {
-    -fx-background-color: #243342;
-}
-
-.business-info {
-    -fx-background-color: #2980b9;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 5, 0);
-}
 
 /* Grid and Background */
 .grid-pane {
@@ -536,103 +469,58 @@
 }
 
 /* Login View Styling */
-.login-container .mfx-text-field {
-    -fx-background-color: white;
-    -fx-border-color: #e9ecef;
-    -fx-border-radius: 5;
-    -fx-background-radius: 5;
-    -fx-font-size: 14px;
-    -fx-padding: 8;
+/* Login Container */
+.login-container {
+    -fx-background-color: linear-gradient(to right, #1e3a8a 50%, #ffffff 50%); /* Darker blue gradient for better contrast */
 }
 
-.login-container .mfx-text-field:focused {
-    -fx-border-color: #2c3e50;
+/* Business Info Section */
+.business-info {
+    -fx-background-color: transparent; /* Set by the gradient in login-container */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5); /* Subtle shadow for depth */
 }
 
-.login-container .mfx-text-field .floating-text {
-    -fx-background-color: white;
-    -fx-text-fill: #7f8c8d;
-    -fx-padding: 0 5;
+/* Business Logo */
+.business-logo {
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.3), 15, 0, 0, 0); /* White glow to make logo pop */
 }
 
-.login-container .mfx-text-field:focused .floating-text {
-    -fx-text-fill: #2c3e50;
-}
-
-.login-container .mfx-text-field .floating-text.float {
-    -fx-translate-y: -25;
-}
-
-/* Apply the same styles to password field */
-.login-container .mfx-password-field {
-    -fx-background-color: white;
-    -fx-border-color: #e9ecef;
-    -fx-border-radius: 5;
-    -fx-background-radius: 5;
-    -fx-font-size: 14px;
-    -fx-padding: 8;
-}
-
-.login-container .mfx-password-field:focused {
-    -fx-border-color: #2c3e50;
-}
-
-.login-container .mfx-password-field .floating-text {
-    -fx-background-color: white;
-    -fx-text-fill: #7f8c8d;
-    -fx-padding: 0 5;
-}
-
-.login-container .mfx-password-field:focused .floating-text {
-    -fx-text-fill: #2c3e50;
-}
-
-.login-container .mfx-password-field .floating-text.float {
-    -fx-translate-y: -25;
-}
-
-/* Login Form Styling */
+/* Login Form Container */
 .login-form-container {
-    -fx-background-color: white;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0, 0, 5); /* Slightly stronger shadow */
 }
 
-.login-form {
-    -fx-background-color: white;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 0);
-    -fx-background-radius: 12;
-    -fx-border-radius: 12;
-    -fx-padding: 30;
-    -fx-min-width: 350;
-    -fx-alignment: center;
-}
-
-.input-label {
-    -fx-font-size: 13px;
-    -fx-text-fill: #2c3e50;
-    -fx-font-weight: bold;
-    -fx-padding: 0 0 0 2;
-}
-
+/* Input Fields */
 .login-input {
     -fx-background-color: #f8f9fa;
-    -fx-border-color: #e9ecef;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
+    -fx-background-radius: 12;
     -fx-font-size: 14px;
-    -fx-padding: 12;
+    -fx-padding: 14;
+    -fx-border-width: 0; /* Border removed as requested */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2); /* Subtle shadow for depth */
 }
 
 .login-input:focused {
-    -fx-border-color: #3498db;
-    -fx-background-color: white;
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.3), 8, 0, 0, 3); /* Stronger shadow on focus */
 }
 
-.login-button {
-    -fx-background-color: #3498db;
-    -fx-text-fill: white;
+/* Input Labels */
+.input-label {
     -fx-font-size: 14px;
-    -fx-padding: 14 20;
-    -fx-background-radius: 8;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+/* Login Button */
+.login-button {
+    -fx-background-color: #1e3a8a; /* Match the left side's primary color */
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-padding: 16 20;
+    -fx-background-radius: 12;
     -fx-cursor: hand;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.3), 8, 0, 0, 4);
@@ -640,15 +528,20 @@
 }
 
 .login-button:hover {
-    -fx-background-color: #2980b9;
-    -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.4), 10, 0, 0, 6);
-    -fx-translate-y: -1;
+    -fx-background-color: #2b4db3; /* Lighter shade on hover */
+    -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.4), 12, 0, 0, 6);
+    -fx-translate-y: -2;
 }
 
 .login-button:pressed {
-    -fx-background-color: #2472a4;
+    -fx-background-color: #152b6b; /* Darker shade on press */
     -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.2), 4, 0, 0, 2);
     -fx-translate-y: 1;
+}
+
+/* Business Email Label Hover Effect */
+.business-email-label:hover {
+    -fx-text-fill: #d1e7ff; /* Lighter shade on hover */
 }
 
 .mfx-text-field {
