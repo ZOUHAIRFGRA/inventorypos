@@ -67,6 +67,19 @@ public class LoginController {
 
     @FXML
     public void initialize() {
+        // Add event handler for Enter key
+        usernameField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                passwordField.requestFocus();
+            }
+        });
+        
+        passwordField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                handleLogin();
+            }
+        });
+
         try {
             BusinessSettings settings = settingsService.getSettings();
 
