@@ -72,11 +72,53 @@ public class ChangePasswordController {
                 return;
             }
 
-            currentUser.setPassword(newPassword); // Will be hashed in updateUser
+            currentUser.setPassword(newPassword);
             currentUser.setTemporaryPassword(false);
             userService.updateUser(currentUser.getId(), currentUser);
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Password updated successfully. Please log in with your new password.");
-            returnToLogin();
+            
+            // Re-authenticate with new password to update the session
+            userService.authenticate(currentUser.getUsername(), newPassword);
+            
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Password changed successfully!");
+            
+            // Navigate to appropriate dashboard based on user role
+            Stage stage = (Stage) saveButton.getScene().getWindow();
+            String fxmlPath;
+            String title;
+            
+            if (currentUser.getRole() == User.Role.OWNER) {
+                fxmlPath = "/view/AdminDashboard.fxml";
+                title = "Admin Dashboard";
+            } else if (currentUser.getRole() == User.Role.CASHIER) {
+                fxmlPath = "/view/CashierDashboard.fxml";
+                title = "Cashier Dashboard";
+            } else if (currentUser.getRole() == User.Role.SUPPORT_ADMIN) {
+                fxmlPath = "/view/SupportDashboard.fxml";
+                title = "Support Administrator Dashboard";
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Error", "Unsupported user role");
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            loader.setControllerFactory(context::getBean);
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            
+            // Add stylesheet
+            String cssPath = getClass().getResource("/styles/styles.css") != null
+                ? getClass().getResource("/styles/styles.css").toExternalForm()
+                : null;
+            if (cssPath != null) {
+                scene.getStylesheets().add(cssPath);
+            }
+            
+            stage.setScene(scene);
+            stage.setTitle(title);
+            if (currentUser.getRole() == User.Role.OWNER) {
+                stage.setMaximized(true);
+            }
+            stage.show();
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Failed to update password: " + e.getMessage());
             e.printStackTrace();
@@ -95,7 +137,17 @@ public class ChangePasswordController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
             loader.setControllerFactory(context::getBean);
             Parent root = loader.load();
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            
+            // Add stylesheet
+            String cssPath = getClass().getResource("/styles/styles.css") != null
+                ? getClass().getResource("/styles/styles.css").toExternalForm()
+                : null;
+            if (cssPath != null) {
+                scene.getStylesheets().add(cssPath);
+            }
+            
+            stage.setScene(scene);
             stage.setTitle("Inventory POS System - Login");
             stage.show();
         } catch (IOException e) {

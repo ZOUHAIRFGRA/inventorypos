@@ -14,6 +14,7 @@ package com.fouiguira.pos.inventorypos.controllers;
 import com.fouiguira.pos.inventorypos.entities.BusinessSettings;
 import com.fouiguira.pos.inventorypos.entities.Product;
 import com.fouiguira.pos.inventorypos.entities.Sale;
+import com.fouiguira.pos.inventorypos.entities.User;
 import com.fouiguira.pos.inventorypos.services.interfaces.BusinessSettingsService;
 import com.fouiguira.pos.inventorypos.services.interfaces.CategoryService;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
@@ -21,6 +22,7 @@ import com.fouiguira.pos.inventorypos.services.interfaces.SalesService;
 import com.fouiguira.pos.inventorypos.services.interfaces.UserService;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.palexdev.materialfx.controls.MFXButton;
+import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
 import jakarta.persistence.OptimisticLockException;
 import javafx.application.Platform;
@@ -86,6 +88,15 @@ public class SettingsController {
 
     @FXML
     private MFXButton exportInventoryButton;
+
+    @FXML
+    private MFXPasswordField currentPasswordField;
+
+    @FXML
+    private MFXPasswordField newPasswordField;
+
+    @FXML
+    private MFXPasswordField confirmPasswordField;
 
     @SuppressWarnings("unused")
     private final UserService userService;
@@ -212,6 +223,49 @@ public class SettingsController {
             showAlert(Alert.AlertType.ERROR, "Error", "Failed to save business info: " + e.getMessage());
             System.err.println("Failed to save business info: " + e.getMessage());
         }
+    }
+
+    @FXML
+    private void handleChangePassword() {
+        String currentPassword = currentPasswordField.getText().trim();
+        String newPassword = newPasswordField.getText().trim();
+        String confirmPassword = confirmPasswordField.getText().trim();
+
+        if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Warning", "All password fields are required.");
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            showAlert(Alert.AlertType.ERROR, "Error", "New password and confirmation do not match.");
+            return;
+        }
+
+        try {
+            User currentUser = userService.getCurrentUser();
+            User authenticatedUser = userService.authenticate(currentUser.getUsername(), currentPassword);
+            
+            if (currentUser == null || authenticatedUser == null) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Current password is incorrect.");
+                return;
+            }
+
+            currentUser.setPassword(newPassword);
+            currentUser.setTemporaryPassword(false);
+            userService.updateUser(currentUser.getId(), currentUser);
+
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Password updated successfully!");
+            clearPasswordFields();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to update password: " + e.getMessage());
+            System.err.println("Failed to update password: " + e.getMessage());
+        }
+    }
+
+    private void clearPasswordFields() {
+        currentPasswordField.clear();
+        newPasswordField.clear();
+        confirmPasswordField.clear();
     }
 
     @FXML

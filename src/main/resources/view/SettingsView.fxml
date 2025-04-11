@@ -12,6 +12,15 @@
     <VBox spacing="20" style="-fx-padding: 20;">
         <Label text="Settings" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
 
+        <!-- Admin Password Section -->
+        <VBox spacing="15" styleClass="settings-section">
+            <Label text="Admin Security" styleClass="section-header"/>
+            <MFXPasswordField fx:id="currentPasswordField" floatingText="Current Password" promptText="Enter current password" prefWidth="300"/>
+            <MFXPasswordField fx:id="newPasswordField" floatingText="New Password" promptText="Enter new password" prefWidth="300"/>
+            <MFXPasswordField fx:id="confirmPasswordField" floatingText="Confirm Password" promptText="Confirm new password" prefWidth="300"/>
+            <MFXButton fx:id="changePasswordButton" text="Change Password" onAction="#handleChangePassword" styleClass="button-primary"/>
+        </VBox>
+
         <!-- Business Information Section -->
         <VBox spacing="15" styleClass="settings-section">
             <Label text="Business Information" styleClass="section-header"/>

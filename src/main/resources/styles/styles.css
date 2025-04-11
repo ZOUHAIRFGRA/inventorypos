@@ -1241,4 +1241,45 @@
     -fx-background-color: #f8f9fa;
 }
 
+/* Password Change View Styles */
+.password-form .mfx-password-field {
+    -fx-padding: 12;
+    -fx-border-width: 1;
+    -fx-border-color: transparent;
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.password-form .mfx-password-field:focused {
+    -fx-background-color: white !important;
+    -fx-border-color: #4CAF50;
+}
+
+.password-form .mfx-password-field:hover {
+    -fx-background-color: #ffffff !important;
+}
+
+.button-primary:hover {
+    -fx-background-color: #43A047 !important;
+    -fx-translate-y: -1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);
+}
+
+.button-primary:pressed {
+    -fx-background-color: #388E3C !important;
+    -fx-translate-y: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 0, 2);
+}
+
+.button-secondary:hover {
+    -fx-background-color: #616161 !important;
+    -fx-translate-y: -1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);
+}
+
+.button-secondary:pressed {
+    -fx-background-color: #424242 !important;
+    -fx-translate-y: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 0, 2);
+}
+
 

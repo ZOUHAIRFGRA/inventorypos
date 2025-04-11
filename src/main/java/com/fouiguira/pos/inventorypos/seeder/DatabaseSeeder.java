@@ -66,9 +66,9 @@ public class DatabaseSeeder implements CommandLineRunner {
             admin.setRole(User.Role.OWNER);
             admin.setCreatedAt(new Date());
             admin.setUpdatedAt(new Date());
-            admin.setTemporaryPassword(false);
+            admin.setTemporaryPassword(true);  // Set initial password as temporary
             userRepository.save(admin);
-            logger.info("✅ Default admin user created.");
+            logger.info("✅ Default admin user created with temporary password.");
 
             logger.info("⚡ Seeding default SupportAdmin user...");
             User support = new User();

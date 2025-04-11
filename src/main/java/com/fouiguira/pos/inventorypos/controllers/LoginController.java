@@ -174,6 +174,19 @@ public class LoginController {
         User user = userService.authenticate(username, password);
         if (user != null) {
             try {
+                // Check if this is the admin's first login with default password
+                if (username.equals("admin") && password.equals("admin123")) {
+                    // Force password change
+                    Stage stage = (Stage) loginButton.getScene().getWindow();
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/change_password.fxml"));
+                    loader.setControllerFactory(MainApp.springContext::getBean);
+                    Parent root = loader.load();
+                    stage.setScene(new Scene(root));
+                    stage.setTitle("Change Password - First Time Login");
+                    stage.show();
+                    return;
+                }
+
                 Stage stage = (Stage) loginButton.getScene().getWindow();
                 String fxmlPath;
                 String title;
