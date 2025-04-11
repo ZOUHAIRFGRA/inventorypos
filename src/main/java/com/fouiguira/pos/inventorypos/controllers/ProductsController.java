@@ -243,14 +243,14 @@ public class ProductsController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AddProductView.fxml"));
             loader.setControllerFactory(c -> new AddProductController(productService, categoryService, v -> loadProducts()));
-            Parent root = loader.load();
-
-            Stage stage = new Stage();
+            Parent root = loader.load();            Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setTitle("Add New Product");
             Scene scene = new Scene(root);
             scene.getStylesheets().add(getClass().getResource("/styles/styles.css").toExternalForm());
             stage.setScene(scene);
+            stage.setResizable(false);  // Prevent resizing
+            stage.sizeToScene();        // Set stage size to match the scene
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
