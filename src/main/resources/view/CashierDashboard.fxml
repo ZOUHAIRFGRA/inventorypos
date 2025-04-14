@@ -22,6 +22,9 @@
           style="-fx-background-color: #FFFFFF; -fx-padding: 15; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
         <Label fx:id="welcomeLabel" text="Cashier: touhair" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
         <HBox HBox.hgrow="ALWAYS"/>
+        <MFXButton fx:id="returnsButton" text="Returns" onAction="#handleReturns"
+                   style="-fx-background-color: #FFA726; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5; -fx-font-weight: bold;"
+                   styleClass="returns-button"/>
         <MFXButton fx:id="logoutButton" text="Logout" onAction="#handleLogout" 
                    style="-fx-background-color: #FF5252; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5; -fx-font-weight: bold;"
                    styleClass="logout-button"/>

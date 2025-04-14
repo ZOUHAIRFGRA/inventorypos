@@ -86,6 +86,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
     }
 
+    @SuppressWarnings("unused")
     private void seedCategoriesAndProducts() {
         if (categoryRepository.count() > 0 || productRepository.count() > 0) {
             logger.info("Categories or products already exist. Skipping seeding.");

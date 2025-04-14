@@ -22,9 +22,7 @@ import java.util.List;
 public class Sale {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL)
+    private Long id;    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<SaleProduct> products;
 
     @Column(nullable = false)

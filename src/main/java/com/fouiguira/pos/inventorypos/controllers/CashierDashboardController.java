@@ -15,12 +15,17 @@ import com.fouiguira.pos.inventorypos.entities.*;
 import com.fouiguira.pos.inventorypos.services.interfaces.*;
 import io.github.palexdev.materialfx.controls.*;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
@@ -35,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,6 +73,8 @@ public class CashierDashboardController {
     private MFXButton checkoutButton;
     @FXML
     private MFXButton clearCartButton;
+    @FXML
+    private MFXButton returnsButton;
 
     @FXML
     private VBox cartVBox;
@@ -84,20 +92,26 @@ public class CashierDashboardController {
     private final SalesService salesService;
     private final InvoiceService invoiceService;
     private final UserService userService;
+    private final ReturnService returnService;
     private final ApplicationContext context;
 
     private ObservableList<SaleProduct> cartItems = FXCollections.observableArrayList();
     private static final DecimalFormat df = new DecimalFormat("#,##0.00");
     private static final String PLACEHOLDER_IMAGE = "/images/placeholder.png";
 
-    public CashierDashboardController(ProductService productService, CategoryService categoryService,
-            SalesService salesService, InvoiceService invoiceService,
-            UserService userService, ApplicationContext context) {
+    public CashierDashboardController(ProductService productService, 
+                                    CategoryService categoryService,
+                                    SalesService salesService, 
+                                    InvoiceService invoiceService,
+                                    UserService userService, 
+                                    ReturnService returnService,
+                                    ApplicationContext context) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.salesService = salesService;
         this.invoiceService = invoiceService;
         this.userService = userService;
+        this.returnService = returnService;
         this.context = context;
     }
 
@@ -727,5 +741,226 @@ public class CashierDashboardController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    public void handleReturns() {
+        Dialog<Long> invoiceDialog = new Dialog<>();
+        invoiceDialog.setTitle("Return Products");
+        invoiceDialog.setHeaderText("Enter Invoice Number");
+
+        VBox content = new VBox(10);
+        content.setAlignment(javafx.geometry.Pos.CENTER);
+
+        TextField invoiceField = new TextField();
+        invoiceField.setPromptText("Invoice #");
+        invoiceField.setPrefWidth(200);
+
+        Label errorLabel = new Label();
+        errorLabel.setStyle("-fx-text-fill: #FF5252;");
+        errorLabel.setVisible(false);
+
+        content.getChildren().addAll(
+            new Label("Invoice Number:"),
+            invoiceField,
+            errorLabel
+        );
+
+        invoiceDialog.getDialogPane().setContent(content);
+        ButtonType lookupButtonType = new ButtonType("Look Up", ButtonBar.ButtonData.OK_DONE);
+        invoiceDialog.getDialogPane().getButtonTypes().addAll(lookupButtonType, ButtonType.CANCEL);
+
+        Node lookupButton = invoiceDialog.getDialogPane().lookupButton(lookupButtonType);
+        lookupButton.setDisable(true);
+
+        invoiceField.textProperty().addListener((obs, old, newValue) -> {
+            lookupButton.setDisable(newValue.trim().isEmpty());
+            errorLabel.setVisible(false);
+        });
+
+        invoiceDialog.setResultConverter(dialogButton -> {
+            if (dialogButton == lookupButtonType) {
+                try {
+                    return Long.parseLong(invoiceField.getText().trim());
+                } catch (NumberFormatException e) {
+                    errorLabel.setText("Please enter a valid invoice number");
+                    errorLabel.setVisible(true);
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        Optional<Long> result = invoiceDialog.showAndWait();
+        result.ifPresent(invoiceId -> {
+            try {
+                Invoice invoice = invoiceService.getInvoiceById(invoiceId);
+                if (invoice != null) {
+                    showReturnDialog(invoice);
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Error", "Invoice #" + invoiceId + " not found");
+                }
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to look up invoice: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void showReturnDialog(Invoice invoice) {
+        Dialog<List<SaleProduct>> returnDialog = new Dialog<>();
+        returnDialog.setTitle("Process Return");
+        returnDialog.setHeaderText("Return Products from Invoice #" + invoice.getId());
+
+        VBox content = new VBox(15);
+        content.setPrefWidth(600);
+        content.setMaxHeight(500);
+        content.setPadding(new javafx.geometry.Insets(20));
+
+        // Sale info section
+        GridPane saleInfo = new GridPane();
+        saleInfo.setHgap(10);
+        saleInfo.setVgap(5);
+        saleInfo.addRow(0, new Label("Date:"), 
+            new Label(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(invoice.getSale().getTimestamp())));
+        saleInfo.addRow(1, new Label("Client:"), 
+            new Label(invoice.getSale().getClientName()));
+        saleInfo.addRow(2, new Label("Cashier:"), 
+            new Label(invoice.getSale().getCashier().getUsername()));
+
+        TableView<SaleProduct> productsTable = new TableView<>();
+
+        TableColumn<SaleProduct, String> nameCol = new TableColumn<>("Product");
+        nameCol.setCellValueFactory(data -> 
+            new SimpleStringProperty(data.getValue().getProduct().getName()));
+
+        TableColumn<SaleProduct, Integer> qtyCol = new TableColumn<>("Original Qty");
+        qtyCol.setCellValueFactory(data -> 
+            new SimpleObjectProperty<>(data.getValue().getQuantity()));
+
+        TableColumn<SaleProduct, Double> priceCol = new TableColumn<>("Unit Price");
+        priceCol.setCellValueFactory(data -> 
+            new SimpleObjectProperty<>(data.getValue().getProduct().getPrice()));
+
+        TableColumn<SaleProduct, Integer> returnQtyCol = new TableColumn<>("Return Qty");
+        returnQtyCol.setCellFactory(col -> new TableCell<>() {
+            private final TextField field = new TextField("0");
+            {
+                field.setPrefWidth(60);
+                field.setStyle("-fx-alignment: CENTER;");
+                field.textProperty().addListener((obs, old, newValue) -> {
+                    if (!newValue.matches("\\d*")) {
+                        field.setText(newValue.replaceAll("[^\\d]", ""));
+                    }
+                    try {
+                        int returnQty = Integer.parseInt(newValue);
+                        SaleProduct sp = getTableRow().getItem();
+                        if (sp != null && returnQty > sp.getQuantity()) {
+                            field.setText(String.valueOf(sp.getQuantity()));
+                        }
+                    } catch (NumberFormatException e) {
+                        field.setText("0");
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(field);
+                }
+            }
+        });
+
+        @SuppressWarnings("unchecked")
+        TableColumn<SaleProduct, ?>[] columns = new TableColumn[]{nameCol, qtyCol, priceCol, returnQtyCol};
+        productsTable.getColumns().addAll(columns);
+        productsTable.setItems(FXCollections.observableArrayList(invoice.getSale().getProducts()));
+
+        content.getChildren().addAll(
+            saleInfo,
+            new Label("Select Products to Return:"),
+            productsTable
+        );
+
+        returnDialog.getDialogPane().setContent(content);
+        ButtonType returnButtonType = new ButtonType("Process Return", ButtonBar.ButtonData.OK_DONE);
+        returnDialog.getDialogPane().getButtonTypes().addAll(returnButtonType, ButtonType.CANCEL);
+
+        returnDialog.setResultConverter(dialogButton -> {
+            if (dialogButton == returnButtonType) {
+                List<SaleProduct> returnsToProcess = new ArrayList<>();
+                for (SaleProduct sp : productsTable.getItems()) {
+                    TableCell<SaleProduct, Integer> cell = (TableCell<SaleProduct, Integer>) productsTable
+                            .lookupAll(".table-cell").stream()
+                            .filter(node -> node instanceof TableCell<?,?> 
+                                && ((TableCell<?,?>)node).getTableColumn() == returnQtyCol
+                                && ((TableCell<?,?>)node).getTableRow() != null
+                                && ((TableCell<?,?>)node).getTableRow().getItem() == sp)
+                            .findFirst().orElse(null);
+
+                    if (cell != null) {
+                        TextField field = ((TextField)cell.getGraphic());
+                        try {
+                            int returnQty = Integer.parseInt(field.getText());
+                            if (returnQty > 0) {
+                                SaleProduct returnProduct = new SaleProduct();
+                                returnProduct.setProduct(sp.getProduct());
+                                returnProduct.setQuantity(returnQty);
+                                // Create a new Sale for the return
+                                Sale returnSale = new Sale();
+                                returnSale.setClientName(invoice.getSale().getClientName());
+                                returnSale.setCashier(userService.getCurrentUser());
+                                returnSale.setPaymentMethod("Return");
+                                returnSale.setTotalPrice(-(sp.getProduct().getPrice() * returnQty)); // Negative amount for return
+                                returnSale.setTimestamp(new Date());
+                                returnSale.setProducts(new ArrayList<>());
+                                // Set the bidirectional relationship
+                                returnProduct.setSale(returnSale);
+                                returnSale.getProducts().add(returnProduct);
+                                returnsToProcess.add(returnProduct);
+                            }
+                        } catch (NumberFormatException e) {
+                            // Skip if invalid number
+                        }
+                    }
+                }
+                return returnsToProcess;
+            }
+            return null;
+        });
+
+        Optional<List<SaleProduct>> result = returnDialog.showAndWait();
+        result.ifPresent(returnsToProcess -> {
+            if (returnsToProcess.isEmpty()) {
+                showAlert(Alert.AlertType.WARNING, "Warning", "No products selected for return");
+                return;
+            }
+
+            try {
+                // Process returns and update stock
+                for (SaleProduct sp : returnsToProcess) {
+                    Product product = sp.getProduct();
+                    product.setStockQuantity(product.getStockQuantity() + sp.getQuantity());
+                    productService.updateProduct(product.getId(), product);
+                    
+                    // Save the return sale
+                    salesService.createSale(sp.getSale());
+                }
+
+                showAlert(Alert.AlertType.INFORMATION, "Success", 
+                    "Return processed successfully!\nStock quantities have been updated.");
+                
+                // Refresh product display
+                loadProducts();
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Error", 
+                    "Failed to process return: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
     }
 }

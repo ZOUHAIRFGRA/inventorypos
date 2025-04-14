@@ -29,8 +29,10 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
+@Transactional
 public class SalesServiceImpl implements SalesService {
 
     private final SaleRepository saleRepository;
@@ -44,12 +46,19 @@ public class SalesServiceImpl implements SalesService {
     @Lazy
     public void setInvoiceService(InvoiceService invoiceService) {
         this.invoiceService = invoiceService;
-    }
-
-    @Override
+    }    @Override
     @Transactional
     public Sale createSale(Sale sale) {
-        sale.getProducts().forEach(sp -> sp.setSale(sale));
+        if (sale.getProducts() == null) {
+            sale.setProducts(new ArrayList<>());
+        }
+        // Ensure bidirectional relationship is properly set up
+        sale.getProducts().forEach(sp -> {
+            sp.setSale(sale);
+            if (sp.getQuantity() == null) {
+                sp.setQuantity(1); // Default quantity if not specified
+            }
+        });
         return saleRepository.save(sale);
     }
 

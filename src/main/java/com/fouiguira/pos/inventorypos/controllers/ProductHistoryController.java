@@ -12,7 +12,6 @@
 package com.fouiguira.pos.inventorypos.controllers;
 
 import com.fouiguira.pos.inventorypos.entities.Product;
-import com.fouiguira.pos.inventorypos.entities.Sale;
 import com.fouiguira.pos.inventorypos.entities.SaleProduct;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
 import com.fouiguira.pos.inventorypos.services.interfaces.SaleProductService;
@@ -59,6 +58,7 @@ public class ProductHistoryController {
 
     private final ProductService productService;
     private final SaleProductService saleProductService;
+    @SuppressWarnings("unused")
     private final SalesService salesService;
     private final DecimalFormat df = new DecimalFormat("#,##0.00");
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -104,7 +104,6 @@ public class ProductHistoryController {
         startDatePicker.setValue(LocalDate.now().minusDays(30));
     }
 
-    @SuppressWarnings("unchecked")
     private void setupTable() {
         colDate.setRowCellFactory(sp -> {
             MFXTableRowCell<SaleProduct, String> cell = new MFXTableRowCell<>(
