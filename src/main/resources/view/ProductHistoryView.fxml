@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXTableView?>
+<?import io.github.palexdev.materialfx.controls.MFXTableColumn?>
+<?import io.github.palexdev.materialfx.controls.MFXDatePicker?>
+<?import io.github.palexdev.materialfx.controls.MFXComboBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+
+<VBox spacing="20" style="-fx-padding: 20;" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.fouiguira.pos.inventorypos.controllers.ProductHistoryController">
+    
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Product Sales History" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+    </HBox>
+    
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <MFXComboBox fx:id="productComboBox" prefWidth="200" floatingText="Select Product"/>
+        <MFXDatePicker fx:id="startDatePicker" floatingText="Start Date"/>
+        <MFXDatePicker fx:id="endDatePicker" floatingText="End Date"/>
+    </HBox>
+    
+    <LineChart fx:id="salesTrendChart" title="Sales Trend">
+        <xAxis>
+            <CategoryAxis label="Date"/>
+        </xAxis>
+        <yAxis>
+            <NumberAxis label="Quantity Sold"/>
+        </yAxis>
+    </LineChart>
+    
+    <HBox spacing="20">
+        <VBox style="-fx-background-color: #E3F2FD; -fx-padding: 15; -fx-background-radius: 5;">
+            <Label text="Total Units Sold" style="-fx-font-size: 14;"/>
+            <Label fx:id="totalSoldLabel" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+        </VBox>
+        
+        <VBox style="-fx-background-color: #E8F5E9; -fx-padding: 15; -fx-background-radius: 5;">
+            <Label text="Total Revenue" style="-fx-font-size: 14;"/>
+            <Label fx:id="totalRevenueLabel" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+        </VBox>
+        
+        <VBox style="-fx-background-color: #FFF3E0; -fx-padding: 15; -fx-background-radius: 5;">
+            <Label text="Average Units Per Sale" style="-fx-font-size: 14;"/>
+            <Label fx:id="avgUnitsLabel" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+        </VBox>
+    </HBox>
+    
+    <MFXTableView fx:id="historyTable" prefHeight="400">
+        <tableColumns>
+            <MFXTableColumn fx:id="colDate" text="Date" prefWidth="120"/>
+            <MFXTableColumn fx:id="colQuantity" text="Quantity" prefWidth="100"/>
+            <MFXTableColumn fx:id="colClient" text="Client" prefWidth="150"/>
+            <MFXTableColumn fx:id="colCashier" text="Cashier" prefWidth="120"/>
+            <MFXTableColumn fx:id="colUnitPrice" text="Unit Price" prefWidth="100"/>
+            <MFXTableColumn fx:id="colTotalPrice" text="Total Price" prefWidth="120"/>
+        </tableColumns>
+    </MFXTableView>
+    
+</VBox>

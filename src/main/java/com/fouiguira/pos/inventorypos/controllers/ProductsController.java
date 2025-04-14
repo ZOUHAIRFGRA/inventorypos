@@ -14,6 +14,8 @@ package com.fouiguira.pos.inventorypos.controllers;
 import com.fouiguira.pos.inventorypos.entities.Product;
 import com.fouiguira.pos.inventorypos.services.interfaces.CategoryService;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
+import com.fouiguira.pos.inventorypos.services.interfaces.SaleProductService;
+import com.fouiguira.pos.inventorypos.services.interfaces.SalesService;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXTableColumn;
 import io.github.palexdev.materialfx.controls.MFXTableView;
@@ -91,10 +93,17 @@ public class ProductsController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final SaleProductService saleProductService;
+    private final SalesService salesService;
 
-    public ProductsController(ProductService productService, CategoryService categoryService) {
+    public ProductsController(ProductService productService, 
+                            CategoryService categoryService,
+                            SaleProductService saleProductService,
+                            SalesService salesService) {
         this.productService = productService;
         this.categoryService = categoryService;
+        this.saleProductService = saleProductService;
+        this.salesService = salesService;
     }
 
     @FXML
@@ -151,6 +160,18 @@ public class ProductsController {
                 }
             });
 
+            MFXButton historyButton = new MFXButton("History");
+            historyButton.getStyleClass().add("button-history");
+            historyButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+            historyButton.setOnAction(event -> {
+                Product selectedProduct = productTable.getSelectionModel().getSelectedValue();
+                if (selectedProduct != null) {
+                    openProductHistory(selectedProduct);
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a product to view its history.");
+                }
+            });
+
             MFXButton viewImgButton = new MFXButton("View Img");
             viewImgButton.getStyleClass().add("button-view-img");
             viewImgButton.setOnAction(event -> {
@@ -166,7 +187,7 @@ public class ProductsController {
                 }
             });
 
-            HBox actions = new HBox(10, editButton, deleteButton, viewImgButton);
+            HBox actions = new HBox(5, editButton, deleteButton, historyButton, viewImgButton);
             actions.setAlignment(javafx.geometry.Pos.CENTER);
             cell.setGraphic(actions);
 
@@ -357,5 +378,28 @@ public class ProductsController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void openProductHistory(Product product) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ProductHistoryView.fxml"));
+            loader.setControllerFactory(c -> new ProductHistoryController(productService, saleProductService, salesService));
+            Parent root = loader.load();
+
+            // Get the controller and pre-select the product
+            ProductHistoryController controller = loader.getController();
+            controller.selectProduct(product);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Product Sales History - " + product.getName());
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/styles/styles.css").toExternalForm());
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open product history: " + e.getMessage());
+        }
     }
 }

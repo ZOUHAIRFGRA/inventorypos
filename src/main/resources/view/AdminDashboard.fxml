@@ -39,6 +39,11 @@
                         <MFXFontIcon description="fas-layer-group" size="20" color="white" />
                     </graphic>
                 </MFXButton>
+                <MFXButton fx:id="productHistoryViewButton" text="Products History" onAction="#loadproductHistoryViewButton" styleClass="sidebar-button">
+                    <graphic>
+                        <MFXFontIcon description="fas-chart-line" size="20" color="white" />
+                    </graphic>
+                </MFXButton>
                 <MFXButton fx:id="analyticsButton" text="Products Analytics" onAction="#loadProductAnalytics" styleClass="sidebar-button">
                     <graphic>
                         <MFXFontIcon description="fas-chart-line" size="20" color="white" />

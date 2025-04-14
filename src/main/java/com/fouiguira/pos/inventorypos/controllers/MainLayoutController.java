@@ -37,7 +37,7 @@ public class MainLayoutController {
     private BorderPane mainLayout;
 
     @FXML
-    private MFXButton dashboardButton,manage_cashiersButton,categoryButton, productsButton, salesHistoryButton, cashierButton, settingsButton, invoicesButton, exitButton;
+    private MFXButton dashboardButton,manage_cashiersButton,categoryButton, productsButton, salesHistoryButton, cashierButton, settingsButton, invoicesButton, productHistoryViewButton, exitButton;
 
     private final ApplicationContext context;
     private final UserService userService; // Now properly injected
@@ -69,6 +69,7 @@ public class MainLayoutController {
         settingsButton.setOnAction(e -> loadView("SettingsView.fxml"));
         invoicesButton.setOnAction(e -> loadView("InvoiceView.fxml"));
         categoryButton.setOnAction(e -> loadView("CategoryView.fxml"));
+        productHistoryViewButton.setOnAction(e -> loadView("ProductHistoryView.fxml"));
         exitButton.setOnAction(this::handleExit);
 
         // Apply role-based access

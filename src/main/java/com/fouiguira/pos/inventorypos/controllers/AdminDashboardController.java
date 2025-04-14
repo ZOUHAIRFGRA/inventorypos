@@ -41,6 +41,7 @@ public class AdminDashboardController {
     @FXML private MFXButton settingsButton;
     @FXML private MFXButton logoutButton;
     @FXML private MFXButton analyticsButton;
+    @FXML private MFXButton productHistoryViewButton;
     @FXML private Label messageLabel;
 
     private final UserService userService;
@@ -74,6 +75,8 @@ public class AdminDashboardController {
 
     @FXML
     public void loadProductAnalytics() { loadView("ProductAnalyticsView.fxml"); }
+    @FXML
+    public void loadproductHistoryViewButton() { loadView("ProductHistoryView.fxml"); }
 
     @FXML
     public void handleLogout() {
