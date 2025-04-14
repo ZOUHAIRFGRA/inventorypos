@@ -116,4 +116,10 @@
             </HBox>
         </VBox>
     </ScrollPane>
+    
+    <!-- Copyright Footer -->
+    <HBox alignment="CENTER" style="-fx-padding: 10 0 5 0;">
+        <Label text="© 2025 ZOUHAIR FOUIGUIRA - All Rights Reserved | Non-Commercial Use Only" 
+               style="-fx-font-size: 11px; -fx-text-fill: #95a5a6;"/>
+    </HBox>
 </VBox>

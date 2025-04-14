@@ -8,7 +8,8 @@
 <HBox xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" 
       fx:controller="com.fouiguira.pos.inventorypos.controllers.LoginController"
       alignment="CENTER" styleClass="login-container" style="-fx-fill-width: true;"
-      prefWidth="1280" prefHeight="700">
+      prefWidth="1280" prefHeight="700"
+      maxWidth="1280" maxHeight="700">
       
     <!-- Left side: Business Info -->
     <VBox alignment="CENTER" spacing="30" styleClass="business-info" HBox.hgrow="ALWAYS"
@@ -68,13 +69,25 @@
                 <MFXPasswordField fx:id="passwordField" prefWidth="350" styleClass="login-input"/>
             </VBox>
             
-            <Region prefHeight="20"/>
+            <Region prefHeight="5"/>
             
             <MFXButton fx:id="loginButton" text="Login" onAction="#handleLogin" 
                       styleClass="login-button" prefWidth="350"/>
                       
             <Label fx:id="messageLabel" wrapText="true" alignment="CENTER"
-                   style="-fx-text-fill: #e74c3c; -fx-font-size: 14px; -fx-min-height: 20px;"/>
+                   style="-fx-text-fill: #e74c3c; -fx-font-size: 14px; -fx-min-height: 15px;"/>
+                   
+            <VBox spacing="1" alignment="CENTER" style="-fx-padding: 5 0 0 0;">
+                <HBox spacing="3" alignment="CENTER">
+                    <Label text="© 2025 ZOUHAIR FOUIGUIRA" 
+                           style="-fx-font-size: 10px; -fx-text-fill: #95a5a6;"/>
+                    <Label text="•" style="-fx-font-size: 10px; -fx-text-fill: #95a5a6;"/>
+                    <Label text="CC BY-NC-ND 4.0" 
+                           style="-fx-font-size: 10px; -fx-text-fill: #95a5a6;"/>
+                </HBox>
+                <Hyperlink text="github.com/ZOUHAIRFGRA" 
+                          style="-fx-font-size: 10px; -fx-text-fill: #3498db;"/>
+            </VBox>
         </VBox>
     </VBox>
 </HBox>

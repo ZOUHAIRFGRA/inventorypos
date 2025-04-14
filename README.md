@@ -2,110 +2,105 @@
 
 A desktop Point of Sale (POS) system for inventory management built with Spring Boot and JavaFX. This application provides a comprehensive solution for managing inventory, sales, and business operations.
 
+**Current Version: 1.0**
+
 ## Features
 
 ### User Role Management
 - **Multi-level Access Control**
   - Owner/Admin full system access
   - Cashier restricted access
-  - Staff limited access
   - Support admin for system maintenance
+  - Staff limited access (Coming in next version)
 - **Security Features**
   - Secure password hashing
-  - Password reset functionality
+  - Password reset via support admin
   - Temporary password system
-  - Session management
+  - Basic session management
 
 ### Product Management
-- **Comprehensive Product Control**
+- **Product Control**
   - Add, edit, and delete products
-  - Bulk product import/export
   - Product image management
   - Custom product descriptions
-  - Barcode support
+  - Product history tracking
+  - Stock quantity management
 - **Category Management**
   - Create and manage categories
   - Category-based filtering
-  - Category analytics
+  - Basic category organization
 - **Inventory Control**
   - Real-time stock tracking
-  - Low stock alerts
-  - Stock history
-  - Auto stock updates on sales
+  - Low stock visual indicators
+  - Auto stock updates on sales/returns
   - Initial stock tracking
+  - Returns processing
 
 ### Sales Management
 - **Modern POS Interface**
   - Intuitive product search
-  - Quick category filters
+  - Category-based filtering
   - Real-time stock validation
-  - Dynamic pricing updates
-- **Advanced Cart Features**
+  - Product grid display with images
+- **Cart Features**
   - Multiple items management
-  - Quantity adjustments
+  - Quantity adjustments with stock validation
   - Real-time total calculation
-  - Cart save/restore
   - Quick item removal
+  - Customer name tracking
 - **Payment Processing**
-  - Multiple payment methods
-  - Split payment support
-  - Payment validation
-  - Change calculation
-- **Receipt System**
-  - Custom receipt generation
-  - PDF receipt export
-  - Digital receipt copies
-  - Receipt reprint functionality
+  - Cash and card payment methods
+  - Basic payment processing
+  - Sale record keeping
+- **Receipt & Returns**
+  - Professional PDF invoice generation
+  - Digital invoice storage
+  - Invoice reprint capability
+  - Product returns processing
+  - Return stock adjustment
 
 ### Analytics & Reporting
-- **Sales Analytics**
-  - Daily/Monthly/Annual reports
-  - Sales trend analysis
-  - Top selling products
-  - Revenue tracking
-- **Product Analytics**
-  - Stock level analysis
-  - Product performance metrics
-  - Margin calculations
-  - Category-wise analysis
-- **Export Capabilities**
-  - Sales data export
-  - Inventory reports
-  - Custom report generation
-  - Multiple export formats
+- **Dashboard Analytics**
+  - Basic sales overview
+  - Sales trend visualization
+  - Average ticket size tracking
+  - Growth rate indicators
+- **Product Analytics** (Basic Implementation)
+  - Stock level monitoring
+  - Low stock indicators
+  - Basic sales tracking
+- **Export Features**
+  - Sales data export to CSV
+  - Product data export
+  - Inventory reports export
 
 ### Business Management
 - **Business Settings**
-  - Company information management
+  - Basic company information management
   - Logo customization
-  - Contact details
-  - Business hours
+  - Contact details management
 - **Data Management**
-  - Automated backups
-  - Data restore functionality
-  - Data export tools
-  - System logs
+  - Manual backup functionality
+  - Data restore capability
+  - Basic data export tools
 - **Invoice System**
-  - Professional invoice generation
-  - Invoice customization
-  - PDF export
+  - Basic invoice generation
+  - PDF format invoices
   - Invoice history tracking
 
 ### User Interface
 - **Modern Design**
   - Material design components
   - Responsive layouts
-  - Dark/Light theme support
-  - Custom styling
+  - Professional styling
 - **Usability Features**
-  - Keyboard shortcuts
+  - Basic keyboard shortcuts
   - Quick actions
   - Search functionality
   - Sorting and filtering
 - **Notifications**
-  - Low stock alerts
-  - Sale completion alerts
-  - System notifications
+  - Basic system alerts
+  - Operation status alerts
   - Error notifications
 
 ## Technology Stack
