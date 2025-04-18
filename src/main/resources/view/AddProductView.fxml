@@ -4,64 +4,65 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.fouiguira.pos.inventorypos.controllers.AddProductController"
-      spacing="10" style="-fx-padding: 15;"
-       prefWidth="400" maxHeight="350" maxWidth="450" prefHeight="350">
-
-    <HBox alignment="CENTER">
-        <Label text="Add New Product" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-    </HBox>
-
-    <GridPane hgap="10" vgap="10">
-        <columnConstraints>
-            <ColumnConstraints minWidth="100" prefWidth="150"/>
-            <ColumnConstraints hgrow="ALWAYS"/>
-        </columnConstraints>
-
-        <!-- Product Name -->
-        <Label text="Product Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-        <MFXTextField fx:id="productNameField" prefWidth="200" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-
-        <!-- Category -->
-        <Label text="Category:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-        <MFXComboBox fx:id="categoryComboBox" prefWidth="200" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-
-        <!-- Selling Price -->
-        <Label text="Selling Price:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-        <MFXTextField fx:id="priceField" prefWidth="200" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
-        <!-- Purchase Price -->
-        <Label text="Purchase Price:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-        <MFXTextField fx:id="purchasePriceField" prefWidth="200" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-
-        <!-- Stock -->
-        <Label text="Initial Stock:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-        <MFXTextField fx:id="stockField" prefWidth="200" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-
-        <!-- Image -->
-        <Label text="Image:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-        <HBox spacing="10" GridPane.rowIndex="5" GridPane.columnIndex="1">
-            <MFXTextField fx:id="imagePathField" prefWidth="200"/>
-            <MFXButton text="Browse" onAction="#handleSelectImage"/>
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.fouiguira.pos.inventorypos.controllers.AddProductController"
+           fitToWidth="true" fitToHeight="true"
+           maxHeight="600" prefHeight="500" 
+           maxWidth="450" prefWidth="400">
+    <VBox spacing="10" style="-fx-padding: 15;">
+        <HBox alignment="CENTER">
+            <Label text="Add New Product" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
         </HBox>
 
-        <!-- Description -->
-        <Label text="Description:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-        <TextArea fx:id="descriptionField" prefRowCount="3" wrapText="true" 
-                  GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+        <GridPane hgap="10" vgap="10" VBox.vgrow="NEVER">
+            <columnConstraints>
+                <ColumnConstraints minWidth="100" prefWidth="120"/>
+                <ColumnConstraints hgrow="SOMETIMES"/>
+            </columnConstraints>
 
-        <!-- Image Preview -->
-        <ImageView fx:id="productImage" fitWidth="150" fitHeight="150" preserveRatio="true"
-                  GridPane.rowIndex="7" GridPane.columnIndex="1"/>
-    </GridPane>
+            <!-- Product Name -->
+            <Label text="Product Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <MFXTextField fx:id="productNameField" maxWidth="200" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-    <!-- Buttons -->
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <MFXButton fx:id="saveButton" text="Save" onAction="#handleSaveProduct"
-                   style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
-        <MFXButton fx:id="cancelButton" text="Cancel" onAction="#handleCancel"
-                   style="-fx-background-color: #E91E63; -fx-text-fill: white;"/>
-    </HBox>
+            <!-- Category -->
+            <Label text="Category:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <MFXComboBox fx:id="categoryComboBox" maxWidth="200" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-</VBox>
+            <!-- Selling Price -->
+            <Label text="Selling Price:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <MFXTextField fx:id="priceField" maxWidth="200" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <!-- Purchase Price -->
+            <Label text="Purchase Price:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <MFXTextField fx:id="purchasePriceField" maxWidth="200" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+            <!-- Stock -->
+            <Label text="Initial Stock:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <MFXTextField fx:id="stockField" maxWidth="200" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+            <!-- Image -->
+            <Label text="Image:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+            <HBox spacing="10" GridPane.rowIndex="5" GridPane.columnIndex="1">
+                <MFXTextField fx:id="imagePathField" maxWidth="140"/>
+                <MFXButton text="Browse" onAction="#handleSelectImage"/>
+            </HBox>
+
+            <!-- Description -->
+            <Label text="Description:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+            <TextArea fx:id="descriptionField" prefRowCount="3" maxHeight="70" wrapText="true" 
+                     GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+            <!-- Image Preview -->
+            <ImageView fx:id="productImage" fitWidth="120" fitHeight="120" preserveRatio="true"
+                      GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+        </GridPane>
+
+        <!-- Buttons -->
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <MFXButton fx:id="saveButton" text="Save" onAction="#handleSaveProduct"
+                      style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+            <MFXButton fx:id="cancelButton" text="Cancel" onAction="#handleCancel"
+                      style="-fx-background-color: #E91E63; -fx-text-fill: white;"/>
+        </HBox>
+    </VBox>
+</ScrollPane>
