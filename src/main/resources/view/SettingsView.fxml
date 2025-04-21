@@ -53,6 +53,16 @@
                     <MFXButton fx:id="exportInventoryButton" text="Export Inventory" onAction="#handleExportInventory" styleClass="button-success"/>
                 </HBox>
             </VBox>
+        </VBox>        <!-- Version and Updates Section -->
+        <VBox spacing="15" styleClass="settings-section">
+            <Label text="Version and Updates" styleClass="section-header"/>
+            <VBox spacing="10">
+                <Label fx:id="currentVersionLabel" text="Current Version: 1.0" styleClass="version-label"/>
+                <HBox spacing="10">
+                    <MFXButton fx:id="checkUpdatesButton" text="Check for Updates" onAction="#handleCheckUpdates" styleClass="button-primary"/>
+                    <Label fx:id="updateStatusLabel" styleClass="update-status-label"/>
+                </HBox>
+            </VBox>
         </VBox>
     </VBox>
 </ScrollPane>

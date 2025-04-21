@@ -15,6 +15,7 @@ import com.fouiguira.pos.inventorypos.entities.BusinessSettings;
 import com.fouiguira.pos.inventorypos.entities.Product;
 import com.fouiguira.pos.inventorypos.entities.Sale;
 import com.fouiguira.pos.inventorypos.entities.User;
+import com.fouiguira.pos.inventorypos.utils.VersionUtil;
 import com.fouiguira.pos.inventorypos.services.interfaces.BusinessSettingsService;
 import com.fouiguira.pos.inventorypos.services.interfaces.CategoryService;
 import com.fouiguira.pos.inventorypos.services.interfaces.ProductService;
@@ -25,10 +26,12 @@ import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
 import jakarta.persistence.OptimisticLockException;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,6 +39,10 @@ import com.opencsv.CSVWriter;
 
 import javax.sql.DataSource;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
@@ -43,6 +50,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+import org.json.JSONObject;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -96,9 +105,17 @@ public class SettingsController {
     private MFXPasswordField newPasswordField;
 
     @FXML
-    private MFXPasswordField confirmPasswordField;
-
-    @SuppressWarnings("unused")
+    private MFXPasswordField confirmPasswordField;    @FXML
+    private Label currentVersionLabel;
+    
+    @FXML
+    private Label updateStatusLabel;
+    
+    @FXML
+    private MFXButton checkUpdatesButton;
+    
+    private static final String UPDATE_CHECK_URL = "https://api.github.com/repos/ZOUHAIRFGRA/inventorypos/releases/latest";
+    private String currentVersion;@SuppressWarnings("unused")
     private final UserService userService;
     private final BusinessSettingsService settingsService;
     private final ProductService productService;
@@ -106,6 +123,11 @@ public class SettingsController {
     @SuppressWarnings("unused")
     private final CategoryService categoryService;
     private BusinessSettings cachedSettings;
+    private HostServices hostServices;
+    
+    public void setHostServices(HostServices hostServices) {
+        this.hostServices = hostServices;
+    }
 
     private static final String CONFIG_DIR = "config";
     private static final String DEFAULT_LOGO = CONFIG_DIR + File.separator + "default_logo.png";
@@ -127,10 +149,25 @@ public class SettingsController {
         this.dataSource = dataSource;
         initializeConfig();
     }
-
     @FXML
     public void initialize() {
         loadSettings();
+        // Get version from pom.xml properties
+        Properties pomProperties = new Properties();
+        try (InputStream is = getClass().getResourceAsStream("/META-INF/maven/com.fouiguira.pos/inventorypos/pom.properties")) {
+            if (is != null) {
+                pomProperties.load(is);
+                String pomVersion = pomProperties.getProperty("version", "0.0.1-SNAPSHOT");
+                currentVersion = pomVersion.equals("0.0.1-SNAPSHOT") ? "1.0" : pomVersion;
+            } else {
+                currentVersion = "1.0"; // Fallback version
+            }
+        } catch (IOException e) {
+            currentVersion = "1.0"; // Fallback version
+            e.printStackTrace();
+        }
+        currentVersionLabel.setText("Current Version: " + currentVersion);
+        updateStatusLabel.setText("Click 'Check for Updates' to check for new versions");
     }
 
     private void initializeConfig() {
@@ -534,12 +571,94 @@ public class SettingsController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    public BusinessSettings getCachedSettings() {
+    }    public BusinessSettings getCachedSettings() {
         if (cachedSettings == null) {
             loadSettings();
         }
         return cachedSettings;
+    }    @FXML
+    private void handleCheckUpdates() {
+        try {
+            updateStatusLabel.setText("Checking for updates...");
+            
+            VersionUtil.UpdateInfo updateInfo = VersionUtil.checkForUpdates(currentVersion, UPDATE_CHECK_URL);
+            
+            if (updateInfo.isUpdateAvailable()) {
+                // Create backup before proceeding
+                File backupFile = new File("backups/pre_update_" + getTimestamp() + ".zip");
+                backupFile.getParentFile().mkdirs();
+                
+                try (FileOutputStream fos = new FileOutputStream(backupFile);
+                     ZipOutputStream zos = new ZipOutputStream(fos)) {
+                    
+                    // Add database file to backup
+                    File dbFile = new File("inventory.mv.db");
+                    if (dbFile.exists()) {
+                        try (FileInputStream fis = new FileInputStream(dbFile)) {
+                            ZipEntry zipEntry = new ZipEntry("inventory.mv.db");
+                            zos.putNextEntry(zipEntry);
+                            
+                            byte[] buffer = new byte[1024];
+                            int length;
+                            while ((length = fis.read(buffer)) > 0) {
+                                zos.write(buffer, 0, length);
+                            }
+                            zos.closeEntry();
+                        }
+
+                        // Add trace.db file if it exists
+                        File traceDb = new File("inventory.trace.db");
+                        if (traceDb.exists()) {
+                            try (FileInputStream fis = new FileInputStream(traceDb)) {
+                                ZipEntry zipEntry = new ZipEntry("inventory.trace.db");
+                                zos.putNextEntry(zipEntry);
+                                byte[] buffer = new byte[1024];
+                                int length;
+                                while ((length = fis.read(buffer)) > 0) {
+                                    zos.write(buffer, 0, length);
+                                }
+                                zos.closeEntry();
+                            }
+                        }
+                    }
+                }
+
+                // Show update confirmation with release notes
+                Alert confirmUpdate = new Alert(Alert.AlertType.CONFIRMATION);
+                confirmUpdate.setTitle("Update Available");
+                confirmUpdate.setHeaderText("Version " + updateInfo.getLatestVersion() + " is available");
+                confirmUpdate.setContentText(
+                    "Release Notes:\n" + updateInfo.getReleaseNotes() + "\n\n" +
+                    "Would you like to update now? A backup has been created at:\n" + backupFile.getAbsolutePath()
+                );
+                confirmUpdate.getDialogPane().setPrefWidth(500);
+
+                if (confirmUpdate.showAndWait().orElse(null) == ButtonType.OK) {
+                    // Close database connections
+                    if (dataSource instanceof AutoCloseable) {
+                        try {
+                            ((AutoCloseable) dataSource).close();
+                        } catch (Exception e) {
+                            System.err.println("Warning: Error closing datasource: " + e.getMessage());
+                        }
+                    }
+
+                    // Show final message and open download page
+                    hostServices.showDocument(updateInfo.getDownloadUrl());
+                    showAlert(Alert.AlertType.INFORMATION, "Update Ready", 
+                        "The download page has been opened in your browser.\n" +
+                        "Application will now close. Please install the new version after download completes.\n" +
+                        "Your data has been backed up to: " + backupFile.getAbsolutePath());
+                    Platform.exit();
+                } else {
+                    updateStatusLabel.setText("Update cancelled. You can check for updates again later.");
+                }
+            } else {
+                updateStatusLabel.setText("You are running the latest version (" + currentVersion + ")");
+            }
+        } catch (Exception e) {
+            updateStatusLabel.setText("Update check failed: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to check for updates: " + e.getMessage());
+        }
     }
 }
