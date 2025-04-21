@@ -85,7 +85,7 @@
                                     style="-fx-background-color: #FF5252; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 8 15; -fx-background-radius: 5; -fx-border-radius: 5; -fx-font-weight: bold;"
                                     styleClass="clear-cart-button"/>
                             </HBox>
-                            <TableView fx:id="cartTable" VBox.vgrow="ALWAYS" styleClass="cart-table"/>
+                            <TableView fx:id="cartTable" VBox.vgrow="ALWAYS" styleClass="cart-table" minHeight="300" maxHeight="Infinity"/>
                         </VBox>
 
                         <!-- Payment Section -->
